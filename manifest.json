@@ -1,0 +1,39 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/modules/data/base64/manifest.json",
+		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
+		"$(MODDABLE)/modules/io/manifest.json"
+	],
+	"modules": {
+		"*": [
+			"./main",
+			"./nodered",
+			"./nodes"
+		]
+	},
+	"preload": [
+		"nodered",
+		"nodes"
+	],
+	"creation": {
+		"static": 28672,
+		"keys": {
+			"available": 128
+		}
+	},
+	"x-strip": [
+		"Atomics",
+		"Generator",
+		"Promise",
+		"Proxy",
+		"Reflect",
+		"RegExp",
+		"Set",
+		"SharedArrayBuffer",
+		"WeakRef",
+		"WeakMap",
+		"WeakSet"
+	]
+}
+

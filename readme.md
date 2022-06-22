@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 20, 2022<br>
+Updated June 21, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -111,11 +111,12 @@ This section lists the supported nodes. The implemented features are checked.
 - [X] Console output is displayed in the xsbug log pane
 - [X] Sidebar output is displayed in the xsbug message pane
 - [X] Display of selected property or complete message
-- [ ] Sending to status node
+- [ ] Output to node status (maybe meaningless on device)
 
 ### Function
 - [X] "On Start", "On Message" and "On Stop" handlers
 - [X] Access to Node context, flow context, and global context
+- [X] Report uncaught exceptions to Catch nodes
 - [ ] Import modules (Setup)
 - [ ] When "On Start" returns Promise, queue received messages until ready
 - [ ] Does not wrap `setTimeout` (and friends) to automatically clear on stop
@@ -140,6 +141,15 @@ This section lists the supported nodes. The implemented features are checked.
 - [X] "Send to all connected link nodes"
 - [X] "Return to calling link node"
 
+### Catch
+- [X] "Catch errors from all nodes"
+- [X] "Catch errors from selected nodes"
+- [X] "Ignore errors handled by other Catch nodes"
+
+### Status
+- [X] "Report status from all nodes"
+- [X] "Report status from selected nodes"
+
 ### GPIO In
 Implemented using "rpi-gpio in" node
 
@@ -153,7 +163,7 @@ Implemented using "rpi-gpio in" node
 - [X] Digital and PWM output modes
 - [X] Initialize initial pin state option
 
-Implemented using "rpi-gpio out" node with ECMA-419 Digital and PWM classes
+Implemented using "rpi-gpio out" node with ECMA-419 Digital and PWM classes.
 
 ### MQTT Broker
 - [X] Broker URL and port number
@@ -208,7 +218,7 @@ In this prototype, the nodes and flows exported by Node-RED are converted from J
 ### Nodes
 Possible future work on built-in nodes:
 
-- **Common nodes**. The Catch, Status, and Complete nodes appear to require  Node-RED runtime behaviors beyond what this exploration now implements. They should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
+- **Common nodes**. The Complete nodes appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Switch, Change, Delay, Trigger, and Filter nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
 - **Network nodes**. The HTTP, WebSocket, TCP, and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented.
 - **Sequence nodes**. The Split, Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.

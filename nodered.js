@@ -142,8 +142,10 @@ class Flow extends Map {
 
 class Node {
 	#outputs = Node.noOutputs;
+	#flow;
 
 	constructor(id, flow, name) {
+		this.#flow = flow;
 		const properties = {
 			id: {value: id}
 		};
@@ -176,8 +178,22 @@ class Node {
 		if (result)
 			return this.send(result);
 	}
-	status(msg) {
-		this.trace(`Status of ${this.name ?? this.id}: ` + JSON.serialize(msg));
+	status(status) {
+		const msg = {
+			status: {
+				...status,
+				source: {
+					id: this.id,
+					type: this.constructor.type,
+					name: this.name
+				}
+			}
+		};
+
+		for (const node of this.#flow.nodes) {
+			if (node instanceof StatusNode)
+				node.onStatus(msg);
+		}
 	}
 	done(msg) {
 		debugger;
@@ -188,8 +204,24 @@ class Node {
 	warn(msg) {
 		this.trace(msg);
 	}
-	error(msg) {
-		this.trace(msg);
+	error(error, msg) {
+		msg = {
+			...msg,
+			error: {
+				message: error.toString(),
+				source: {
+					id: this.id,
+					type: this.constructor.type,
+					name: this.name,
+					count: 1	
+				}
+			}
+		};
+
+		for (const node of this.#flow.nodes) {
+			if (node instanceof CatchNode)
+				node.onCatch(msg);
+		}
 	}
 	debug(msg) {
 		this.trace(msg);
@@ -200,10 +232,11 @@ class Node {
 	get outputCount() {
 		return this.#outputs.length;
 	}
-	
+
+	static type = "comment";
 	static {
 		this.noOutputs = Object.freeze([]);
-		nodeClasses.set("comment", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -228,8 +261,50 @@ class DebugNode extends Node {
 			trace.right(value);
 	}
 
+	static type = "debug"
 	static {
-		nodeClasses.set("debug", this);
+		nodeClasses.set(this.type, this);
+	}
+}
+
+class CatchNode extends Node {
+	#scope;
+	#uncaught;
+
+	onSetup(config) {
+		this.#scope = config.scope;
+		this.#uncaught = config.uncaught ?? false;
+	}
+	onCatch(msg) {
+		if (this.#uncaught && (1 !== msg.error.source.count))
+			return;
+
+		if (!this.#scope || this.#scope.includes(msg.error?.source?.id)) {
+			this.send(msg);
+			msg.error.source.count += 1;
+		}
+	}
+
+	static type = "catch";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
+class StatusNode extends Node {
+	#scope;
+
+	onSetup(config) {
+		this.#scope = config.scope;
+	}
+	onStatus(msg) {
+		if (!this.#scope || this.#scope.includes(msg.status?.source?.id))
+			this.send(msg);
+	}
+
+	static type = "status";
+	static {
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -267,6 +342,7 @@ class InjectNode extends Node {
 					value = parseFloat(value);
 					break;
 				case "str":
+					value = value ?? "";
 					break;
 				default:
 					throw new Error("unimplemented");
@@ -296,8 +372,9 @@ class InjectNode extends Node {
 		this.send(msg);
 	}
 
+	static type = "inject";
 	static {
-		nodeClasses.set("inject", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -333,21 +410,40 @@ ${config.finalize}
 };
 f;`);
 		const context = this.context;
-		this.#initialize(this, context, context.flow, context.global);
+		const func = this.#initialize;
+		try {
+			func(this, context, context.flow, context.global);
+		}
+		catch (e) {
+			this.error(e);
+		}
 	}
 	onMessage(msg) {
 		const func = this.#func;
 		const context = this.context;
-		msg = func(msg, this, context, context.flow, context.global);
-		if (msg)
-			this.send(msg);
+		try {
+			msg = func(msg, this, context, context.flow, context.global);
+			if (msg)
+				this.send(msg);
+		}
+		catch (e) {
+			this.error(e);
+		}
 	}
 	onStop() {
 		const context = this.context;
-		this.#finalize(this, context, context.flow, context.global);
+		const func = this.#finalize;
+		try {
+			func(this, context, context.flow, context.global);
+		}
+		catch (e) {
+			this.error(e);
+		}
 	}
+
+	static type = "function";
 	static {
-		nodeClasses.set("function", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -375,8 +471,10 @@ class RangeNode extends Node {
 		msg[this.#property] = this.#round ? Math.round(value) : value;
 		return msg;
 	}
+
+	static type = "range";
 	static {
-		nodeClasses.set("range", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -396,16 +494,20 @@ class LinkCallNode extends Node {
 		delete msg._linkSource;
 		this.send(msg);
 	}
+
+	static type = "link call";
 	static {
-		nodeClasses.set("link call", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
 class LinkInNode extends Node {
 	set links(value) {
 	}
+
+	static type = "link in";
 	static {
-		nodeClasses.set("link in", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -430,8 +532,10 @@ class LinkOutNode extends Node {
 		else
 			throw new Error("lost link source");
 	}
+
+	static type = "link out";
 	static {
-		nodeClasses.set("link out", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -468,8 +572,10 @@ class DigitalInNode extends Node {
 		this.#io.close();
 		this.#io = undefined;
 	}
+
+	static type = "rpi-gpio in";
 	static {
-		nodeClasses.set("rpi-gpio in", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -521,8 +627,10 @@ class DigitalOutNode extends Node {
 		this.#io.close();
 		this.#io = undefined;
 	}
+
+	static type = "rpi-gpio out";
 	static {
-		nodeClasses.set("rpi-gpio out", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -656,8 +764,10 @@ class MQTTBrokerNode extends Node {
 			items
 		});
 	}
+
+	static type = "mqtt-broker";
 	static {
-		nodeClasses.set("mqtt-broker", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -681,8 +791,9 @@ class MQTTInNode extends Node {
 		this.#broker.unsubscribe(this, this.#topic); 
 	}
 
+	static type = "mqtt in";
 	static {
-		nodeClasses.set("mqtt in", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 
@@ -717,8 +828,10 @@ class MQTTOutNode extends Node {
 			retain: this.#retain ?? msg.retain ?? false,
 		});
 	}
+
+	static type = "mqtt out";
 	static {
-		nodeClasses.set("mqtt out", this);
+		nodeClasses.set(this.type, this);
 	}
 }
 

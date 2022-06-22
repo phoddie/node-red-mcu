@@ -213,14 +213,23 @@ class Node {
 					id: this.id,
 					type: this.constructor.type,
 					name: this.name,
-					count: 1	
+					count: 0	
 				}
 			}
 		};
 
+		const uncaught = [];
 		for (const node of this.#flow.nodes) {
-			if (node instanceof CatchNode)
+			if (!(node instanceof CatchNode))
+				continue;
+			if (node.uncaught)
+				uncaught.push(node);
+			else
 				node.onCatch(msg);
+		}
+		if (!msg.error.source.count) {
+			for (let i = 0, length = uncaught.length; i < length; i++)
+				uncaught[i].onCatch(msg);
 		}
 	}
 	debug(msg) {
@@ -269,19 +278,15 @@ class DebugNode extends Node {
 
 class CatchNode extends Node {
 	#scope;
-	#uncaught;
 
 	onSetup(config) {
 		this.#scope = config.scope;
-		this.#uncaught = config.uncaught ?? false;
+		Object.defineProperty(this, "uncaught", {value: config.uncaught ?? false});
 	}
 	onCatch(msg) {
-		if (this.#uncaught && (1 !== msg.error.source.count))
-			return;
-
-		if (!this.#scope || this.#scope.includes(msg.error?.source?.id)) {
-			this.send(msg);
+		if (!this.#scope || this.#scope.includes(msg.error.source.id)) {
 			msg.error.source.count += 1;
+			this.send(msg);
 		}
 	}
 
@@ -442,6 +447,77 @@ f;`);
 	}
 
 	static type = "function";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
+class ChangeNode extends Node {
+	#rules;
+
+	onSetup(config) {
+		this.#rules = config.rules.map(config => {
+			const rule = {type: config.t, property: config.p};
+
+			if ("msg" !== config.pt)
+				throw new Error("unimplemented change target");
+
+			if ("set" === config.t) {
+				let value = config.to;
+				switch (config.tot) {
+					case "bool":
+						value = "true" === value;
+						break;
+					case "date":
+						value = injectNow;
+						break;
+					case "json":
+						value = JSON.parse(value);
+						break;
+					case "num":
+						value = parseFloat(value);
+						break;
+					case "str":
+						value = value ?? "";
+						break;
+					default:
+						throw new Error("unimplemented");
+				}
+				rule.value = value;
+			}
+			else if ("delete" === config.t)
+				;
+			else if ("move" === config.t) {
+				if ("msg" !== config.tot)
+					throw new Error("unimplemented move target");
+				rule.to = config.to;
+			}
+			else
+				throw new Error("unimplemented change");
+
+			return rule; 
+		});
+	}
+	onMessage(msg) {
+		for (let i = 0, rules = this.#rules, length = rules.length; i < length; i++) {
+			const rule = rules[i];
+			if ("set" === rule.type) {
+				let value = rule.value;
+				if (value instanceof Function)
+					value = value();
+				msg[rule.property] = value;
+			}
+			else if ("delete" === rule.type)
+				delete msg[rule.property];
+			else if ("move" === rule.type) {
+				msg[rule.to] = msg[rule.property]
+				delete msg[rule.property];
+			}
+		}
+		return msg;
+	}
+
+	static type = "change";
 	static {
 		nodeClasses.set(this.type, this);
 	}

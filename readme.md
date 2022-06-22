@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 21, 2022<br>
+Updated June 22, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -199,6 +199,15 @@ Implemented using ECMA-419 MQTT Client draft.
 - [ ] Scale and limit
 - [ ] Scale and wrap
 
+### Change
+- [X] Delete property
+- [X] Move property
+- [X] Set property value
+- [X] Property values Boolean, timestamp, JSON, number, and string
+- [ ] Replace within property value
+- [ ] flow. and global. targets
+- [ ] Property values buffer, expression, environment variable
+
 ## Future Work
 This prototype is a breadth-first effort to implement all the steps required to execute meaningful Node-RED flows on a resource-constrained microcontroller. For compatibility and completeness, a great deal of work remains. That work requires many different kinds of experience and expertise. Evolving this early proof-of-concept to a generally useful implementation will require contributions from many motivated individuals.
 
@@ -219,7 +228,7 @@ In this prototype, the nodes and flows exported by Node-RED are converted from J
 Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete nodes appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
-- **Function nodes**. The Switch, Change, Delay, Trigger, and Filter nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
+- **Function nodes**. The Switch, Delay, Trigger, and Filter nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
 - **Network nodes**. The HTTP, WebSocket, TCP, and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented.
 - **Sequence nodes**. The Split, Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV and JSON should be possible to support, but the others (HTML, YAML, XML) are likely impractical.

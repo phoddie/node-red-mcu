@@ -227,7 +227,7 @@ In this prototype, the nodes and flows exported by Node-RED are converted from J
 ### Nodes
 Possible future work on built-in nodes:
 
-- **Common nodes**. The Complete nodes appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
+- **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Switch, Delay, Trigger, and Filter nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
 - **Network nodes**. The HTTP, WebSocket, TCP, and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented.
 - **Sequence nodes**. The Split, Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.

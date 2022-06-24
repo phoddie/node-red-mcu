@@ -537,6 +537,157 @@ class ChangeNode extends Node {
 	}
 }
 
+class SwitchNode extends Node {
+	#property;
+	#rules;
+	#all;
+	#previous;
+
+	onSetup(config) {
+		if (("msg" !== config.propertyType) || config.repair)
+			throw new Error("unimplemented");
+
+		this.#property = config.property;
+		this.#all = "true" === config.checkall;
+		this.#rules = config.rules.map(config => {
+			const rule = {type: config.t};
+
+			if ("istype" === config.t)
+				rule.v = config.v;
+			else {
+				if ("v" in config)
+					rule.v = this.resolve(config.vt, config.v);
+				if ("v2" in config)
+					rule.v2 = this.resolve(config.v2t, config.v2);
+			}
+
+			return rule;
+		});
+	}
+	onMessage(msg) {
+		const value = msg[this.#property];
+		const all = this.#all;
+		const outputCount = this.outputCount;
+		let first = true;
+		const result = new Array(outputCount);
+		result.fill(null);
+		for (let i = 0, rules = this.#rules; i < outputCount; i++) {
+			const rule = rules[i]
+			let v = rule.v, v2 = rule.v2;
+			if (SwitchNode.previousValue === v)
+				v = this.#previous;
+			if (SwitchNode.previousValue === v2)
+				v2 = this.#previous;
+
+			let match;
+			switch (rule.type) {
+				case "btwn":
+					match = (v <= value) && (value <= v2);
+					break;
+				case "eq":
+					match = value == v;
+					break;
+				case "neq":
+					match = value != v;
+					break;
+				case "lt":
+					match = value < v;
+					break;
+				case "lte":
+					match = value <= v;
+					break;
+				case "gt":
+					match = value > v;
+					break;
+				case "gte":
+					match = value >= v;
+					break;
+				case "true":
+					match = true === value;
+					break;
+				case "false":
+					match = false === value
+					break;
+				case "null":
+					match = null === value;
+					break;
+				case "nnull":
+					match = null !== value;
+					break;
+				case "istype":
+					switch (v) {
+						case "string":
+							match = "string" === typeof value;
+							break;
+						case "number":
+							match = "number" === typeof value;
+							break;
+						case "boolean":
+							match = "boolean" === typeof value;
+							break;
+						case "array":
+							match = Array.isArray(value);
+							break;
+						case "object":
+							match = "object" === typeof value;
+							break;
+						case "json":
+							try {
+								JSON.parse(value);
+								match = true;
+							}
+							catch {
+							}
+							break;
+						case "undefined":
+							match = undefined === value;
+							break;
+						case "null":
+							match = null === value;
+							break;
+						default:
+							throw new Error("unimplemented " + v);
+					}
+					break;
+				case "else":
+					match = first;
+					break;
+				default:
+					throw new Error("unimplemented " + rule.type);
+			}
+			
+			if (match) {
+				result[i] = msg;
+				if (!all)
+					break;
+				first = false;
+			}
+		}
+
+		this.#previous = value; 
+
+		return result;
+	}
+	resolve(type, value) {
+		switch (type) {
+			case "num":
+				return Number(value);
+			case "str":
+				return value.toString();
+			case "prev":
+				return SwitchNode.previousValue;
+			default:
+				throw new Error("unimplemented");
+		}
+	}
+
+	static previousValue = Symbol(); 
+	static type = "switch";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
 class RangeNode extends Node {
 	#property;
 	#scale;

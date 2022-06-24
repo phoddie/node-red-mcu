@@ -89,7 +89,7 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 - [X] Outputs
 	- [X] Single node output
 	- [X] Output connects to multiple inputs
-	- [ ] Multiple node output
+	- [X] Multiple node output
 - [X] Messages
 	- [X] Shallow copy on send
 	- [X] Synchronous send

@@ -165,8 +165,17 @@ class Node {
 	onMessage(msg) {
 	}
 	send(msg) {
-		if (Array.isArray(msg))
-			throw new Error("only single output implemented");
+		if (Array.isArray(msg)) {
+			const length = Math.min(msg.length, this.#outputs.length);
+			for (let j = 0; j < length; j++) {
+				const m = msg[j];
+				if (null === m)
+					continue;
+
+				for (let i = 0, outputs = this.#outputs[j], length = outputs.length; i < length; i++)
+					outputs[i].receive(RED.util.cloneMessage(m));
+			}
+		}
 		else {
 			for (let i = 0, outputs = this.#outputs[0], length = outputs.length; i < length; i++)
 				outputs[i].receive(RED.util.cloneMessage(msg));

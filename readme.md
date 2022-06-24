@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 22, 2022<br>
+Updated June 23, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -75,7 +75,7 @@ The Node-RED runtime executes the nodes and flows. This runtime architecture det
 This is a summary of what is implemented in the Node-RED for MCUs runtime:
 
 - [X] Nodes (details below)
-	- [ ] Disabled nodes are ignored
+	- [X] Disabled nodes are ignored
 - [X] Flows
 	- [X] Multiple
 	- [X] Configuration

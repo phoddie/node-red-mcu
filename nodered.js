@@ -53,7 +53,7 @@ class RED {
 			const flow = flows.get(item.z ?? configFlowID);
 			if (!flow) throw new Error("missing flow " + item.z);
 
-			const node = new (nodeClasses.get(item.type))(item.id, flow, item.name);
+			const node = new (item.d ? DisabledNode : nodeClasses.get(item.type))(item.id, flow, item.name);
 			flow.addNode(node);
 		});
 
@@ -247,6 +247,11 @@ class Node {
 		this.noOutputs = Object.freeze([]);
 		nodeClasses.set(this.type, this);
 	}
+}
+
+class DisabledNode extends Node {
+	receive() {}
+	send() {}
 }
 
 class DebugNode extends Node {

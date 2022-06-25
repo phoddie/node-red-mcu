@@ -54,7 +54,13 @@ class RED {
 			const flow = flows.get(item.z ?? configFlowID);
 			if (!flow) throw new Error("missing flow " + item.z);
 
-			const node = new (item.d ? DisabledNode : nodeClasses.get(item.type))(item.id, flow, item.name);
+			const Node = item.d ? DisabledNode : nodeClasses.get(item.type);
+			if (!Node) {	
+				const msg = `Unsupported Node "${item.type}"`; 
+				trace(msg, "\n");
+				throw new Error(msg);
+			}
+			const node = new Node(item.id, flow, item.name);
 			flow.addNode(node);
 		});
 

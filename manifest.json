@@ -1,6 +1,7 @@
 {
 	"include": [
 		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/modules/base/modules/manifest.json",
 		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
 		"$(MODDABLE)/modules/io/manifest.json"

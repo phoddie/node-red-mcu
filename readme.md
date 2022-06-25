@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 23, 2022<br>
+Updated June 24, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -117,7 +117,7 @@ This section lists the supported nodes. The implemented features are checked.
 - [X] "On Start", "On Message" and "On Stop" handlers
 - [X] Access to Node context, flow context, and global context
 - [X] Report uncaught exceptions to Catch nodes
-- [ ] Import modules (Setup)
+- [X] Import modules (Setup)
 - [ ] When "On Start" returns Promise, queue received messages until ready
 - [ ] Does not wrap `setTimeout` (and friends) to automatically clear on stop
 

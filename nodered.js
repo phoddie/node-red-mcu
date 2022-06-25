@@ -20,6 +20,7 @@
 
 import Timer from "timer";
 import Base64 from "base64";
+import Modules from "modules";
 
 const nodeClasses = new Map;
 const configFlowID = "config";
@@ -403,6 +404,7 @@ class FunctionNode extends Node {
 	#initialize = nop;
 	#func = nop;
 	#finalize = nop;
+	#libs;
 
 	constructor(id, flow, name) {
 		super(id, flow, name);
@@ -410,28 +412,38 @@ class FunctionNode extends Node {
 		this.context.flow = flow.context;
 	}
 	onSetup(config) {
-		if (config.libs?.length)
-			throw new Error("unimplemented");
+		let libs = "";
+		if (config.libs.length) {
+			this.#libs = [];
+			libs = [];
+			for (let i = 0; i < config.libs.length; i++) {
+				const item = config.libs[i];
+				this.#libs[i] = Modules.importNow(item.module);
+				libs[i] = item.var;
+			}
+			Object.freeze(this.#libs);
+			libs = `\tconst [${libs.join(", ")}] = libs;\n`
+		}
 
 		if (config.func)
-			this.#func = eval(`function f(msg, node, context, flow, global) {
-${config.func}
+			this.#func = eval(`function f(msg, node, context, flow, global, libs) {
+${libs}${config.func}
 };
 f;`);
 		if (config.initialize)
-			this.#initialize = eval(`function f(node, context, flow, global) {
-${config.initialize}
+			this.#initialize = eval(`function f(node, context, flow, global, libs) {
+${libs}${config.initialize}
 };
 f;`);
 		if (config.finalize)
-			this.#finalize = eval(`function f(node, context, flow, global) {
-${config.finalize}
+			this.#finalize = eval(`function f(node, context, flow, global, libs) {
+${libs}${config.finalize}
 };
 f;`);
 		const context = this.context;
 		const func = this.#initialize;
 		try {
-			func(this, context, context.flow, context.global);
+			func(this, context, context.flow, context.global, this.#libs);
 		}
 		catch (e) {
 			this.error(e);
@@ -441,7 +453,7 @@ f;`);
 		const func = this.#func;
 		const context = this.context;
 		try {
-			msg = func(msg, this, context, context.flow, context.global);
+			msg = func(msg, this, context, context.flow, context.global, this.#libs);
 			if (msg)
 				this.send(msg);
 		}
@@ -453,7 +465,7 @@ f;`);
 		const context = this.context;
 		const func = this.#finalize;
 		try {
-			func(this, context, context.flow, context.global);
+			func(this, context, context.flow, context.global, this.#libs);
 		}
 		catch (e) {
 			this.error(e);

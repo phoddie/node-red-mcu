@@ -935,13 +935,34 @@ class MQTTBrokerNode extends Node {
 				if (options.more)
 					throw new Error("fragmented receive unimplemented!");
 
-				let payload = this.#mqtt.read(count);
+				const payload = this.#mqtt.read(count);
 				const msg = {topic: options.topic, QoS: options.QoS};
 				if (options.retain) msg.retain = true;
 
+				const topic = options.topic.split("/");
+				topic.shift();
+			subscriptions:
 				for (let subscriptions = this.#subscriptions, i = 0, length = subscriptions.length; i < length; i++) {
 					const subscription = subscriptions[i];
-					if (subscription.topic === options.topic) {	//@@ wildcard match
+					const parts = subscription.topic.split("/");
+					parts.shift();
+					let ti = 0;
+					for (let k = 0; k < parts.length; k++) {
+						const part = parts[k];
+						if ("#" === part) {
+							if ((k + 1) === parts.length) {
+								ti = topic.length;
+								break;
+							}
+							continue subscriptions;
+						}
+						else if ("+" === part)
+							ti++;
+						else if (topic[ti++] !== part)
+							continue subscriptions;
+					}
+
+					if (ti === topic.length) {
 						switch (subscription.format) {
 							case "utf8":
 								msg.payload = String.fromArrayBuffer(payload);

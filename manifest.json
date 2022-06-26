@@ -44,6 +44,12 @@
 					"available": 512
 				}
 			}
+		},
+		"win": {
+			"error": "Node-RED MCU does not currently run on Windows "
+		},
+		"lin": {
+			"error": "Node-RED MCU does not currently run on Linux "
 		}
 	}	
 }

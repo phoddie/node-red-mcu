@@ -739,6 +739,80 @@ class RangeNode extends Node {
 	}
 }
 
+class FilterNode extends Node {
+	#topic;
+	#property;
+	#inout;
+	#ignoreFirst;
+	#last;
+
+	onSetup(config) {
+		if (("rbe" !== config.func) && ("rbei" !== config.func))
+			throw new Error("unimplemented filter func");
+
+		this.#ignoreFirst = "rbei" === config.func;
+		this.#inout = config.inout;
+		this.#property = config.property;
+		this.#topic = config.septopics ? config.topi : undefined;
+	}
+	onMessage(msg) {
+		if (msg.reset) {
+			if (msg.topic) {
+				if (this.#topic)
+					this.#last?.delete(msg.topic);
+			}
+			else
+				this.#last = undefined;
+			return;
+		}
+
+		let value = msg[this.#property], last, ignoreFirst, topic;
+		if (this.#topic) { 
+			this.#last ??= new Map;
+			topic = msg[this.#topic];
+			if (undefined === topic)
+				return;
+			last = this.#last.get(topic);
+		}
+		else
+			last = this.#last;
+		if (undefined === last)
+			ignoreFirst = this.#ignoreFirst;
+
+		if (("object" === typeof value) && ("object" === typeof last)) { 		//@@ naive shallow compare
+			const names = Object.getOwnPropertyNames(value);
+			if (names.length === Object.getOwnPropertyNames(last).length) {
+				let equal = true;
+				for (let name of names) {
+					if (value[name] !== last[name]) {
+						equal = false;
+						break;
+					}
+				}
+				if (equal)
+					msg = undefined;
+			}
+		}
+		else if (value === last)
+			msg = undefined;
+
+		if (topic) 
+			this.#last.set(topic, value);
+		else
+			this.#last = value;
+
+		if (ignoreFirst)
+			return;
+
+		return msg;
+	}
+
+	static type = "rbe";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
 class LinkCallNode extends Node {
 	#link;
 

@@ -233,6 +233,18 @@ Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 - [ ] is of type: buffer
 - [ ] has key, contains, matches regexp, is empty, is not empty, sequence rules, JSONata exp
 
+### Filter
+- [X] "block unless value changes"
+- [X] "block unless value changes (ignore initial value)"
+- [X] msg.payload
+- [X] "Apply mode separately for each" msg.topic
+- [X] Compare by number, string, and object (shallow)
+- [ ] Deep object compare
+- [ ] "Block unless value change is greater or equal to"
+- [ ] "Block unless value change is greater than"
+- [ ] "Block if value change is greater or equal to"
+- [ ] "Block if value change is greater than"
+
 ## Future Work
 This prototype is a breadth-first effort to implement all the steps required to execute meaningful Node-RED flows on a resource-constrained microcontroller. For compatibility and completeness, a great deal of work remains. That work requires many different kinds of experience and expertise. Evolving this early proof-of-concept to a generally useful implementation will require contributions from many motivated individuals.
 

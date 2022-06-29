@@ -710,10 +710,12 @@ class SwitchNode extends Node {
 
 class RangeNode extends Node {
 	#property;
-	#scale;
 	#in;
 	#out;
 	#round;
+	#action;
+	#maxout;
+	#maxin
 
 	onSetup(config) {
 //@@ assert on wrap and constrain (or implement!)
@@ -721,15 +723,29 @@ class RangeNode extends Node {
 		const maxout = parseFloat(config.maxout);
 		const minin = parseFloat(config.minin);
 		const minout = parseFloat(config.minout);
-		this.#scale = (maxout - minout) / (maxin - minin);
-		this.#in = minin; 
+		const action = (config.action);
+		this.#in = minin;
+		this.#action = action;
 		this.#out = minout;
 		this.#property = config.property;
-		this.#round = config.round; 
+		this.#round = config.round;
+		this.#maxin = maxin;
+		this.#maxout = maxout
 	}
 	onMessage(msg) {
-		const value = ((msg[this.#property] - this.#in) * this.#scale) + this.#out;
+ 
+		if (this.#action == "clamp") {
+			if (msg[this.#property] < this.#in) { msg[this.#property] = this.#in; }
+			if (msg[this.#property] > this.#maxin) { msg[this.#property] = this.#maxin; }
+		}
+		if (this.#action == "roll") {
+			var divisor = this.#maxin - this.#in;
+			msg[this.#property] = ((msg[this.#property] - this.#in) % divisor + divisor) % divisor + this.#in;
+		}
+			var value = ((((msg[this.#property]) - (this.#in)) / ((this.#maxin) - (this.#in)) * ((this.#maxout) - (this.#out))) + (this.#out));
+
 		msg[this.#property] = this.#round ? Math.round(value) : value;
+
 		return msg;
 	}
 

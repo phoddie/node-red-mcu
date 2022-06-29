@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 25, 2022<br>
+Updated June 28, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -191,6 +191,22 @@ Implemented using ECMA-419 MQTT Client draft.
 ### MQTT Out
 - [X] Data formats: number, string, object, buffer
 - [X] Retain flag
+
+### HTTP Request
+- [X] Method (from Node or incoming message)
+- [X] URL (from Node or incoming message)
+- [X] Set request headers from incoming message
+- [X] Payload: ignore, append to query-string parameters, send as request body 
+- [X] Enable connection keep-alive (maybe)
+- [X] Return (response body): UTF-8 string, binary buffer, parsed JSON object
+- [X] Status in outgoing message
+- [X] Response headers in outgoing message
+- [ ] TLS (always insecure)
+- [ ] Use authentication
+- [ ] Use proxy
+- [ ] Only send non-2xx responses to Catch node
+
+Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 
 ### Range
 - [X] Scale property value

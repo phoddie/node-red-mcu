@@ -21,6 +21,8 @@
 import Timer from "timer";
 import Base64 from "base64";
 import Modules from "modules";
+import fetch from "fetch";
+import {Headers, URLSearchParams} from "fetch";
 
 const nodeClasses = new Map;
 const configFlowID = "config";
@@ -1110,6 +1112,79 @@ class MQTTOutNode extends Node {
 	}
 
 	static type = "mqtt out";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
+class HTTPRequestNode extends Node {
+	#options;
+	#format; 
+	#paytoqs;
+	#persist;
+
+	onSetup(config) {
+		if (config.tls || config.proxy || config.authType || config.senderr)
+			throw new Error("unimplemented");
+
+		this.#format = config.ret;
+		this.#paytoqs = config.paytoqs;
+		this.#persist = config.persist;
+		this.#options = {
+			method: config.method,
+			url: config.url
+		};
+	}
+	onMessage(msg) {
+		const headers = new Headers([
+			["User-Agent", "node-red-mcu/v0"]
+		]);
+		headers.set("Connection", this.#persist ? "keep-alive" : "close");		//@@ not sure
+		for (let name in msg.headers)
+			headers.set(name, msg.headers[value]);
+		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;
+		let url = msg.url ?? this.#options.url;
+		if (undefined !== body) {
+			if ("object" === typeof body) {
+				if (!(body instanceof ArrayBuffer)) {
+					if ("query" === this.#paytoqs) {
+						url += (url.indexOf("?") < 0) ? "?" : "&";
+						url += (new URLSearchParams(Object.entries(body))).toString(); 
+					}
+					else {
+						body = JSON.stringify(body);
+						headers.set("content-type", "application/json");
+					}
+				}
+			}
+			else
+				body = body.toString();
+		}
+
+		fetch("http://" + url, {
+			method: msg.method ?? this.#options.method ?? "GET",
+			headers,
+		})
+		.then(response => {
+			msg.statusCode = response.status;
+			msg.headers = {/* ["x-node-red-request-node"]: this.id */};		//@@ what is this?
+			response.headers.forEach((value, key) => {msg.headers[key] = value;});
+
+			if ("txt" === this.#format)
+				return response.text();
+			if ("obj" === this.#format)
+				return response.json();
+			if ("bin" === this.#format)
+				return response.arrayBuffer();
+			throw new Error("unexpected http request format");
+		})
+		.then(payload => {
+			msg.payload = payload;
+			this.send(msg);
+		});
+	}
+
+	static type = "http request";
 	static {
 		nodeClasses.set(this.type, this);
 	}

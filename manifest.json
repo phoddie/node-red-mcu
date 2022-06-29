@@ -4,6 +4,7 @@
 		"$(MODDABLE)/modules/base/modules/manifest.json",
 		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
+		"$(MODDABLE)/examples/io/tcp/fetch/manifest_fetch.json",
 		"$(MODDABLE)/modules/io/manifest.json"
 	],
 	"modules": {
@@ -21,7 +22,8 @@
 		"static": 28672,
 		"keys": {
 			"available": 128
-		}
+		},
+		"stack": 320
 	},
 	"x-strip": [
 		"Atomics",

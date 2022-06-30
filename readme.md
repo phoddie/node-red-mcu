@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 28, 2022<br>
+Updated June 29, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -245,6 +245,14 @@ Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 - [ ] "Block if value change is greater or equal to"
 - [ ] "Block if value change is greater than"
 
+### Split
+- [X] Array
+- [X] String
+- [X] Object
+- [X] Copy key to msg.[]
+- [ ] Binary split
+- [ ] "Handle as a stream of messages"
+
 ## Future Work
 This prototype is a breadth-first effort to implement all the steps required to execute meaningful Node-RED flows on a resource-constrained microcontroller. For compatibility and completeness, a great deal of work remains. That work requires many different kinds of experience and expertise. Evolving this early proof-of-concept to a generally useful implementation will require contributions from many motivated individuals.
 
@@ -267,7 +275,7 @@ Possible future work on built-in nodes:
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Delay and Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
 - **Network nodes**. The WebSocket (Client), TCP, and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented.
-- **Sequence nodes**. The Split, Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
+- **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV and JSON should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** The Read File and Write File nodes can be supported. Watch probably cannot.
 
@@ -277,6 +285,8 @@ The built-in nodes are useful for compatibility with the standard Node-RED behav
 Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. Fortunately, it seems like the Function object can do the same, just less conveniently.
 
 The Template node uses [mustache.js](https://mustache.github.io) for powerful string substitution. Like JSONata, this could be impractical to support on embedded. A small subset is probably straightforward to support, if that would be useful.
+
+The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
 
 ## Thank You
 This exploration was motivated by an extended conversation with [Nick O'Leary](https://github.com/knolleary) who patiently explained Node-RED to me at OpenJS World 2022. That clear and patient discussion gave me grounding to begin this effort.

@@ -813,6 +813,67 @@ class FilterNode extends Node {
 	}
 }
 
+class SplitNode extends Node {
+	#arraySplt;
+	#splt;
+	#addname;
+
+	onSetup(config) {
+		if (config.stream || ("len" !== config.arraySpltType) || ("str" !== config.spltType))
+			throw new Error("unimplemented");
+		
+		this.#splt = config.splt;
+		this.#arraySplt = parseInt(config.arraySplt);
+		this.#addname = config.addname;
+	}
+	onMessage(msg) {
+		let payload = msg.payload; 
+		if (payload instanceof ArrayBuffer)
+			throw new Error("buffer unimplemented")
+		else if (Array.isArray(payload)) {
+			const length = payload.length, arraySplt = this.#arraySplt;
+			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt};
+			msg.parts = parts;
+			for (let i = 0; i < length; i += arraySplt) {
+				msg.payload = (1 === arraySplt) ? payload[i] : payload.slice(i, i + arraySplt);
+				parts.index = Math.idiv(i, arraySplt);
+				this.send(msg);
+			}
+		}
+		else if ("object" === typeof payload) {
+			const names = Object.getOwnPropertyNames(payload);
+			const length = names.length;
+			const parts = {type: "object", count: length};
+			msg.parts = parts;
+			for (let i = 0, addname = this.#addname; i < length; i += 1) {
+				const key = names[i];
+				msg.payload = payload[key];
+				parts.index = i;
+				parts.key = key;
+				if (addname)
+					msg[addname] = key;
+				this.send(msg);
+			}
+		}
+		else {	// string
+			payload = payload.toString().split(this.#splt);
+			const length = payload.length;
+			const parts = {type: "string", count: length, ch: this.#splt};
+			msg.parts = parts;
+			for (let i = 0; i < length; i += 1) {
+				msg.payload = payload[i];
+				parts.index = i;
+				this.send(msg);
+			}
+		}
+	}
+
+	static type = "split";
+	static {
+		nodeClasses.set(this.type, this);
+	}
+}
+
 class LinkCallNode extends Node {
 	#link;
 

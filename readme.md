@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated June 29, 2022<br>
+Updated June 30, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -212,8 +212,8 @@ Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 - [X] Scale property value
 - [X] Round to integer
 - [X] Select property to map
-- [ ] Scale and limit
-- [ ] Scale and wrap
+- [X] Scale and limit
+- [X] Scale and wrap
 
 ### Change
 - [X] Delete property

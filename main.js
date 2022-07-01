@@ -1,4 +1,4 @@
 import "nodered";	// import for global side effects
-import NodesJSON from "nodes";
+import FlowsJSON from "flows";
 
-RED.build(NodesJSON);
+RED.build(FlowsJSON);

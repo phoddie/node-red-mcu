@@ -5,18 +5,19 @@
 		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
 		"$(MODDABLE)/examples/io/tcp/fetch/manifest_fetch.json",
-		"$(MODDABLE)/modules/io/manifest.json"
+		"$(MODDABLE)/modules/io/manifest.json",
+		"./nodes/rpi-ds18b20/manifest.json"
 	],
 	"modules": {
 		"*": [
 			"./main",
 			"./nodered",
-			"./nodes"
+			"./flows"
 		]
 	},
 	"preload": [
 		"nodered",
-		"nodes"
+		"flows"
 	],
 	"creation": {
 		"static": 28672,

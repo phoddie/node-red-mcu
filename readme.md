@@ -61,9 +61,9 @@ The first is exporting the project from Node-RED.
 
 The JSON version of the flows is now on the clipboard. The second step is adding this JSON to the Moddable SDK project:
 
-1. Open the `nodes.js` file in the Node-RED MCU Edition project
-1. Delete the current JSON data assigned to the `nodes` variable  (take care not to delete the `export` statement at the end of the file)
-1. Paste in the Node-RED JSON data so it is assigned to `nodes`
+1. Open the `flows.js` file in the Node-RED MCU Edition project
+1. Delete the current JSON data assigned to the `flows` variable  (take care not to delete the `export` statement at the end of the file)
+1. Paste in the Node-RED JSON data so it is assigned to `flows`
 
 Build and run the Moddable SDK project as usual for the target device. 
 
@@ -164,6 +164,15 @@ Implemented using "rpi-gpio in" node
 - [X] Initialize initial pin state option
 
 Implemented using "rpi-gpio out" node with ECMA-419 Digital and PWM classes.
+
+### DS18B20
+- [X] Multiple temperature sensors
+- [X] Individual messages or array
+- [X] Use `msg.array` to select output format
+- [ ] Use `topic` to select single sensor
+- [ ] `id` property in output matches Node-RED
+
+Implemented using "rpi-ds18b20" node with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
 
 ### MQTT Broker
 - [X] Broker URL and port number

@@ -149,7 +149,7 @@ class Flow extends Map {
 	}
 }
 
-class Node {
+export class Node {
 	#outputs = Node.noOutputs;
 	#flow;
 
@@ -261,9 +261,12 @@ class Node {
 	}
 
 	static type = "comment";
+	static install() {
+		nodeClasses.set(this.type, this);
+	}
 	static {
 		this.noOutputs = Object.freeze([]);
-		nodeClasses.set(this.type, this);
+		this.install();
 	}
 }
 
@@ -295,7 +298,7 @@ class DebugNode extends Node {
 
 	static type = "debug"
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -315,7 +318,7 @@ class CatchNode extends Node {
 
 	static type = "catch";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -332,7 +335,7 @@ class StatusNode extends Node {
 
 	static type = "status";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -402,7 +405,7 @@ class InjectNode extends Node {
 
 	static type = "inject";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -482,7 +485,7 @@ f;`);
 
 	static type = "function";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -553,7 +556,7 @@ class ChangeNode extends Node {
 
 	static type = "change";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -704,7 +707,7 @@ class SwitchNode extends Node {
 	static previousValue = Symbol(); 
 	static type = "switch";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -750,7 +753,7 @@ class RangeNode extends Node {
 
 	static type = "range";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -824,7 +827,7 @@ class FilterNode extends Node {
 
 	static type = "rbe";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -885,7 +888,7 @@ class SplitNode extends Node {
 
 	static type = "split";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -908,7 +911,7 @@ class LinkCallNode extends Node {
 
 	static type = "link call";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -918,7 +921,7 @@ class LinkInNode extends Node {
 
 	static type = "link in";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -946,7 +949,7 @@ class LinkOutNode extends Node {
 
 	static type = "link out";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -986,7 +989,7 @@ class DigitalInNode extends Node {
 
 	static type = "rpi-gpio in";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -1041,7 +1044,7 @@ class DigitalOutNode extends Node {
 
 	static type = "rpi-gpio out";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -1199,7 +1202,7 @@ class MQTTBrokerNode extends Node {
 
 	static type = "mqtt-broker";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -1225,7 +1228,7 @@ class MQTTInNode extends Node {
 
 	static type = "mqtt in";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -1263,7 +1266,7 @@ class MQTTOutNode extends Node {
 
 	static type = "mqtt out";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 
@@ -1336,7 +1339,7 @@ class HTTPRequestNode extends Node {
 
 	static type = "http request";
 	static {
-		nodeClasses.set(this.type, this);
+		super.install();
 	}
 }
 

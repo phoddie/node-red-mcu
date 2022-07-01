@@ -714,36 +714,35 @@ class RangeNode extends Node {
 	#out;
 	#round;
 	#action;
-	#maxout;
+	#scale;
 	#maxin
 
 	onSetup(config) {
-//@@ assert on wrap and constrain (or implement!)
 		const maxin = parseFloat(config.maxin);
 		const maxout = parseFloat(config.maxout);
 		const minin = parseFloat(config.minin);
 		const minout = parseFloat(config.minout);
-		const action = (config.action);
+		this.#scale = (maxout - minout) / (maxin - minin);
+		this.#action = config.action;
 		this.#in = minin;
-		this.#action = action;
 		this.#out = minout;
 		this.#property = config.property;
 		this.#round = config.round;
 		this.#maxin = maxin;
-		this.#maxout = maxout
 	}
 	onMessage(msg) {
- 
-		if (this.#action == "clamp") {
-			if (msg[this.#property] < this.#in) { msg[this.#property] = this.#in; }
-			if (msg[this.#property] > this.#maxin) { msg[this.#property] = this.#maxin; }
+		let value = msg[this.#property]; 
+		if (this.#action === "clamp") {
+			if (value < this.#in)
+				value = this.#in;
+			if (value > this.#maxin)
+				value = this.#maxin;
 		}
-		if (this.#action == "roll") {
-			var divisor = this.#maxin - this.#in;
-			msg[this.#property] = ((msg[this.#property] - this.#in) % divisor + divisor) % divisor + this.#in;
+		else if (this.#action === "roll") {
+			const divisor = this.#maxin - this.#in;
+			value = ((value - this.#in) % divisor + divisor) % divisor + this.#in;
 		}
-			var value = ((((msg[this.#property]) - (this.#in)) / ((this.#maxin) - (this.#in)) * ((this.#maxout) - (this.#out))) + (this.#out));
-
+		value = ((value - this.#in) * this.#scale) + this.#out;
 		msg[this.#property] = this.#round ? Math.round(value) : value;
 
 		return msg;

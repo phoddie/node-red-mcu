@@ -25,7 +25,7 @@ import fetch from "fetch";
 import {Headers, URLSearchParams} from "fetch";
 
 const nodeClasses = new Map;
-const configFlowID = "config";
+export const configFlowID = "config";
 
 class RED {
 	static util = class {
@@ -174,20 +174,24 @@ export class Node {
 	onMessage(msg) {
 	}
 	send(msg) {
+		const outputs = this.#outputs;
+		if (!outputs.length)
+			return;
+
 		if (Array.isArray(msg)) {
-			const length = Math.min(msg.length, this.#outputs.length);
+			const length = Math.min(msg.length, outputs.length);
 			for (let j = 0; j < length; j++) {
 				const m = msg[j];
 				if (null === m)
 					continue;
 
-				for (let i = 0, outputs = this.#outputs[j], length = outputs.length; i < length; i++)
-					outputs[i].receive(RED.util.cloneMessage(m));
+				for (let i = 0, wires = outputs[j], length = outputs.length; i < length; i++)
+					wires[i].receive(RED.util.cloneMessage(m));
 			}
 		}
 		else {
-			for (let i = 0, outputs = this.#outputs[0], length = outputs.length; i < length; i++)
-				outputs[i].receive(RED.util.cloneMessage(msg));
+			for (let i = 0, wires = outputs[0], length = outputs.length; i < length; i++)
+				wires[i].receive(RED.util.cloneMessage(msg));
 		}
 	}
 	receive(msg) {

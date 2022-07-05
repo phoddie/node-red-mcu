@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated July 3, 2022<br>
+Updated July 5, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -227,8 +227,6 @@ Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 - [ ] Send heartbeat (ping)
 
 Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
-
-> **Note**: Not currently enabled pending update to Moddable SDK manifests.
 
 ### WebSocket In
 - [X] "Connect to"

@@ -119,7 +119,7 @@ class WebSocketClient extends Node {
 
 	static type = "websocket-client";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -133,7 +133,7 @@ class WebSocketIn extends Node {
 
 	static type = "websocket in";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -150,6 +150,6 @@ class WebSocketOut extends Node {
 
 	static type = "websocket out";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }

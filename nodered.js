@@ -33,6 +33,12 @@ class RED {
 			return Object.assign({}, msg);	//@@ shallow & naive
 		}
 	}
+	static nodes = {
+		registerType(id, Node) {
+			nodeClasses.set(id, Node);
+		}
+	}
+
 	static build(items) {
 		const flows = new Map;
 
@@ -265,12 +271,9 @@ export class Node {
 	}
 
 	static type = "comment";
-	static install() {
-		nodeClasses.set(this.type, this);
-	}
 	static {
 		this.noOutputs = Object.freeze([]);
-		this.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -302,7 +305,7 @@ class DebugNode extends Node {
 
 	static type = "debug"
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -322,7 +325,7 @@ class CatchNode extends Node {
 
 	static type = "catch";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -339,7 +342,7 @@ class StatusNode extends Node {
 
 	static type = "status";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -409,7 +412,7 @@ class InjectNode extends Node {
 
 	static type = "inject";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -489,7 +492,7 @@ f;`);
 
 	static type = "function";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -560,7 +563,7 @@ class ChangeNode extends Node {
 
 	static type = "change";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -711,7 +714,7 @@ class SwitchNode extends Node {
 	static previousValue = Symbol(); 
 	static type = "switch";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -757,7 +760,7 @@ class RangeNode extends Node {
 
 	static type = "range";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -831,7 +834,7 @@ class FilterNode extends Node {
 
 	static type = "rbe";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -892,7 +895,7 @@ class SplitNode extends Node {
 
 	static type = "split";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -915,7 +918,7 @@ class LinkCallNode extends Node {
 
 	static type = "link call";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -925,7 +928,7 @@ class LinkInNode extends Node {
 
 	static type = "link in";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -953,7 +956,7 @@ class LinkOutNode extends Node {
 
 	static type = "link out";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -993,7 +996,7 @@ class DigitalInNode extends Node {
 
 	static type = "rpi-gpio in";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -1048,7 +1051,7 @@ class DigitalOutNode extends Node {
 
 	static type = "rpi-gpio out";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -1206,7 +1209,7 @@ class MQTTBrokerNode extends Node {
 
 	static type = "mqtt-broker";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -1232,7 +1235,7 @@ class MQTTInNode extends Node {
 
 	static type = "mqtt in";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -1270,7 +1273,7 @@ class MQTTOutNode extends Node {
 
 	static type = "mqtt out";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -1343,7 +1346,7 @@ class HTTPRequestNode extends Node {
 
 	static type = "http request";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }
 

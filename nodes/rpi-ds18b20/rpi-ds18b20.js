@@ -75,6 +75,6 @@ class RpiDS18B20 extends Node {
 
 	static type = "rpi-ds18b20";
 	static {
-		super.install();
+		RED.nodes.registerType(this.type, this);
 	}
 }

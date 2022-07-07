@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"*": "./lower-case"
+	},
+	"preload": "lower-case"
+}

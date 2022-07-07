@@ -25,17 +25,22 @@ import fetch from "fetch";
 import {Headers, URLSearchParams} from "fetch";
 
 const nodeClasses = new Map;
+let compatibilityClasses;
 export const configFlowID = "config";
 
 class RED {
+	static #compatibility = []
+
 	static util = class {
 		static cloneMessage(msg) {
 			return Object.assign({}, msg);	//@@ shallow & naive
 		}
 	}
-	static nodes = {
-		registerType(id, Node) {
-			nodeClasses.set(id, Node);
+	static nodes = class {
+		static registerType(id, Node) {
+			(compatibilityClasses ?? nodeClasses).set(id, Node);
+		}
+		static createNode() {		// nothing to do: initialization done in class
 		}
 	}
 
@@ -44,6 +49,11 @@ class RED {
 
 		globalThis.globalContext = new Context;
 		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
+
+		if (this.#compatibility.length) {
+			compatibilityClasses = new Map;
+			this.#compatibility.forEach(f => f(RED));
+		}
 
 		// create flows
 		items.forEach(item => {
@@ -62,14 +72,16 @@ class RED {
 			const flow = flows.get(item.z ?? configFlowID);
 			if (!flow) throw new Error("missing flow " + item.z);
 
-			const Node = item.d ? DisabledNode : nodeClasses.get(item.type);
-			if (!Node) {	
+			const Class = item.d ? DisabledNode : (nodeClasses.get(item.type) ?? compatibilityClasses?.get(item.type));
+			if (!Class) {	
 				const msg = `Unsupported Node "${item.type}"`; 
 				trace(msg, "\n");
 				throw new Error(msg);
 			}
-			const node = new Node(item.id, flow, item.name);
-			flow.addNode(node);
+			if (Node.isPrototypeOf(Class))
+				 flow.addNode(new Class(item.id, flow, item.name));
+			else
+				 flow.addNode(new CompatibiltyNode(item.id, flow, item.name, Class));
 		});
 
 		// connect wires
@@ -121,6 +133,10 @@ class RED {
 		}
 
 		return flows;
+	}
+
+	static addCompatibility(module) {
+		this.#compatibility.push(module);
 	}
 }
 
@@ -1350,6 +1366,54 @@ class HTTPRequestNode extends Node {
 	}
 }
 
+const CompatibilityEvents = Object.freeze(["input", "close"]);		//@@ others??
+class CompatibiltyNode extends Node {
+	#module;
+	#events = {};
+	#send;
+
+	constructor(id, flow, name, module) {
+		super(id, flow, name);
+		this.#module = module;
+	}
+	onSetup(config) {
+		this.#module(config);
+	}
+	onMessage(msg) {
+		//@@ done argument
+		this.#events.input?.forEach(input => input.call(this, msg, this.#send));
+	}
+	onStop() {	//@@ done and removed are very tricky here?
+		this.#events.close?.forEach(close => close.call(this));
+	}
+	on(event, handler) {
+		if (!CompatibilityEvents.includes(event))
+			return this;
+
+		this.#events[event] ??= [];
+		this.#events[event].push(handler);
+
+		if ("input" === event)
+			this.#send ??= msg => super.send(msg);
+
+		return this;
+	}
+	off(event, handler) {
+		const events = this.#events[event];
+		if (!events?.length)
+			return this;
+
+		const index = events.indexOf(handler);
+		if (index >= 0)
+			events.splice(index, 1);
+
+		return this;
+	}
+
+	static type = "Node-RED Compatibility";
+}
+ 
+
 class Console {
 	static log(...parts) {
 		trace(...parts, "\n");
@@ -1361,4 +1425,10 @@ globalThis.clearInterval = Timer.clear;
 globalThis.setTimeout = Timer.set;
 globalThis.clearTimeout = Timer.clear;
 globalThis.console = Console;
+
 globalThis.RED = RED;
+globalThis.module = Object.freeze({
+	set exports(module) {
+		RED.addCompatibility(module);
+	}
+});

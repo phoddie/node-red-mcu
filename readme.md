@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated July 5, 2022<br>
+Updated July 6, 2022<br>
 
 ## Introduction
 This document introduces an early implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -281,6 +281,26 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [ ] Binary split
 - [ ] "Handle as a stream of messages"
 
+### Compatibility Node
+The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
+
+The Compatibility Node is tricky for a number of reasons. At this time, it should be considered a proof-of-concept and a foundation for future work.
+
+The Node-RED nodes, including the `lower-case` example, are written as CommonJS modules. The XS JavaScript engine supports only standard ECMAScript modules (ESM). This leads to some limitations: `export.modules` can only be set once and any other exported properties are ignored. Because all modules are loaded as standard ECMAScript modules, nodes run by the Compatibility Node run in strict mode.
+
+- [X] `config` passed to node implementation for initialization
+- [X] `.on()` and `.off()` to register event handlers
+- [X] `"input"` and `"close"` events
+- [X] `node.send()` and `send()` to send messages
+- [X] `.log()`, `.warn()`, and `.error()`
+- [X] `.status()`
+- [ ] `done` and `.done()`
+- [ ] Invoking`"close"` event handlers
+
+While a degree of source code compatibility is provided, the Compatibility Node does not attempt to emulate the (substantial) Node.js runtime. Consequently, it only runs nodes compatible with the features available in the Moddable SDK runtime. Nodes must be added to the Node-RED manifest to be included in the build. See the `lower-case` example in this repository for an example.
+
+> **Note**: The `CompatibilityNode` is implemented as a subclass of `Node`, the fundamental node type of the Node-RED MCU Edition runtime. The `CompatibilityClass` adds features for compatibility that use more memory and CPU power. For efficiency, internal nodes (`inject`, `split`, `http-request`, etc.) are implemented as subclasses of `Node`.
+
 ## Future Work
 This prototype is a breadth-first effort to implement all the steps required to execute meaningful Node-RED flows on a resource-constrained microcontroller. For compatibility and completeness, a great deal of work remains. That work requires many different kinds of experience and expertise. Evolving this early proof-of-concept to a generally useful implementation will require contributions from many motivated individuals.
 
@@ -294,7 +314,7 @@ In this prototype, the nodes and flows exported by Node-RED are converted from J
 
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.
-- [ ] Messages sent between nodes should be sent asynchronously to avoid JavaScript stack overflows on long chains of nodes (what does Node-RED do here?)
+- [ ] Should messages sent between nodes should be sent asynchronously to avoid JavaScript stack overflows on long chains of nodes (what does Node-RED do here?)
 - [ ] Implement support to instantiate nodes from a [Mod](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/mods.md). This would allow updated flows to be installed on embedded devices in seconds.
 
 ### Nodes
@@ -302,7 +322,7 @@ Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Delay and Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
-- **Network nodes**. The WebSocket (Client), TCP, and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented.
+- **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. (Note: all network support is client. Server support is also possible, but not yet explored.)
 - **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV and JSON should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** The Read File and Write File nodes can be supported. Watch probably cannot.

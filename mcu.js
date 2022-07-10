@@ -1,16 +1,13 @@
 const fs = require('fs-extra');
 const path = require('path');
 const { exec } = require('node:child_process');
-const { execSync } = require('child_process');
 
-const build_env = [
+const env4build = [
     "./main.js",      
     "./manifest.json",
     "./nodered.js",
     "./nodes"
 ]
-
-let controller;
 
 module.exports = function(RED) {
     function mcuBuilder(config) {
@@ -49,7 +46,7 @@ module.exports = function(RED) {
             if (cfg.env === true) {
 
                 try {
-                    let env = build_env;
+                    let env = env4build;
                     let dest = cfg.cwd;
 
                     fs.ensureDirSync(dest);

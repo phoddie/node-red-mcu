@@ -18,17 +18,23 @@ module.exports = function(RED) {
         var node = this;
         node.on('input', function(msg, send, done) {
 
-            let flows2build = config.flows2build || [];
+            let cfg = {
+                flows2build: msg.mcu.flows || config.flows2build || [],
+                cmd: msg.mcu.msg || config.cmd || "",
+                cwd: msg.mcu.cwd || config.cwd || "",
+                env: msg.mcu.env || config.env || false
+            }
+
             let nodes = [];
             let error;
             // let stdout;
             // let stderr;
 
-            let f2bl = flows2build.length;
+            let f2bl = cfg.flows2build.length;
             if (f2bl > 0) {
                 RED.nodes.eachNode(function(n) {
                     for (let i=0; i<f2bl; i+=1) {
-                        if ((n.id && n.id==flows2build[i]) || (n.z && n.z==flows2build[i])) {
+                        if ((n.id && n.id==cfg.flows2build[i]) || (n.z && n.z==cfg.flows2build[i])) {
                             nodes.push(n);
                             break;
                         }
@@ -40,11 +46,11 @@ module.exports = function(RED) {
             flowsjs = "const flows=" + nodes + ";\n";
             flowsjs+= "export default Object.freeze(flows, true);"
 
-            if (config.env === true) {
+            if (cfg.env === true) {
 
                 try {
                     let env = build_env;
-                    let dest = config.cwd;
+                    let dest = cfg.cwd;
 
                     fs.ensureDirSync(dest);
                     for (let i=0; i<env.length; i+=1) {
@@ -63,7 +69,7 @@ module.exports = function(RED) {
             }
 
             if (!error) {
-                fs.writeFileSync(path.join(config.cwd, 'flows.js'), flowsjs, (err) => {
+                fs.writeFileSync(path.join(cfg.cwd, 'flows.js'), flowsjs, (err) => {
                     if (err) {
                         error = err;
                     }
@@ -80,8 +86,8 @@ module.exports = function(RED) {
                 return;    
             }
 
-            exec(config.cmd, {
-                cwd: config.cwd,
+            exec(cfg.cmd, {
+                cwd: cfg.cwd,
             }, (err, stdout, stderr) => {
 
                 if (err) {

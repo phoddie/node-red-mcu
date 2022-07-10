@@ -1,0 +1,29 @@
+{
+  "name": "node-red-contrib-mcu",
+  "version": "0.0.1",
+  "description": "Node-RED implementation for microcontrollers",
+  "node-red" : {
+    "nodes": {
+      "mcu": "mcu.js"
+    }
+  },
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/phoddie/node-red-mcu.git"
+  },
+  "keywords": [
+    "node-red"
+  ],
+  "dependencies": {
+    "fs-extra": "^10.1.0"
+  },
+  "author": "",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/phoddie/node-red-mcu/issues"
+  },
+  "homepage": "https://github.com/phoddie/node-red-mcu#readme"
+}

@@ -1,0 +1,156 @@
+<script type="text/javascript">
+
+    let flowList;
+
+    RED.nodes.registerType('node-red-mcu',{
+        category: 'MCU',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:""},
+            cmd: { value: "mcconfig -d -m -p mac"},
+            cwd: { value: ""},
+            flows2build: { value: []},
+            env: { value: true }
+        },
+        inputs:1,
+        outputs:1,
+        icon: "font-awesome/fa-microchip",
+        label: function() {
+            return this.name||"MCU builder";
+        },
+        // name: "MCU builder",
+        paletteLabel: function() { return "Builder";},
+        oneditprepare: function() {
+
+            var objects = {};
+            let self = this;
+
+            function getFlowLabel(n) {
+                var label = (typeof n === "string")? n : n.label;
+                var newlineIndex = label.indexOf("\\n");
+                if (newlineIndex > -1) {
+                    label = label.substring(0,newlineIndex)+"...";
+                }
+                return label;
+            }
+
+            function getGutter(n) {
+                var span = $("<span>",{class:"red-ui-info-outline-gutter red-ui-treeList-gutter-float"});
+                var revealButton = $('<button type="button" class="red-ui-info-outline-item-control-reveal red-ui-button red-ui-button-small"><i class="fa fa-search"></i></button>').appendTo(span).on("click",function(evt) {
+                    evt.preventDefault();
+                    evt.stopPropagation();
+                    RED.view.reveal(n.id);
+                })
+                RED.popover.tooltip(revealButton,RED._("sidebar.info.find"));
+                return span;
+            }
+
+            function getFlowData() {
+                var flowData = [];
+                RED.nodes.eachWorkspace(function(ws){
+                    d = {
+                        label: getFlowLabel(ws),
+                        id: ws.id,
+                        checkbox: true,
+                        icon: "red-ui-icons red-ui-icons-flow",
+                        deferBuild: false,
+                        gutter: getGutter(ws),                        
+                    };
+
+                    for (let i = 0; i< self.flows2build.length; i+=1) {
+                        if (self.flows2build[i] === ws.id) {
+                            d.selected = true;
+                            break;
+                        }
+                    }
+
+                    flowData.push(d);
+                })
+                return flowData;
+            }
+
+            let container = $("#node-tree");
+            flowList = $("<div>").css({width: "100%"}).appendTo(container).treeList({
+                data:getFlowData(),
+                multi: true,
+            });
+        },
+        oneditsave: function () {
+
+            let dirty = false;
+            let flows = [];
+            let selected = flowList.treeList("selected")
+
+            for (let ii=0; ii<selected.length; ii+=1) {
+                let s = selected[ii];
+                let changed = true;
+                for (let i = 0; i< this.flows2build.length; i+=1) {
+                    if (this.flows2build[i] === s.id) {
+                        changed = false;
+                        break;
+                    }
+                }
+
+                flows.push(s.id);
+                if (changed) {
+                    dirty = true;
+                }
+
+            }
+
+            this.flows2build = flows;
+            // returning 'true' here sets the "Deploy" status in the editor.
+            return dirty;
+        },
+    });
+</script>
+
+<script type="text/html" data-template-name="node-red-mcu">
+    <div class="form-row">
+        <label for="node-input-name" style="width: 150px;"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name" style="width:calc(100% - 160px)">
+    </div>
+    <div class="form-row">
+        <label for="node-input-cmd" style="width: 150px;"><i class="fa fa-tag"></i> Build Command</label>
+        <input type="text" id="node-input-cmd" placeholder="Build Command" style="width:calc(100% - 160px)">
+    </div>
+    <div class="form-row">
+        <label for="node-input-cwd" style="width: 150px;"><i class="fa fa-tag"></i> Working Directory</label>
+        <input type="text" id="node-input-cwd" placeholder="Absolute path to working directory (on server)" style="width:calc(100% - 160px)">
+    </div>
+    <div class="form-row">
+        <label style="width: 150px;"></label>
+        <input type="checkbox" id="node-input-env" placeholder="Create environment to build in the working directory?" style="width:20px;">
+        <label for="node-input-env" style="width: 200px; vertical-align:sub;"> Create build environment?</label>
+    </div>
+    <div class="form-row">
+        <label for="node-tree" style="width: 150px;"><i class="fa fa-tag"></i> Flows to build</label>
+        <div id="node-tree" class="red-ui-info-outline" style="position:absolute; width: 90%; min-height:300px; border: 1px solid var(--red-ui-form-input-border-color); border-radius: 4px; padding: 2px;"></div>
+
+    </div>
+</script>
+
+<script type="text/markdown" data-help-name="node-red-mcu">
+A node to build flows for node-red-mcu.
+**!! EXPERIMENTAL !!**
+
+### Inputs
+
+: mcu (object) :  Object to define build parameters. If set, this date superceeds the configuration provided in the node.
+: mcu.cmd (string): Build command. Defaults to `mcconfig -d -m -p mac`.
+: mcu.cwd (string): Working directory.
+: mcu.env (boolean): If `true`, the necessary building environment will be generated in the working directory. **Existing files will be overwritten.**
+: mcu.flows (array of strings): Array of ID's of flows to be build.
+    
+### Outputs
+
+: error (object): The error object - if an error occured.
+: exec (object): `stdout` & `stderr` received when executing the build command.
+    
+### Details
+
+This node allows to trigger the build process of node-red-mcu. Refer to the [Moddable SDK](https://github.com/Moddable-OpenSource/moddable) for details.
+
+The configuration of the build process can be defined via the node configuration or by providing parameters as `msg.mcu`.
+
+</script>

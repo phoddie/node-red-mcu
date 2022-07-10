@@ -1,0 +1,8 @@
+# Dependency directories
+node_modules/
+
+# local package_lock
+package-lock.json
+
+# Mac specific
+.DS_Store

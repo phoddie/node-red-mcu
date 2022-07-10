@@ -69,6 +69,17 @@ Build and run the Moddable SDK project as usual for the target device.
 
 This process is quick and easy for early exploration. Of course, there are many ways it could be streamlined to improve the developer experience.  
 
+### MCU Builder node | experimental
+
+The building process can be automated by using the `MCU Builder` node. Be aware, that this is an **experimental** feature.
+To use the `MCU Builder` node, clone this repository to a folder on the system running your `node-red` application.
+If successful, `cd` into your `.node-red` directory & run the installation of this package:
+```
+npm install <path to your cloned directory>
+
+```
+Please be aware that - as of now - this package does not follow the node-red naming conventions!
+
 ## Structure
 The Node-RED runtime executes the nodes and flows. This runtime architecture determines how nodes interact with each other. It also is a key factor in how efficiently the execution uses the limited RAM and CPU power available. 
 

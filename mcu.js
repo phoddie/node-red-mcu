@@ -11,21 +11,20 @@ const env4build = [
 
 module.exports = function(RED) {
     function mcuBuilder(config) {
-        RED.nodes.createNode(this,config);
-        var node = this;
+        RED.nodes.createNode(this, config);
+        let node = this;
         node.on('input', function(msg, send, done) {
 
+            let mcu = msg.mcu || {};
             let cfg = {
-                flows2build: msg.mcu.flows || config.flows2build || [],
-                cmd: msg.mcu.msg || config.cmd || "",
-                cwd: msg.mcu.cwd || config.cwd || "",
-                env: msg.mcu.env || config.env || false
-            }
+                flows2build: mcu.flows || config.flows2build || [],
+                cmd: mcu.msg || config.cmd || "",
+                cwd: mcu.cwd || config.cwd || "",
+                env: mcu.env || config.env || false
+            };
 
             let nodes = [];
             let error;
-            // let stdout;
-            // let stderr;
 
             let f2bl = cfg.flows2build.length;
             if (f2bl > 0) {
@@ -40,7 +39,7 @@ module.exports = function(RED) {
             }
             nodes = JSON.stringify(nodes, null, 2);
 
-            flowsjs = "const flows=" + nodes + ";\n";
+            let flowsjs = "const flows=" + nodes + ";\n";
             flowsjs+= "export default Object.freeze(flows, true);"
 
             if (cfg.env === true) {

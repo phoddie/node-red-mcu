@@ -234,6 +234,8 @@ export class Node {
 			}
 		};
 
+		trace.left(JSON.stringify(msg));
+
 		for (const node of this.#flow.nodes) {
 			if (node instanceof StatusNode)
 				node.onStatus(msg);

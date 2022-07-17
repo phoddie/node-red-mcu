@@ -3,14 +3,22 @@ const net = require('node:net');
 const proxyPortIn = 5004;		// proxy listening port
 
 /*
-	Moddable SDK prrojects connect to xsbug at loaclhost:5002.
-	This proxy listens on loaclhost:5004. To get the Noddable SDK project to connect to the proxy
+	Moddable SDK projects connect to xsbug at loaclhost:5002.
+	This proxy listens on loaclhost:5004. To have the Noddable SDK project to connect to the proxy
 	requires a manual source code change. On macOS, in $MODDABLE/xs/platforms/mac_xs.c, change 
 		address.sin_port = htons(5002);
 	to
 		address.sin_port = htons(5004);
-	Linux and Windows have similar changes. Eventuall We can add an option to mcconfig to set the xsbug
+	Linux and Windows have similar changes. Eventually We can add an option to mcconfig to set the xsbug
 	port. 
+	
+	To work with an MCU connected via serial, change $MODDABLE/tools/serial2xsbug/serial2xsbug.c from:
+		self->port = 5002;
+	to
+		self->port = 5004;
+	Then rebuild the Moddable SDK tools:
+		cd $MODDABLE/build/makefiles/mac
+		make
 */
 
 const proxyPortOut = 5002;		// xsbug listening port

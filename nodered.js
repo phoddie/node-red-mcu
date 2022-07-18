@@ -207,12 +207,12 @@ export class Node {
 				if (null === m)
 					continue;
 
-				for (let i = 0, wires = outputs[j], length = outputs.length; i < length; i++)
+				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++)
 					wires[i].receive(RED.util.cloneMessage(m));
 			}
 		}
 		else {
-			for (let i = 0, wires = outputs[0], length = outputs.length; i < length; i++)
+			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++)
 				wires[i].receive(RED.util.cloneMessage(msg));
 		}
 	}

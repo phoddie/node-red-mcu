@@ -314,11 +314,22 @@ class DebugNode extends Node {
 		this.#sidebar = config.tosidebar;
 	}
 	onMessage(msg) {
-		const value = JSON.stringify(this.#property ? msg[this.#property] : msg);
-		if (this.#console)
-			trace(value, "\n");
-		if (this.#sidebar)
-			trace.right(value);
+		if (this.#console) {
+			const value = this.#property ? msg[this.#property] : msg;
+			trace(JSON.stringify(value), "\n");
+		}
+		if (this.#sidebar) {
+			let value = this.#property ? {[this.#property]: msg[this.#property]} : msg;
+			value = {
+				...value,
+				source: {
+					id: this.id,
+					type: this.constructor.type,
+					name: this.name,
+				} 
+			}
+			trace.right(JSON.stringify(value));
+		}
 	}
 
 	static type = "debug"

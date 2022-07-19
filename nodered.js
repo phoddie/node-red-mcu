@@ -392,6 +392,7 @@ class InjectNode extends Node {
 		if (config.chrontab)
 			throw new Error("unimplemented");
 
+		if (config.once)
 			this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
 		this.#repeat = config.repeat ? parseFloat(config.repeat) * 1000 : 0;
 		this.#properties = config.props.map(property => {
@@ -421,14 +422,21 @@ class InjectNode extends Node {
 		});
  	}
 	onStart() {
+		if ((undefined === this.#delay) && (0 === this.#repeat))
+			return;
+		
 		if (this.#repeat)
-			this.#timer = Timer.set(() => this.trigger(), this.#delay, this.#repeat);
+			this.#timer = Timer.set(() => this.trigger(), this.#delay ?? 0, this.#repeat);
 		else
-			this.#timer = Timer.set(() => {this.#timer = undefined; this.trigger();}, this.#delay, this.#repeat);
+			this.#timer = Timer.set(() => {this.#timer = undefined; this.trigger();}, this.#delay);
 	}
 	onStop() {
 		Timer.clear(this.#timer);
 		this.#timer = undefined;
+	}
+	onCommand(options) {
+		if ("inject" === options.command)
+			this.trigger();
 	}
 	trigger() {
 		const msg = {};

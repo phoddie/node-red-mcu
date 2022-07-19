@@ -22,7 +22,7 @@ const proxyPortIn = 5004;		// proxy listening port
 */
 
 const proxyPortOut = 5002;		// xsbug listening port
-const trace = false;				// trace progress to console for debugging 
+const trace = false;			// trace progress to console for debugging 
 const relay = true;
 /*
 	When relay is true, proxy relays messages between Moddable SDK project and xsbug.
@@ -66,6 +66,7 @@ const server = net.createServer(target => {
 
 	target.setEncoding("utf8");
 	let first = true;
+	let timeout;
 	target.on('data', data => {
 		if (trace)
 			console.log("to xsbug: " + data);
@@ -74,6 +75,19 @@ const server = net.createServer(target => {
 		// each message is an XML document
 		// status messages are sent in a bubble right message of the form:
 		// <xsbug><bubble name="" value="2" path="/Users/hoddie/Projects/moddable/examples/helloworld/main.js" line="18">JSON STATUS MESSAGE HERE</bubble></xsbug>
+
+		// example of sending a command to the Node-RED MCU runtime.
+		// sends an "inject" ccommand the node in the specified flow
+		if (undefined === timeout) {
+			timeout = setTimeout(() => {
+				const options = {
+					command: "inject",
+					flow: "d908d28ca7c5c7b4",
+					id: "cfef9cb598d205ef"
+				};
+				target.write(`\r\n<script path="" line="0"><![CDATA[${JSON.stringify(options)}]]></script>\r\n`);
+			}, 1000);
+		}
 
 		if (relay) { 
 			if (xsbug.deferred)
@@ -85,11 +99,11 @@ const server = net.createServer(target => {
 			if (first) {
 				// first time need to send set-all-breakpoints as xsbug does
 				first = false;;
-				target.write('<set-all-breakpoints><breakpoint path="exceptions" line="0"/></set-all-breakpoints>\r\n');
+				target.write('\r\n<set-all-breakpoints><breakpoint path="exceptions" line="0"/></set-all-breakpoints>\r\n');
 			}
 			else {
 				// assume any other messages are a break, so send go. This isn't always corrrect but may always work.
-				target.write('<go/>\r\n');
+				target.write('\r\n<go/>\r\n');
 			}
 		}
 	});

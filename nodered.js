@@ -287,6 +287,9 @@ export class Node {
 	get outputCount() {
 		return this.#outputs.length;
 	}
+	onCommand(options) {
+		trace(`Node ${this.id} ignored: ${options.command}\n`);
+	}
 
 	static type = "comment";
 	static {
@@ -389,7 +392,7 @@ class InjectNode extends Node {
 		if (config.chrontab)
 			throw new Error("unimplemented");
 
-		this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
+			this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
 		this.#repeat = config.repeat ? parseFloat(config.repeat) * 1000 : 0;
 		this.#properties = config.props.map(property => {
 			const name = property.p;
@@ -1425,7 +1428,15 @@ class CompatibiltyNode extends Node {
 
 	static type = "Node-RED Compatibility";
 }
- 
+
+globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
+	const options = JSON.parse(script);
+	const node = flows.get(options.flow)?.getNode(options.id);
+	if (!node)
+		return;
+
+	node.onCommand(options);
+}
 
 class Console {
 	static log(...parts) {

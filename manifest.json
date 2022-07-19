@@ -41,6 +41,11 @@
 		"WeakMap",
 		"WeakSet"
 	],
+	"defines": {
+		"xs": {
+			"xsbug_hooks": 1
+		}
+	},
 	"platforms": {
 		"esp32": {
 			"creation": {

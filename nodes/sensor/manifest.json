@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"sensor": "./sensor-mcu"
+	},
+	"preload": "sensor"
+}

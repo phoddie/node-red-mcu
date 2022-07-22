@@ -1,0 +1,123 @@
+<script type="text/javascript">
+    RED.nodes.registerType('sensor',{
+        category: 'function',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:""},
+            io: {value:"I2C"},
+            module: {
+				value:"",
+				validate: function(v) {
+					return v !== "";
+				}
+			},
+			configuration: {
+				value: "{}",
+				validate: function(v) {
+					try {
+						if ("" !== v)
+							JSON.parse(v);
+					}
+					catch {
+						return false;
+					}
+					return true;
+				}
+			}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "file.png",
+        label: function() {
+            return this.name||"sensor";
+        }
+    });
+</script>
+
+<!-- stolen from MQTT -->
+<style>
+
+    .sensor-form-row-cols2 > input.sensor-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+    .sensor-form-row-cols2 > select.sensor-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+
+    .sensor-form-row-cols2 > label.sensor-form-row-col2 {
+        width: 100px;
+        margin-left: 42px;
+        display: inline-block;
+    }
+    .sensor-form-row-cols2 > input.sensor-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .sensor-form-row-cols2 > select.sensor-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .form-row.sensor5-out > label {
+        width: 130px;
+    }
+    .form-row.sensor-flags-row > label {
+        vertical-align: top;
+    }
+    .form-row.sensor-flags-row > .sensor-flags {
+        display: inline-block;
+        width: 70%
+    }
+
+    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label {
+        display: block;
+        width: 100%;
+    }
+    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label > input {
+        position: relative;
+        vertical-align: bottom;
+        top: -2px;
+        width: 15px;
+        height: 15px;
+    }
+    .form-row-sensor5 {
+        display: none;
+    }
+    .form-row-sensor5.form-row-sensor5-active:not(.form-row-sensor-static-disabled) {
+        display: block
+    }
+    .form-row-sensor-static-disabled {
+        display: none;
+        /* opacity: 0.3;
+        pointer-events: none; */
+    }
+
+</style>
+
+<script type="text/html" data-template-name="sensor">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-module"><i class="fa fa-tasks"></i> Module</label>
+        <input type="text" id="node-input-module" placeholder="embedded:sensor/AtmosphericPressure-Temperature/BMP180">
+    </div>
+
+    <div class="form-row form-row-sensor-static">
+		<label for="node-input-io" class="sensor-form-row-col1"><i class="fa fa-empire"></i> I/O</label>
+		<select id="node-input-io" class="sensor-form-row-col1">
+			<option value="I2C">I²C</option>
+			<option value="SMBus">SMBus</option>
+		</select>
+	</div>
+
+    <div class="form-row">
+        <label for="node-input-configuration"><i class="fa fa-tasks"></i> Configure</label>
+        <input type="text" id="node-input-configuration" placeholder="{}">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="sensor">
+    <p>Read samples from Ecma-419 sensor class implementations</p>
+</script>

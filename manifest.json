@@ -8,7 +8,9 @@
 		"$(MODDABLE)/modules/io/manifest.json",
 		"./nodes/rpi-ds18b20/manifest.json",
 		"./nodes/websocketnodes/manifest.json",
-		"./nodes/lower-case/manifest.json"
+		"./nodes/lower-case/manifest.json",
+		"./nodes/sensor/manifest.json",
+		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json"
 	],
 	"modules": {
 		"*": [
@@ -41,6 +43,11 @@
 		"WeakMap",
 		"WeakSet"
 	],
+	"defines": {
+		"xs": {
+			"xsbug_hooks": 1
+		}
+	},
 	"platforms": {
 		"esp32": {
 			"creation": {

@@ -287,6 +287,9 @@ export class Node {
 	get outputCount() {
 		return this.#outputs.length;
 	}
+	onCommand(options) {
+		trace(`Node ${this.id} ignored: ${options.command}\n`);
+	}
 
 	static type = "comment";
 	static {
@@ -399,7 +402,8 @@ class InjectNode extends Node {
 		if (config.chrontab)
 			throw new Error("unimplemented");
 
-		this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
+		if (config.once)
+			this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
 		this.#repeat = config.repeat ? parseFloat(config.repeat) * 1000 : 0;
 		this.#properties = config.props.map(property => {
 			const name = property.p;
@@ -428,14 +432,21 @@ class InjectNode extends Node {
 		});
  	}
 	onStart() {
+		if ((undefined === this.#delay) && (0 === this.#repeat))
+			return;
+		
 		if (this.#repeat)
-			this.#timer = Timer.set(() => this.trigger(), this.#delay, this.#repeat);
+			this.#timer = Timer.set(() => this.trigger(), this.#delay ?? 0, this.#repeat);
 		else
-			this.#timer = Timer.set(() => {this.#timer = undefined; this.trigger();}, this.#delay, this.#repeat);
+			this.#timer = Timer.set(() => {this.#timer = undefined; this.trigger();}, this.#delay);
 	}
 	onStop() {
 		Timer.clear(this.#timer);
 		this.#timer = undefined;
+	}
+	onCommand(options) {
+		if ("inject" === options.command)
+			this.trigger();
 	}
 	trigger() {
 		const msg = {};
@@ -1435,7 +1446,15 @@ class CompatibiltyNode extends Node {
 
 	static type = "Node-RED Compatibility";
 }
- 
+
+globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
+	const options = JSON.parse(script);
+	const node = flows.get(options.flow)?.getNode(options.id);
+	if (!node)
+		return;
+
+	node.onCommand(options);
+}
 
 class Console {
 	static log(...parts) {

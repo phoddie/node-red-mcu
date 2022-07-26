@@ -1,5 +1,5 @@
 {
-	"name": "node-red-contrib-example-lower-case",
+	"name": "@moddable-node-red/example-lower-case",
 	"version": "1.0.0",
 	"description": "example",
 	"license": "UNLICENSED",

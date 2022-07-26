@@ -1,5 +1,5 @@
 {
-	"name": "node-red-contrib-sensor",
+	"name": "@moddable-node-red/sensor",
 	"version": "1.0.0",
 	"description": "example",
 	"license": "UNLICENSED",

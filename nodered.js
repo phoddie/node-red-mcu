@@ -307,7 +307,9 @@ class DebugNode extends Node {
 	#property;
 	#console;
 	#sidebar;
-	#config
+	#toStatus;
+	#statusType;
+	#statusVal;
 
 	onSetup(config) {
 		if (("jsonata" === config.targetType) /*|| config.tostatus*/)
@@ -316,7 +318,9 @@ class DebugNode extends Node {
 		this.#property = ("true" === config.complete) ? null : config.complete;
 		this.#console = config.console;
 		this.#sidebar = config.tosidebar;
-		this.#config = config;
+		this.#toStatus = config.tostatus;
+		this.#statusType = config.statusType;
+		this.#statusVal = config.statusVal;
 	}
 	onMessage(msg) {
 		if (this.#console) {
@@ -335,11 +339,15 @@ class DebugNode extends Node {
 			}
 			trace.right(JSON.stringify(value));
 		}
-		if (this.#config.tostatus) {
-			if (this.#config.statusType === "msg") {
-				let val = msg[this.#config.statusVal];
+		if (this.#toStatus) {
+			// This is nothing but a very simplistic copy of what the NR node really does...
+			// ToDo: Move closer to the NR debug node!
+			if (this.#statusType === "msg") {
+				let val = msg[this.#statusVal];
+				let fill = "grey";
+				let shape = "dot";
 				if (val) {
-					this.status({text: val})
+					this.status({"fill": fill, "shape": shape, "text": val})
 				}
 			}
 		}

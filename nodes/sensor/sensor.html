@@ -119,5 +119,12 @@
 </script>
 
 <script type="text/html" data-help-name="sensor">
-    <p>Read samples from Ecma-419 sensor class implementations</p>
+    <p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">Ecma-419 sensor class</a> implementations</p>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">object</span></dt>
+        <dd>the payload is the object returned by calling "sample()"</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The optional "configuration" JSON data is passed to the "configure" method.</p>
+    <p>When running in full Node-RED the node simulates a tempperature sensor. This is useful for debugging flows before deploying them to the MCU.</p>
 </script>

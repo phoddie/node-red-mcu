@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"delay": "./89-delay"
+	},
+	"preload": "delay"
+}

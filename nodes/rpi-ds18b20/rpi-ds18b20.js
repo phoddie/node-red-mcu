@@ -28,13 +28,12 @@ class RpiDS18B20 extends Node {
 	#bus;
 	#sensors = [];
 
-	onSetup(config) {
+	onStart(config) {
 		if (config.topic)
 			throw new Error("topic unimplemented");
 
 		this.#array = config.array;
-	}
-	onStart() {
+
 		this.#bus = new OneWire({
 		  pin: mcconfig.onewire.pin
 		});
@@ -67,10 +66,6 @@ class RpiDS18B20 extends Node {
 				}
 			});
 		}
-	}
-	onStop() {
-		this.#sensors = undefined;
-		this.#bus?.close();
 	}
 
 	static type = "rpi-ds18b20";

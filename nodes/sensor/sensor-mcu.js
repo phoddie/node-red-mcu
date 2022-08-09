@@ -27,12 +27,11 @@ class Sensor extends Node {
 	#sensor;
 	#configuration;
 
-	onSetup(config) {
+	onStart(config) {
 		this.#io = config.io;
 		this.#module = config.module;
 		this.#configuration = config.configuration ? JSON.parse(config.configuration) : undefined;
-	}
-	onStart() {
+
 		try {
 			const Sensor = Modules.importNow(this.#module);
 			let sensor;
@@ -50,10 +49,6 @@ class Sensor extends Node {
 	onMessage(msg) {
 		msg.payload = this.#sensor?.sample();
 		return msg;
-	}
-	onStop() {
-		this.#sensor?.close();
-		this.#sensor = undefined;
 	}
 
 	static type = "sensor";

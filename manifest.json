@@ -1,6 +1,7 @@
 {
 	"include": [
 		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/modules/base/deepEqual/manifest.json",
 		"$(MODDABLE)/modules/base/modules/manifest.json",
 		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
@@ -9,6 +10,7 @@
 		"./nodes/rpi-ds18b20/manifest.json",
 		"./nodes/websocketnodes/manifest.json",
 		"./nodes/lower-case/manifest.json",
+		"./nodes/delay/manifest.json",
 		"./nodes/sensor/manifest.json",
 		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json"
 	],
@@ -16,7 +18,10 @@
 		"*": [
 			"./main",
 			"./nodered",
-			"./flows"
+			{
+				"source": "./flows",
+				"transform": "nodered2mcu"
+			}
 		]
 	},
 	"preload": [
@@ -24,7 +29,6 @@
 		"flows"
 	],
 	"creation": {
-		"static": 28672,
 		"keys": {
 			"available": 128
 		},

@@ -42,7 +42,7 @@ class WebSocketClient extends Node {
 	#options;
 	#nodes;
 
-	onSetup(config) {
+	onStart(config) {
 		if (config.tls || ("0" !== config.hb))
 			throw new Error("unimplemented");		
 
@@ -51,8 +51,7 @@ class WebSocketClient extends Node {
 			wholemsg: "true" === config.wholemsg,
 			subprotocol: config.subprotocol
 		};
-	}
-	onStart() {
+
 		this.status(disconnected);
 		this.#connect();
 	}
@@ -126,7 +125,7 @@ class WebSocketClient extends Node {
 class WebSocketIn extends Node {
 	#client;
 
-	onSetup(config) {
+	onStart(config) {
 		this.#client = flows.get(configFlowID).getNode(config.client);
 		this.#client?.add(this);
 	}
@@ -140,7 +139,7 @@ class WebSocketIn extends Node {
 class WebSocketOut extends Node {
 	#client;
 
-	onSetup(config) {
+	onStart(config) {
 		this.#client = flows.get(configFlowID).getNode(config.client);
 		this.#client?.add(this);
 	}

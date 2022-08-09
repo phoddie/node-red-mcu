@@ -19,6 +19,7 @@
  */
 
 import Timer from "timer";
+import deepEqual from "deepEqual";
 import Base64 from "base64";
 import Modules from "modules";
 import fetch from "fetch";
@@ -26,14 +27,34 @@ import {Headers, URLSearchParams} from "fetch";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
-export const configFlowID = "config";
+export const configFlowID = "__config";
+
+function generateId() @ "xs_nodered_util_generateId";
 
 class RED {
-	static #compatibility = []
+	static #compatibility = [];
+
+	static settings = Object.freeze({
+	});
 
 	static util = class {
 		static cloneMessage(msg) {
-			return Object.assign({}, msg);	//@@ shallow & naive
+			return Object.assign({}, msg);	//@@ shallow
+		}
+		static compareObjects = deepEqual;
+		static evaluateNodeProperty(inputField, inputFieldType, node, msg) {
+			throw new Error;
+		}
+		static generateId = generateId;
+		static getMessageProperty(msg, property) {
+		}
+		static getObjectProperty(msg, property) {
+		}
+		static setMessageProperty(msg, prop, value, createMissing) {
+			throw new Error;
+		}
+		static setObjectProperty(msg, prop, value, createMissing) {
+			throw new Error;
 		}
 	}
 	static nodes = class {
@@ -42,95 +63,58 @@ class RED {
 		}
 		static createNode() {		// nothing to do: initialization done in class
 		}
+		static getNode(id) {
+			for (let flow of flows.values()) {
+				const node = flow.getNode(id);
+				if (node)
+					return node;
+			}
+		}
+	}
+	static mcu = class {
+		static getNodeConstructor(type) {
+			const Class = nodeClasses.get(type);
+			if (!Class) {	
+				const msg = `Unsupported Node "${type}"`; 
+				trace(msg, "\n");
+				throw new Error(msg);
+			}
+			return Class;
+		}
 	}
 
-	static build(items) {
+	static build(builder) {
 		const flows = new Map;
+		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
 
 		globalThis.globalContext = new Context;
-		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
 
 		if (this.#compatibility.length) {
 			compatibilityClasses = new Map;
 			this.#compatibility.forEach(f => f(RED));
 		}
 
-		// create flows
-		items.forEach(item => {
-			if (("tab" === item.type) && (true !== item.disabled)) {
-				const flow = new Flow(item.id, item.label);
-				flows.set(item.id, flow);
-			}
-		});
-		flows.set(configFlowID, new Flow(configFlowID, "global configuration"));
-
-		// create nodes
-		items.forEach(item => {
-			if ("tab" === item.type)
-				return;
-
-			const flow = flows.get(item.z ?? configFlowID);
-			if (!flow) throw new Error("missing flow " + item.z);
-
-			const Class = item.d ? DisabledNode : (nodeClasses.get(item.type) ?? compatibilityClasses?.get(item.type));
-			if (!Class) {	
-				const msg = `Unsupported Node "${item.type}"`; 
-				trace(msg, "\n");
-				throw new Error(msg);
-			}
-			if (Node.isPrototypeOf(Class))
-				 flow.addNode(new Class(item.id, flow, item.name));
-			else
-				 flow.addNode(new CompatibiltyNode(item.id, flow, item.name, Class));
-		});
-
-		// connect wires
-		items.forEach(item => {
-			const wires = item.wires;
-			if (!wires?.length)
-				return;
-			
-			const flow = flows.get(item.z ?? configFlowID);
-			const node = flow.getNode(item.id);
-			const outputs = wires.map(wire => Object.freeze(wire.map(target => flow.getNode(target)))); 
-			Object.freeze(outputs);
-			node.setOutputs(outputs);
-		});
-		
-		// connect links
-		items.forEach(item => {
-			let links = item.links;
-			if (!links?.length)
-				return;
-
-			const flow = flows.get(item.z);
-			const node = flow.getNode(item.id);
-			links = links.map(link => { 
-				for (let [id, flow] of flows) {
-					const node = flow.getNode(link);
-					if (node)
-						return node;
+		builder.build(
+			flows,
+			(id, name) => {
+				const flow = new Flow(id, name);
+				flows.set(id, flow);
+				return flow;
+			},
+			(type, id, name, flow) => {
+				let Class = nodeClasses.get(type) ?? compatibilityClasses?.get(type);
+				if (!Class) {	
+					const msg = `Unsupported Node "${type}"`; 
+					trace(msg, "\n");
+					throw new Error(msg);
 				}
-				throw new Error("unresolved link");
-			});
-			Object.freeze(links);
-			node.links = links;
-		});
 
-		// setup nodes
-		items.forEach(item => {
-			if ("tab" === item.type)
-				return;
-
-			const node = flows.get(item.z ?? configFlowID).getNode(item.id);
-			node.onSetup(item);
-		});
-
-		// start nodes
-		for (let [id, flow] of flows) {
-			for (let node of flow.nodes)
-				node.onStart();
-		}
+				if (Node.isPrototypeOf(Class))
+					flow.addNode(new Class(id, flow, name));
+				else
+					flow.addNode(new CompatibiltyNode(id, flow, name, Class));
+			}
+		);
 
 		return flows;
 	}
@@ -166,7 +150,7 @@ class Flow extends Map {
 	getNode(id) {
 		return super.get(id);
 	}
-	get nodes() {
+	nodes() {
 		return super.values();
 	}
 }
@@ -184,14 +168,12 @@ export class Node {
 			properties.name = {value: name};
 		Object.defineProperties(this, properties);
 	}
-	setOutputs(outputs) {
-		this.#outputs = outputs; 
-	}
-	onSetup(config) {
-	}
-	onStart() {
-	}
-	onStop(c) {
+	onStart(config) {
+		const wires = config.wires;
+		if (!wires?.length)
+			return;
+
+		this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target))); 
 	}
 	onMessage(msg) {
 	}
@@ -200,6 +182,7 @@ export class Node {
 		if (!outputs.length)
 			return;
 
+		const util = RED.util;
 		if (Array.isArray(msg)) {
 			const length = Math.min(msg.length, outputs.length);
 			for (let j = 0; j < length; j++) {
@@ -207,13 +190,15 @@ export class Node {
 				if (null === m)
 					continue;
 
+				m._msgid ??= util.generateId();
 				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++)
-					wires[i].receive(RED.util.cloneMessage(m));
+					wires[i].receive(util.cloneMessage(m));
 			}
 		}
 		else {
+			msg._msgid ??= util.generateId();
 			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++)
-				wires[i].receive(RED.util.cloneMessage(msg));
+				wires[i].receive(util.cloneMessage(msg));
 		}
 	}
 	receive(msg) {
@@ -236,7 +221,7 @@ export class Node {
 
 		trace.left(JSON.stringify(msg));
 
-		for (const node of this.#flow.nodes) {
+		for (const node of this.#flow.nodes()) {
 			if (node instanceof StatusNode)
 				node.onStatus(msg);
 		}
@@ -265,7 +250,7 @@ export class Node {
 		};
 
 		const uncaught = [];
-		for (const node of this.#flow.nodes) {
+		for (const node of this.#flow.nodes()) {
 			if (!(node instanceof CatchNode))
 				continue;
 			if (node.uncaught)
@@ -287,6 +272,9 @@ export class Node {
 	get outputCount() {
 		return this.#outputs.length;
 	}
+	get flow() {
+		return this.#flow.context;
+	}
 	onCommand(options) {
 		trace(`Node ${this.id} ignored: ${options.command}\n`);
 	}
@@ -298,24 +286,31 @@ export class Node {
 	}
 }
 
-class DisabledNode extends Node {
+class UnknownNode extends Node {
+	onStart() {}	// so outputs are not needlessly connected
 	receive() {}
 	send() {}
+
+	static type = "unknown";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
 }
 
 class DebugNode extends Node {
 	#property;
+	#getter;
 	#console;
 	#sidebar;
 	#toStatus;
 	#statusType;
 	#statusVal;
 
-	onSetup(config) {
-		if (("jsonata" === config.targetType) /*|| config.tostatus*/)
-			throw new Error("unimplemented");
+	onStart(config) {
+		super.onStart(config);
 
-		this.#property = ("true" === config.complete) ? null : config.complete;
+		this.#property = config.property;
+		this.#getter = config.getter;
 		this.#console = config.console;
 		this.#sidebar = config.tosidebar;
 		this.#toStatus = config.tostatus;
@@ -323,12 +318,13 @@ class DebugNode extends Node {
 		this.#statusVal = config.statusVal;
 	}
 	onMessage(msg) {
-		if (this.#console) {
-			const value = this.#property ? msg[this.#property] : msg;
-			trace(JSON.stringify(value), "\n");
-		}
+		const value = this.#getter(msg);
+
+		if (this.#console)
+			trace(("object" === typeof value) ? JSON.stringify(value) : value, "\n");
+
 		if (this.#sidebar) {
-			let value = this.#property ? {[this.#property]: msg[this.#property]} : msg;
+			let value = this.#property ? {[this.#property]: value} : msg;
 			value = {
 				...value,
 				source: {
@@ -342,13 +338,11 @@ class DebugNode extends Node {
 		if (this.#toStatus) {
 			// This is nothing but a very simplistic copy of what the NR node really does...
 			// ToDo: Move closer to the NR debug node!
-			if (this.#statusType === "msg") {
-				let val = msg[this.#statusVal];
-				let fill = "grey";
-				let shape = "dot";
-				if (val) {
-					this.status({"fill": fill, "shape": shape, "text": val})
-				}
+			const statusVal = this.#statusVal(msg);
+			if (statusVal) {
+				const fill = "grey";
+				const shape = "dot";
+				this.status({fill, shape, text: statusVal})
 			}
 		}
 	}
@@ -362,7 +356,9 @@ class DebugNode extends Node {
 class CatchNode extends Node {
 	#scope;
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		this.#scope = config.scope;
 		Object.defineProperty(this, "uncaught", {value: config.uncaught ?? false});
 	}
@@ -382,7 +378,9 @@ class CatchNode extends Node {
 class StatusNode extends Node {
 	#scope;
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		this.#scope = config.scope;
 	}
 	onStatus(msg) {
@@ -396,76 +394,16 @@ class StatusNode extends Node {
 	}
 }
 
-function injectNow() {
-	return Date.now();
-}
-
 class InjectNode extends Node {
-	#timer;
-	#delay;
-	#repeat;
-	#properties;
+	onStart(config) {
+		super.onStart(config);
 
-	onSetup(config) {
-		if (config.chrontab)
-			throw new Error("unimplemented");
-
-		if (config.once)
-			this.#delay = config.once ? parseFloat(config.onceDelay) * 1000 : 0;
-		this.#repeat = config.repeat ? parseFloat(config.repeat) * 1000 : 0;
-		this.#properties = config.props.map(property => {
-			const name = property.p;
-			const type = ("payload" === name) ? config.payloadType : property.vt;
-			let value = ("payload" === name) ? config.payload : property.v;
-			switch (type) {
-				case "bool":
-					value = "true" === value;
-					break;
-				case "date":
-					value = injectNow;
-					break;
-				case "json":
-					value = JSON.parse(value);
-					break;
-				case "num":
-					value = parseFloat(value);
-					break;
-				case "str":
-					value = value ?? "";
-					break;
-				default:
-					throw new Error("unimplemented");
-			}
-			return {name, value};
-		});
- 	}
-	onStart() {
-		if ((undefined === this.#delay) && (0 === this.#repeat))
-			return;
-		
-		if (this.#repeat)
-			this.#timer = Timer.set(() => this.trigger(), this.#delay ?? 0, this.#repeat);
-		else
-			this.#timer = Timer.set(() => {this.#timer = undefined; this.trigger();}, this.#delay);
-	}
-	onStop() {
-		Timer.clear(this.#timer);
-		this.#timer = undefined;
+		Object.defineProperty(this, "trigger", {value: config.trigger});
+		config.initialize?.call(this);
 	}
 	onCommand(options) {
 		if ("inject" === options.command)
 			this.trigger();
-	}
-	trigger() {
-		const msg = {};
-		for (let i = 0, properties = this.#properties, length = properties.length; i < length; i++) {
-			let property = properties[i];
-			let value = property.value;
-			if (value instanceof Function)
-				value = value();
-			msg[property.name] = value;
-		}
-		this.send(msg);
 	}
 
 	static type = "inject";
@@ -474,12 +412,9 @@ class InjectNode extends Node {
 	}
 }
 
-// wraps timeout / interval calls to be able to clear on stop / redeploy... maybe don't care?
 class FunctionNode extends Node {
 	context = new Context;
-	#initialize = nop;
-	#func = nop;
-	#finalize = nop;
+	#func;
 	#libs;
 
 	constructor(id, flow, name) {
@@ -487,61 +422,34 @@ class FunctionNode extends Node {
 		this.context.global = globalContext;
 		this.context.flow = flow.context;
 	}
-	onSetup(config) {
-		let libs = "";
-		if (config.libs.length) {
+	onStart(config) {
+		super.onStart(config);
+
+		if (config.libs?.length) {
 			this.#libs = [];
-			libs = [];
-			for (let i = 0; i < config.libs.length; i++) {
-				const item = config.libs[i];
-				this.#libs[i] = Modules.importNow(item.module);
-				libs[i] = item.var;
-			}
+			for (let i = 0; i < config.libs.length; i++)
+				this.#libs[i] = Modules.importNow(config.libs[i]);
 			Object.freeze(this.#libs);
-			libs = `\tconst [${libs.join(", ")}] = libs;\n`
 		}
 
-		if (config.func)
-			this.#func = eval(`function f(msg, node, context, flow, global, libs) {
-${libs}${config.func}
-};
-f;`);
-		if (config.initialize)
-			this.#initialize = eval(`function f(node, context, flow, global, libs) {
-${libs}${config.initialize}
-};
-f;`);
-		if (config.finalize)
-			this.#finalize = eval(`function f(node, context, flow, global, libs) {
-${libs}${config.finalize}
-};
-f;`);
-		const context = this.context;
-		const func = this.#initialize;
+		this.#func = config.func ?? nop;
+
 		try {
-			func(this, context, context.flow, context.global, this.#libs);
+			const context = this.context;
+			const initialize = config.initialize;
+			initialize?.(this, context, context.flow, context.global, this.#libs);
 		}
 		catch (e) {
 			this.error(e);
 		}
 	}
 	onMessage(msg) {
-		const func = this.#func;
-		const context = this.context;
 		try {
+			const context = this.context;
+			const func = this.#func;
 			msg = func(msg, this, context, context.flow, context.global, this.#libs);
 			if (msg)
 				this.send(msg);
-		}
-		catch (e) {
-			this.error(e);
-		}
-	}
-	onStop() {
-		const context = this.context;
-		const func = this.#finalize;
-		try {
-			func(this, context, context.flow, context.global, this.#libs);
 		}
 		catch (e) {
 			this.error(e);
@@ -555,68 +463,10 @@ f;`);
 }
 
 class ChangeNode extends Node {
-	#rules;
+	onStart(config) {
+		super.onStart(config);
 
-	onSetup(config) {
-		this.#rules = config.rules.map(config => {
-			const rule = {type: config.t, property: config.p};
-
-			if ("msg" !== config.pt)
-				throw new Error("unimplemented change target");
-
-			if ("set" === config.t) {
-				let value = config.to;
-				switch (config.tot) {
-					case "bool":
-						value = "true" === value;
-						break;
-					case "date":
-						value = injectNow;
-						break;
-					case "json":
-						value = JSON.parse(value);
-						break;
-					case "num":
-						value = parseFloat(value);
-						break;
-					case "str":
-						value = value ?? "";
-						break;
-					default:
-						throw new Error("unimplemented");
-				}
-				rule.value = value;
-			}
-			else if ("delete" === config.t)
-				;
-			else if ("move" === config.t) {
-				if ("msg" !== config.tot)
-					throw new Error("unimplemented move target");
-				rule.to = config.to;
-			}
-			else
-				throw new Error("unimplemented change");
-
-			return rule; 
-		});
-	}
-	onMessage(msg) {
-		for (let i = 0, rules = this.#rules, length = rules.length; i < length; i++) {
-			const rule = rules[i];
-			if ("set" === rule.type) {
-				let value = rule.value;
-				if (value instanceof Function)
-					value = value();
-				msg[rule.property] = value;
-			}
-			else if ("delete" === rule.type)
-				delete msg[rule.property];
-			else if ("move" === rule.type) {
-				msg[rule.to] = msg[rule.property]
-				delete msg[rule.property];
-			}
-		}
-		return msg;
+		Object.defineProperty(this, "onMessage", {value: config.onMessage});
 	}
 
 	static type = "change";
@@ -626,150 +476,12 @@ class ChangeNode extends Node {
 }
 
 class SwitchNode extends Node {
-	#property;
-	#rules;
-	#all;
-	#previous;
+	onStart(config) {
+		super.onStart(config);
 
-	onSetup(config) {
-		if (("msg" !== config.propertyType) || config.repair)
-			throw new Error("unimplemented");
-
-		this.#property = config.property;
-		this.#all = "true" === config.checkall;
-		this.#rules = config.rules.map(config => {
-			const rule = {type: config.t};
-
-			if ("istype" === config.t)
-				rule.v = config.v;
-			else {
-				if ("v" in config)
-					rule.v = this.resolve(config.vt, config.v);
-				if ("v2" in config)
-					rule.v2 = this.resolve(config.v2t, config.v2);
-			}
-
-			return rule;
-		});
-	}
-	onMessage(msg) {
-		const value = msg[this.#property];
-		const all = this.#all;
-		const outputCount = this.outputCount;
-		let first = true;
-		const result = new Array(outputCount);
-		result.fill(null);
-		for (let i = 0, rules = this.#rules; i < outputCount; i++) {
-			const rule = rules[i]
-			let v = rule.v, v2 = rule.v2;
-			if (SwitchNode.previousValue === v)
-				v = this.#previous;
-			if (SwitchNode.previousValue === v2)
-				v2 = this.#previous;
-
-			let match;
-			switch (rule.type) {
-				case "btwn":
-					match = (v <= value) && (value <= v2);
-					break;
-				case "eq":
-					match = value == v;
-					break;
-				case "neq":
-					match = value != v;
-					break;
-				case "lt":
-					match = value < v;
-					break;
-				case "lte":
-					match = value <= v;
-					break;
-				case "gt":
-					match = value > v;
-					break;
-				case "gte":
-					match = value >= v;
-					break;
-				case "true":
-					match = true === value;
-					break;
-				case "false":
-					match = false === value
-					break;
-				case "null":
-					match = null === value;
-					break;
-				case "nnull":
-					match = null !== value;
-					break;
-				case "istype":
-					switch (v) {
-						case "string":
-							match = "string" === typeof value;
-							break;
-						case "number":
-							match = "number" === typeof value;
-							break;
-						case "boolean":
-							match = "boolean" === typeof value;
-							break;
-						case "array":
-							match = Array.isArray(value);
-							break;
-						case "object":
-							match = "object" === typeof value;
-							break;
-						case "json":
-							try {
-								JSON.parse(value);
-								match = true;
-							}
-							catch {
-							}
-							break;
-						case "undefined":
-							match = undefined === value;
-							break;
-						case "null":
-							match = null === value;
-							break;
-						default:
-							throw new Error("unimplemented " + v);
-					}
-					break;
-				case "else":
-					match = first;
-					break;
-				default:
-					throw new Error("unimplemented " + rule.type);
-			}
-			
-			if (match) {
-				result[i] = msg;
-				if (!all)
-					break;
-				first = false;
-			}
-		}
-
-		this.#previous = value; 
-
-		return result;
-	}
-	resolve(type, value) {
-		switch (type) {
-			case "num":
-				return Number(value);
-			case "str":
-				return value.toString();
-			case "prev":
-				return SwitchNode.previousValue;
-			default:
-				throw new Error("unimplemented");
-		}
+		Object.defineProperty(this, "onMessage", {value: config.onMessage});
 	}
 
-	static previousValue = Symbol(); 
 	static type = "switch";
 	static {
 		RED.nodes.registerType(this.type, this);
@@ -777,43 +489,10 @@ class SwitchNode extends Node {
 }
 
 class RangeNode extends Node {
-	#property;
-	#in;
-	#out;
-	#round;
-	#action;
-	#scale;
-	#maxin
+	onStart(config) {
+		super.onStart(config);
 
-	onSetup(config) {
-		const maxin = parseFloat(config.maxin);
-		const maxout = parseFloat(config.maxout);
-		const minin = parseFloat(config.minin);
-		const minout = parseFloat(config.minout);
-		this.#scale = (maxout - minout) / (maxin - minin);
-		this.#action = config.action;
-		this.#in = minin;
-		this.#out = minout;
-		this.#property = config.property;
-		this.#round = config.round;
-		this.#maxin = maxin;
-	}
-	onMessage(msg) {
-		let value = msg[this.#property]; 
-		if (this.#action === "clamp") {
-			if (value < this.#in)
-				value = this.#in;
-			if (value > this.#maxin)
-				value = this.#maxin;
-		}
-		else if (this.#action === "roll") {
-			const divisor = this.#maxin - this.#in;
-			value = ((value - this.#in) % divisor + divisor) % divisor + this.#in;
-		}
-		value = ((value - this.#in) * this.#scale) + this.#out;
-		msg[this.#property] = this.#round ? Math.round(value) : value;
-
-		return msg;
+		Object.defineProperty(this, "onMessage", {value: config.onMessage});
 	}
 
 	static type = "range";
@@ -829,7 +508,9 @@ class FilterNode extends Node {
 	#ignoreFirst;
 	#last;
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		if (("rbe" !== config.func) && ("rbei" !== config.func))
 			throw new Error("unimplemented filter func");
 
@@ -862,19 +543,9 @@ class FilterNode extends Node {
 		if (undefined === last)
 			ignoreFirst = this.#ignoreFirst;
 
-		if (("object" === typeof value) && ("object" === typeof last)) { 		//@@ naive shallow compare
-			const names = Object.getOwnPropertyNames(value);
-			if (names.length === Object.getOwnPropertyNames(last).length) {
-				let equal = true;
-				for (let name of names) {
-					if (value[name] !== last[name]) {
-						equal = false;
-						break;
-					}
-				}
-				if (equal)
-					msg = undefined;
-			}
+		if (("object" === typeof value) && ("object" === typeof last)) {
+			if (deepEqual(value, last, {strict: true}))
+				msg = undefined;
 		}
 		else if (value === last)
 			msg = undefined;
@@ -901,12 +572,11 @@ class SplitNode extends Node {
 	#splt;
 	#addname;
 
-	onSetup(config) {
-		if (config.stream || ("len" !== config.arraySpltType) || ("str" !== config.spltType))
-			throw new Error("unimplemented");
+	onStart(config) {
+		super.onStart(config);
 		
 		this.#splt = config.splt;
-		this.#arraySplt = parseInt(config.arraySplt);
+		this.#arraySplt = config.arraySplt;
 		this.#addname = config.addname;
 	}
 	onMessage(msg) {
@@ -960,10 +630,10 @@ class SplitNode extends Node {
 class LinkCallNode extends Node {
 	#link;
 
-	set links(value) {
-		this.#link = value[0];
-	}
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+		
+		this.#link = RED.nodes.getNode(config.links[0]);
 		//@@ timeout
 	}
 	onMessage(msg) {
@@ -981,9 +651,6 @@ class LinkCallNode extends Node {
 }
 
 class LinkInNode extends Node {
-	set links(value) {
-	}
-
 	static type = "link in";
 	static {
 		RED.nodes.registerType(this.type, this);
@@ -993,12 +660,11 @@ class LinkInNode extends Node {
 class LinkOutNode extends Node {
 	#links;
 
-	set links(value) {
-		this.#links = value;
-	}
-	onSetup(config) {
-		if ("return" === config.mode)
-			this.#links = null;
+	onStart(config) {
+		super.onStart(config);
+		
+		if ("return" !== config.mode)
+			this.#links = config.links.map(link => RED.nodes.getNode(link));
 	}
 	onMessage(msg) {
 		const links = this.#links;
@@ -1018,16 +684,61 @@ class LinkOutNode extends Node {
 	}
 }
 
+class JSONNode extends Node {
+	#action;
+	#property;
+	#indent;
+
+	onStart(config) {
+		super.onStart(config);
+
+		this.#action = config.action;
+		this.#property = config.property;
+		this.#indent = config.pretty ? 4 : 0;
+	}
+	onMessage(msg) {
+		if (msg.schema)
+			throw new Error("schema unimplemented")
+
+		let value = this.#property(msg);
+		const type = typeof value;
+		const action = this.#action ?? (("object" === type) ? "str" : "obj"); 
+		if ("str" === action) {
+			if ("string" === type)
+				return msg;
+			
+			value = JSON.stringify(value, null, this.#indent);
+		}
+		else {
+			if ("object" === type)
+				return msg;
+
+			try {
+				value = JSON.parse(value);
+			}
+			catch (e) {
+				this.error(e);
+			}
+		}
+		
+		this.#property(msg, value);
+		return msg;
+	}
+
+	static type = "json";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
 class DigitalInNode extends Node {
 	#pin;
 	#io;
 
-//@@ split into onSetup & onStart 
-	onSetup(config) {
-		if (config.read || parseFloat(config.debounce))
-			throw new Error("unimplemented");
+	onStart(config) {
+		super.onStart(config);
 
-		this.#pin = parseInt(config.pin);
+		this.#pin = config.pin;
 		const Digital = globalThis.device?.io?.Digital;
 		if (!Digital)
 			return;
@@ -1047,10 +758,6 @@ class DigitalInNode extends Node {
 			}
 		});
 	}
-	onStop() {
-		this.#io.close();
-		this.#io = undefined;
-	}
 
 	static type = "rpi-gpio in";
 	static {
@@ -1061,17 +768,15 @@ class DigitalInNode extends Node {
 class DigitalOutNode extends Node {
 	#pin;
 	#io;
-	#level;
 	#hz;
 
-	onSetup(config) {
-		this.#pin = parseInt(config.pin);
-		this.#hz = ("pwm" !== config.out) ? undefined : (("" === config.freq) ? 0 : parseFloat(config.freq)); 
-		if (config.level)
-			this.#level = parseInt(config.level);
-	}
-	onStart() {
-		const options  = {pin: this.#pin};
+	onStart(config) {
+		super.onStart(config);
+
+		this.#pin = config.pin;
+		this.#hz = config.freq; 
+
+		const options = {pin: this.#pin};
 
 		if (undefined === this.#hz) {
 			if (!globalThis.device?.io?.Digital)
@@ -1079,8 +784,8 @@ class DigitalOutNode extends Node {
 
 			options.mode = device.io.Digital.Output;
 			this.#io = new device.io.Digital(options);
-			if (undefined !== this.#level)
-				this.#io.write(this.#level);
+			if (undefined !== config.level)
+				this.#io.write(config.level);
 		}
 		else {
 			if (!globalThis.device?.io?.PWM)
@@ -1102,10 +807,6 @@ class DigitalOutNode extends Node {
 			trace(`PWM ${this.#pin}: ${value}\n`);
 		}
 	}
-	onStop() {
-		this.#io.close();
-		this.#io = undefined;
-	}
 
 	static type = "rpi-gpio out";
 	static {
@@ -1120,7 +821,9 @@ class MQTTBrokerNode extends Node {
 	#writable;
 	#queue = [];
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		if (config.birthTopic || config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || config.usetls || !config.autoConnect || config.sessionExpiry)
 			throw new Error("unimplemented");
 
@@ -1135,8 +838,7 @@ class MQTTBrokerNode extends Node {
 			this.#options.user = config.credentials.user; 
 		if (config.credentials?.password)
 			this.#options.password = config.credentials.password; 
-	}
-	onStart() {
+
 		const MQTTClient = device.network.mqtt.io;
 		this.#mqtt = new device.network.mqtt.io({
 			...device.network.mqtt,
@@ -1209,6 +911,19 @@ class MQTTBrokerNode extends Node {
 				}
 			},
 			onWritable: (count) => {
+				if ((undefined === this.#writable) && this.#subscriptions.length) {
+					const msg = {
+						operation: MQTTClient.SUBSCRIBE,
+						items: this.#subscriptions.map(subscription => {
+							return {
+								topic: subscription.topic,
+								QoS: subscription.QoS
+							};
+						})
+					};
+					count = this.#mqtt.write(null, msg);	
+				}
+
 				this.#writable = count
 
 				if (this.#queue.length) {
@@ -1217,12 +932,11 @@ class MQTTBrokerNode extends Node {
 				}
 			}
 		});
-		this.#writable = 0;
 	}
 	onMessage(msg) {
 		//@@ fragmented send unimplemented so will stall if message is bigger than output buffer
 		const payload = msg.payload;
-		if (this.#queue.length || ((payload.byteLength + msg.topic.length + 10) > this.#writable)) {
+		if ((undefined === this.#writable) || this.#queue.length || ((payload.byteLength + msg.topic.length + 10) > this.#writable)) {
 			this.#queue.push(msg);
 			return;
 		}
@@ -1233,17 +947,14 @@ class MQTTBrokerNode extends Node {
 			retain: msg.retain
 		});
 	}
-	onStop() {
-		this.#mqtt?.close();
-		this.#mqtt = undefined;
-		this.#subscriptions.length = 0;
-		this.#queue.length = 0;
-	}
 	subscribe(node, topic, format, QoS = 0) {
 		const MQTTClient = device.network.mqtt.io;
 
 		this.#subscriptions.push({node, topic, format, QoS});
-		this.#mqtt?.write(null, {
+		if (undefined === this.#writable)
+			return;
+
+		this.#mqtt.write(null, {
 			operation: MQTTClient.SUBSCRIBE,
 			items: [
 				{topic, QoS},
@@ -1258,8 +969,10 @@ class MQTTBrokerNode extends Node {
 			if (!node || (subscription.node === node) && (subscription.topic === topic))
 				items.push({topic: subscription.topic, QoS: subscription.QoS});
 		}
+		if (undefined === this.#writable)
+			return;
 
-		this.#mqtt?.write(null, {
+		this.#mqtt.write(null, {
 			operation: MQTTClient.UNSUBSCRIBE,
 			items
 		});
@@ -1277,18 +990,16 @@ class MQTTInNode extends Node {
 	#format;
 	#QoS;
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		this.#broker = flows.get(configFlowID).getNode(config.broker);
 
 		this.#topic = config.topic;
 		this.#format = config.datatype;
 		this.#QoS = config.qos;
-	}
-	onStart() {
+
 		this.#broker.subscribe(this, this.#topic, this.#format, this.#QoS); 
-	}
-	onStop() {
-		this.#broker.unsubscribe(this, this.#topic); 
 	}
 
 	static type = "mqtt in";
@@ -1303,7 +1014,9 @@ class MQTTOutNode extends Node {
 	#QoS;
 	#retain;
 
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		this.#broker = flows.get(configFlowID).getNode(config.broker);
 		if (undefined !== config.topic) this.#topic = config.topic;
 		if (undefined !== config.qos) this.#QoS = parseInt(config.qos);
@@ -1341,8 +1054,10 @@ class HTTPRequestNode extends Node {
 	#paytoqs;
 	#persist;
 
-	onSetup(config) {
-		if (config.tls || config.proxy || config.authType || config.senderr)
+	onStart(config) {
+		super.onStart(config);
+
+		if (config.tls || config.proxy || config.authType /* || config.senderr */)
 			throw new Error("unimplemented");
 
 		this.#format = config.ret;
@@ -1359,7 +1074,7 @@ class HTTPRequestNode extends Node {
 		]);
 		headers.set("Connection", this.#persist ? "keep-alive" : "close");		//@@ not sure
 		for (let name in msg.headers)
-			headers.set(name, msg.headers[value]);
+			headers.set(name, msg.headers[name]);
 		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;
 		let url = msg.url ?? this.#options.url;
 		if (undefined !== body) {
@@ -1408,7 +1123,7 @@ class HTTPRequestNode extends Node {
 	}
 }
 
-const CompatibilityEvents = Object.freeze(["input", "close"]);		//@@ others??
+const CompatibilityEvents = Object.freeze(["input" /*, "close" */]);
 class CompatibiltyNode extends Node {
 	#module;
 	#events = {};
@@ -1418,15 +1133,14 @@ class CompatibiltyNode extends Node {
 		super(id, flow, name);
 		this.#module = module;
 	}
-	onSetup(config) {
+	onStart(config) {
+		super.onStart(config);
+
 		this.#module(config);
 	}
 	onMessage(msg) {
-		//@@ done argument
-		this.#events.input?.forEach(input => input.call(this, msg, this.#send));
-	}
-	onStop() {	//@@ done and removed are very tricky here?
-		this.#events.close?.forEach(close => close.call(this));
+		//@@ real done, not nop
+		this.#events.input?.forEach(input => input.call(this, msg, this.#send, nop));
 	}
 	on(event, handler) {
 		if (!CompatibilityEvents.includes(event))

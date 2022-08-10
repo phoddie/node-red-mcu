@@ -144,7 +144,7 @@ class WebSocketOut extends Node {
 		this.#client?.add(this);
 	}
 	onMessage(msg) {
-		return this.#client.onMessage(msg);
+		return this.#client.onMessage(msg);		// maybe unnecessary to use RED.mcu.enqueue here
 	}
 
 	static type = "websocket out";

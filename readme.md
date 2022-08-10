@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated August 8, 2022<br>
+Updated August 9, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -269,8 +269,8 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 	- [X] Shallow copy on send
 	- [X] Synchronous send
 	- [X] ID assigned to each message
+	- [X] Asynchronous send
 	- [ ] Deep copy on send
-	- [ ] Asynchronous send
 - [X] Instantiation
 	- [X] Node-RED JSON transformed to JavaScript during build
 	- [X] 1:1 map from JSON type to class (maybe not always optimal)

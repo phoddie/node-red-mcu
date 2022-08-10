@@ -27,6 +27,7 @@ import {Headers, URLSearchParams} from "fetch";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
+let msgQueue;
 export const configFlowID = "__config";
 
 function generateId() @ "xs_nodered_util_generateId";
@@ -81,11 +82,36 @@ class RED {
 			}
 			return Class;
 		}
+		static enqueue(msg, target) {
+			msg._target = target;
+			if (msgQueue.first) {
+				msgQueue.last._next = msg;
+				msgQueue.last = msg;
+			}
+			else {
+				msgQueue.first = msgQueue.last = msg;
+				Timer.schedule(msgQueue.timer, 0, 5000);
+			}
+		}
+		static deliver() {
+			Timer.schedule(msgQueue.timer);
+
+			let current = msgQueue.first;
+			msgQueue.first = msgQueue.last = undefined;
+			while (current) {
+				const next = current._next, target = current._target;
+				delete current._next; 
+				delete current._target; 
+				target.receive(current);
+				current = next;
+			}
+		}
 	}
 
 	static build(builder) {
 		const flows = new Map;
 		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
+		msgQueue = {first: undefined, last: undefined, timer: Timer.repeat(() => RED.mcu.deliver(), 5000, 5000)};
 
 		globalThis.globalContext = new Context;
 
@@ -192,13 +218,13 @@ export class Node {
 
 				m._msgid ??= util.generateId();
 				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++)
-					wires[i].receive(util.cloneMessage(m));
+					RED.mcu.enqueue(util.cloneMessage(m), wires[i]); 
 			}
 		}
 		else {
 			msg._msgid ??= util.generateId();
 			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++)
-				wires[i].receive(util.cloneMessage(msg));
+				RED.mcu.enqueue(util.cloneMessage(msg), wires[i]); 
 		}
 	}
 	receive(msg) {
@@ -1034,7 +1060,7 @@ class MQTTOutNode extends Node {
 		else
 			payload = ArrayBuffer.fromString(payload.toString());		//@@ not sure about this... correct for string and number and probably boolean
 
-		this.#broker.onMessage({
+		this.#broker.onMessage({		// maybe unnecessary to use RED.mcu.enqueue here
 			payload,
 			topic: this.#topic ?? msg.topic,
 			QoS: this.#QoS ?? msg.QoS ?? 0,

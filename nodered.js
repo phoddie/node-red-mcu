@@ -344,7 +344,7 @@ class DebugNode extends Node {
 		this.#statusVal = config.statusVal;
 	}
 	onMessage(msg) {
-		const value = this.#getter(msg);
+		const value = this.#getter(msg) ?? msg;		//@@ temporary workaround for nodered2mcu bug ("complete msg object" returns undefined)
 
 		if (this.#console)
 			trace(("object" === typeof value) ? JSON.stringify(value) : value, "\n");

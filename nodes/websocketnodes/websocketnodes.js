@@ -64,13 +64,6 @@ class WebSocketClient extends Node {
 		else
 			this.#ws.send(msg.payload);
 	}
-	onStop() {
-		this.#ws.close();
-		this.#ws = undefined;
-		Timer.clear(this.#reconnect);
-		this.#reconnect = undefined;
-		this.#nodes = undefined;
-	}
 	#connect() {
 		const options = this.#options;
 		this.#ws = options.subprotocol ? new WebSocket(options.path, options.subprotocol) : new WebSocket(options.path);
@@ -105,7 +98,7 @@ class WebSocketClient extends Node {
 		this.#ws.addEventListener("error", close);
 	}
 	add(node) {
-		this.#nodes = new Set;
+		this.#nodes ??= new Set;
 		this.#nodes.add(node);
 	}
 	remove(node) {

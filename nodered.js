@@ -22,6 +22,7 @@ import Timer from "timer";
 import deepEqual from "deepEqual";
 import structuredClone from "structuredClone";
 import Base64 from "base64";
+import Hex from "hex";
 import Modules from "modules";
 import fetch from "fetch";
 import {Headers, URLSearchParams} from "fetch";
@@ -343,13 +344,16 @@ class DebugNode extends Node {
 		this.#statusVal = config.statusVal;
 	}
 	onMessage(msg) {
-		const value = this.#getter(msg) ?? msg;		//@@ temporary workaround for nodered2mcu bug ("complete msg object" returns undefined)
+		let value = this.#getter(msg);
 
-		if (this.#console)
+		if (this.#console) {
+			if (value instanceof Uint8Array)
+				value = Hex.toString(value);
 			trace(("object" === typeof value) ? JSON.stringify(value) : value, "\n");
+		}
 
 		if (this.#sidebar) {
-			let value = this.#property ? {[this.#property]: value} : msg;
+			value = this.#property ? {[this.#property]: value} : msg;
 			value = {
 				...value,
 				source: {

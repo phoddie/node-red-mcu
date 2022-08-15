@@ -20,6 +20,7 @@
 
 import Timer from "timer";
 import deepEqual from "deepEqual";
+import structuredClone from "structuredClone";
 import Base64 from "base64";
 import Modules from "modules";
 import fetch from "fetch";
@@ -39,9 +40,7 @@ class RED {
 	});
 
 	static util = class {
-		static cloneMessage(msg) {
-			return Object.assign({}, msg);	//@@ shallow
-		}
+		static cloneMessage = structuredClone;
 		static compareObjects = deepEqual;
 		static evaluateNodeProperty(inputField, inputFieldType, node, msg) {
 			throw new Error;

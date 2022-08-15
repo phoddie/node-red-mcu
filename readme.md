@@ -462,6 +462,25 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] Convert between JSON String & Object, Always Convert to JSON String, Always Convert to JSON Object
 - [X] Format JSON string
 
+### File Write
+- [X] Filename from node or message
+- [X] Encoding from node or message
+- [X] Encodings: auto, UTF-8, binary, hex, Base64
+- [X] Actions: append to file, overwrite file, delete file
+- [X] Add newline to each payload
+- [X] Create directory if doesn't exist
+
+The File Write node is implemented using the Moddable SDK of integration LittleFS.
+
+### File Read
+- [X] Filename from node or message
+- [X] Encodings: UTF-8, binary, hex, Base64
+- [X] Read full file
+- [X] Stream one line or buffer at a time
+- [X] Report errors to Catch nodes
+
+The File Read node is implemented using the Moddable SDK of integration LittleFS.
+
 ### MCU Sensor
 - [X] Retrieve sensor samples from any ECMA-419 Sensor Class Pattern driver
 - [X] Simulated implementation for testing in full Node-RED
@@ -517,7 +536,7 @@ Possible future work on built-in nodes:
 - **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. (Note: all network support is client. Server support is also possible, but not yet explored.)
 - **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
-- **Storage** The Read File and Write File nodes can be supported. Watch probably can monitor for changes made by other nodes.
+- **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 
 The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, a Preferences node, Display node, etc.
 

@@ -13,6 +13,7 @@
 		"./nodes/lower-case/manifest.json",
 		"./nodes/delay/manifest.json",
 		"./nodes/sensor/manifest.json",
+		"./nodes/file/manifest.json",
 		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json"
 	],
 	"modules": {

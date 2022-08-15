@@ -1,0 +1,11 @@
+{
+	"include": [
+		"$(MODDABLE)/modules/files/file/manifest_littlefs.json",
+		"$(MODDABLE)/modules/data/base64/manifest.json",
+		"$(MODDABLE)/modules/data/hex/manifest.json"
+	],
+	"modules": {
+		"*": "./node-red-files"
+	},
+	"preload": "node-red-files"
+}

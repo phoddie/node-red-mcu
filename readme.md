@@ -6,7 +6,7 @@ Updated August 12, 2022<br>
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
 
-Node-RED is built on Node.js and, consequently, runs where Node.js does: desktop computers and single-board computers like the Raspberry Pi. Because of the dependency on Node.js, Node-RED cannot run where Node cannot, notably the low-cost MCUs found in many IoT products and popular in the maker community.
+Node-RED is built on Node.js and, consequently, runs where Node.js does: desktop computers and single-board computers lfike the Raspberry Pi. Because of the dependency on Node.js, Node-RED cannot run where Node cannot, notably the low-cost MCUs found in many IoT products and popular in the maker community.
 
 These MCUs are able to run the same JavaScript language used by Node-RED thanks to the XS JavaScript engine in the [Moddable SDK](https://github.com/Moddable-OpenSource/moddable). However, these MCUs have much less RAM, much less CPU power, and an RTOS instead of a Linux-based OS. As a result, they require a very different implementation. A typical target microcontroller is the ESP32, running FreeRTOS with about 280&nbsp;KB of free RAM and a 160&nbsp;MHz CPU clock. 
 
@@ -298,13 +298,13 @@ This section lists the supported nodes. The implemented features are checked.
 
 ### Inject
 - [X] Injects multiple properties
-- [X] Property values Boolean, timestamp, JSON, number, and string
+- [X] Property values Boolean, timestamp, JSON, number, string, and buffer
 - [X] "Inject once after"
 - [X] "Repeat after"
 - [X] Property values msg., flow., global.
 - [ ] Interval between times
 - [ ] At a specific time
-- [ ] Property values buffer, expression, environment variable
+- [ ] Property values expression & environment variable
 
 ### Link Call
 - [X] Implemented
@@ -423,10 +423,10 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] Delete property
 - [X] Move property
 - [X] Set property value
-- [X] Property values Boolean, timestamp, JSON, number, and string
+- [X] Property values Boolean, timestamp, JSON, number, string, and buffer
 - [X] msg., flow. and global. targets
 - [ ] Replace within property value
-- [ ] Property values buffer, expression, environment variable
+- [ ] Property values expression & environment variable
 
 ### Switch
 - [X] Multiple rules

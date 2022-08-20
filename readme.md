@@ -115,7 +115,7 @@ Node-RED generates this JSON for the Inject node.
     ]
 }
 ```
-The `nodered2mcu` tool is able to optimize this JSON considerably when generating the two JavaScript calls.
+The `nodered2mcu` tool optimize this JSON considerably by converting the data to two JavaScript functions.
 
 ```js
 createNode("inject", "b0afa70581ce895a", "GET httpbin/json", flow);
@@ -134,7 +134,7 @@ node.onStart({
 });
 ```
 
-By converting to JavaScript, `nodered2mcu` can include JavaScript functions in addition to JSON values. It creates a `trigger` function to perform the inject operation described by the JSON. It creates an `initialize` function to set up a timer that invokes `trigger` after six seconds. This optimization allows the Inject node to more quickly than interpreting the JSON configuration at runtime in Node-RED MCU Edition. It also tends to require less RAM.
+By converting to JavaScript, `nodered2mcu` can include JavaScript functions in addition to JSON values. It creates a `trigger` function to perform the inject operation described by the JSON and an `initialize` function to set up a timer that invokes `trigger` after the initial delay. This optimization allows the Inject node to run more quickly than interpreting the JSON configuration on the MCU. It also tends to require less RAM.
 
 ## Change
 Here is a typical Change node.

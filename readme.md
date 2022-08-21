@@ -1,12 +1,12 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated August 12, 2022<br>
+Updated August 21, 2022<br>
 
 ## Introduction
-This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs).  [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
+This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
 
-Node-RED is built on Node.js and, consequently, runs where Node.js does: desktop computers and single-board computers lfike the Raspberry Pi. Because of the dependency on Node.js, Node-RED cannot run where Node cannot, notably the low-cost MCUs found in many IoT products and popular in the maker community.
+Node-RED is built on Node.js and, consequently, runs where Node.js does: desktop computers and single-board computers like the Raspberry Pi. Because of the dependency on Node.js, Node-RED cannot run where Node cannot, notably the low-cost MCUs found in many IoT products and popular in the maker community.
 
 These MCUs are able to run the same JavaScript language used by Node-RED thanks to the XS JavaScript engine in the [Moddable SDK](https://github.com/Moddable-OpenSource/moddable). However, these MCUs have much less RAM, much less CPU power, and an RTOS instead of a Linux-based OS. As a result, they require a very different implementation. A typical target microcontroller is the ESP32, running FreeRTOS with about 280&nbsp;KB of free RAM and a 160&nbsp;MHz CPU clock. 
 
@@ -393,6 +393,26 @@ Implemented using ECMA-419 MQTT Client draft.
 
 Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 
+### HTTP In
+- [X] Methods
+- [X] URL
+- [X] Matching params (e.g. `:name`) in URL
+- [X] 404 on non-matching route
+- [X] Request body parsing from `text/plain`, `application/json`, `application/x-www-form-urlencoded` to `msg.payload`
+- [X] `msg.req.headers`, `msg.req.query`, and `msg.req.params`
+- [ ] Accept file uploads
+- [ ] Cookies
+
+Implemented using `HTTPServer` based on ECMA-419 HTTP Server draft.
+
+### HTTP Response
+- [X] Status code from node and `msg.statusCode`
+- [X] Response headers from node and `msg.headers`
+- [X] Response body from `msg.payload` – `string` as UTF-8, `ArrayBuffer` as binary, `TypedArray` as binary, other as JSON string
+- [ ] Cookies
+
+Implemented using `HTTPServer` based on ECMA-419 HTTP Server draft.
+
 ### WebSocket Client
 - [X] Reconnects dropped connections
 - [X] Subprotocol
@@ -533,7 +553,7 @@ Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
-- **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. (Note: all network support is client. Server support is also possible, but not yet explored.)
+- **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
 - **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.

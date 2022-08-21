@@ -1,0 +1,11 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/io/listener/httpserver/manifest_httpserver.json",
+		"$(MODDABLE)/modules/data/text/decoder/manifest.json",
+		"$(MODDABLE)/modules/data/text/encoder/manifest.json"
+	],
+	"modules": {
+		"*": "./httpserver"
+	},
+	"preload": "httpserver"
+}

@@ -342,6 +342,21 @@ class DebugNode extends Node {
 		this.#statusVal = config.statusVal;
 	}
 	onMessage(msg) {
+		
+		// Feed msg back to the editor.
+		let input = {
+			input: {
+				...msg,
+				source: {
+					id: this.id,
+					type: this.constructor.type,
+					name: this.name,
+				}	
+			}
+		}
+		trace.left(JSON.stringify(input));
+
+		// Process msg for xsbug
 		let value = this.#getter(msg);
 
 		if (this.#console) {
@@ -362,16 +377,17 @@ class DebugNode extends Node {
 			}
 			trace.right(JSON.stringify(value));
 		}
-		if (this.#toStatus) {
-			// This is nothing but a very simplistic copy of what the NR node really does...
-			// ToDo: Move closer to the NR debug node!
-			const statusVal = this.#statusVal(msg);
-			if (statusVal) {
-				const fill = "grey";
-				const shape = "dot";
-				this.status({fill, shape, text: statusVal})
-			}
-		}
+
+		// if (this.#toStatus) {
+		// 	// This is nothing but a very simplistic copy of what the NR node really does...
+		// 	// ToDo: Move closer to the NR debug node!
+		// 	const statusVal = this.#statusVal(msg);
+		// 	if (statusVal) {
+		// 		const fill = "grey";
+		// 		const shape = "dot";
+		// 		this.status({fill, shape, text: statusVal})
+		// 	}
+		// }
 	}
 
 	static type = "debug"

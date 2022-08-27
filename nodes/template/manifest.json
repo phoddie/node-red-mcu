@@ -1,0 +1,12 @@
+{
+	"modules": {
+		"*": [
+			"./template",
+			"./mustache"
+		]
+	},
+	"preload": [
+		"template",
+		"mustache"
+	]
+}

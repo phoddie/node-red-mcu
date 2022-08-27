@@ -482,6 +482,17 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] Convert between JSON String & Object, Always Convert to JSON String, Always Convert to JSON Object
 - [X] Format JSON string
 
+### Template
+- [X] Mustache template format
+- [X] Plain text template format
+- [X] Output as Plain text
+- [X] Output as parsed JSON
+- [ ] Output as parsed YAML
+- [ ] msg.* property (always msg.payload)
+- [ ] msg.template (need a working example)
+
+The Template node uses the [mustache.js](https://github.com/janl/mustache.js) module.
+
 ### File Write
 - [X] Filename from node or message
 - [X] Encoding from node or message
@@ -552,7 +563,7 @@ In this prototype, the nodes and flows exported by Node-RED are converted from J
 Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
-- **Function nodes**. The Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec and Template may not make sense.
+- **Function nodes**. The Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec may not make sense.
 - **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
 - **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
@@ -562,8 +573,6 @@ The built-in nodes are useful for compatibility with the standard Node-RED behav
 
 ### Challenging Dependencies
 Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. Fortunately, it seems like the Function object can do the same, just less conveniently.
-
-The Template node uses [mustache.js](https://mustache.github.io) for powerful string substitution. Like JSONata, this could be impractical to support on embedded. A small subset is probably straightforward to support, if that would be useful.
 
 The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
 

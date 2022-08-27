@@ -15,6 +15,7 @@
 		"./nodes/delay/manifest.json",
 		"./nodes/sensor/manifest.json",
 		"./nodes/file/manifest.json",
+		"./nodes/template/manifest.json",
 		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json"
 	],
 	"modules": {

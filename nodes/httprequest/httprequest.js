@@ -21,6 +21,7 @@
 import {Node} from "nodered";
 import fetch from "fetch";
 import {Headers, URLSearchParams} from "fetch";
+import Mustache from "mustache";
 
 class HTTPRequestNode extends Node {
 	#options;
@@ -51,7 +52,8 @@ class HTTPRequestNode extends Node {
 			headers.set(name, msg.headers[name]);
 		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;
 		let url = msg.url ?? this.#options.url;
-		//@@ resolve template!!
+		if (url.indexOf("{{") >= 0)
+			url = Mustache.render(url, msg)
 		if (undefined !== body) {
 			if ("object" === typeof body) {
 				if (!(body instanceof ArrayBuffer)) {

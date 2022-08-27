@@ -379,7 +379,7 @@ Implemented using ECMA-419 MQTT Client draft.
 
 ### HTTP Request
 - [X] Method (from Node or incoming message)
-- [X] URL (from Node or incoming message)
+- [X] URL (from Node or incoming message, applies {{template}})
 - [X] Set request headers from incoming message
 - [X] Payload: ignore, append to query-string parameters, send as request body 
 - [X] Enable connection keep-alive (maybe)

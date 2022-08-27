@@ -3,7 +3,13 @@
 		"$(MODDABLE)/examples/io/tcp/fetch/manifest_fetch.json"
 	],
 	"modules": {
-		"*": "./httprequest"
+		"*": [
+			"./httprequest",
+			"../template/mustache"
+		]
 	},
-	"preload": "httprequest"
+	"preload": [
+		"httprequest",
+		"mustache"
+	]
 }

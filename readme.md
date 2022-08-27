@@ -442,7 +442,7 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 ### Change
 - [X] Delete property
 - [X] Move property
-- [X] Set property value
+- [X] Set property value (including "deep copy value")
 - [X] Property values Boolean, timestamp, JSON, number, string, and buffer
 - [X] msg., flow. and global. targets
 - [ ] Replace within property value

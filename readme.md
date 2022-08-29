@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated August 21, 2022<br>
+Updated August 29, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -403,6 +403,8 @@ Implemented using `fetch` based on ECMA-419 HTTP Client draft.
 - [ ] Accept file uploads
 - [ ] Cookies
 
+> **Note**: The full Node-RED listens on port 1880; the Node-RED MCU Edition, on port 80. A way to configure this is likely appropriate. If there is one in full Node-RED perhaps it can be used.
+
 Implemented using `HTTPServer` based on ECMA-419 HTTP Server draft.
 
 ### HTTP Response
@@ -444,8 +446,8 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] Move property
 - [X] Set property value (including "deep copy value")
 - [X] Property values Boolean, timestamp, JSON, number, string, and buffer
+- [X] Replace within property value 
 - [X] msg., flow. and global. targets
-- [ ] Replace within property value
 - [ ] Property values expression & environment variable
 
 ### Switch

@@ -35,19 +35,19 @@ class Template extends Node {
 		this.#output = config.output;
 	}
 	onMessage(msg) {
-		let payload = this.#template;
+		let template = this.#template ?? msg.template, result;
 		if ("mustache" === this.#syntax)
-			payload = Mustache.render(payload, msg);
+			result = Mustache.render(template, msg);
 		if ("json" === this.#output) {
 			try {
-				payload = JSON.parse(payload);
+				result = JSON.parse(result);
 			}
 			catch (e) {
 				this.error(e);
 				return;
 			}
 		}
-		msg.payload = payload;
+		msg.payload = result;
 		return msg; 
 	}
 

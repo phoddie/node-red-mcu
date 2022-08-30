@@ -21,6 +21,7 @@
 import {Node} from "nodered";
 import fetch from "fetch";
 import {Headers, URLSearchParams} from "fetch";
+import Mustache from "mustache";
 
 class HTTPRequestNode extends Node {
 	#options;
@@ -49,9 +50,18 @@ class HTTPRequestNode extends Node {
 		headers.set("Connection", this.#persist ? "keep-alive" : "close");		//@@ not sure
 		for (let name in msg.headers)
 			headers.set(name, msg.headers[name]);
-		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;
-		let url = msg.url ?? this.#options.url;
-		//@@ resolve template!!
+//		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;		//@@ what does paytoqs do?? 
+		let body = msg.payload;
+		let url = msg.url;
+		if (this.#options.url) {
+			url = this.#options.url;
+			if (url.indexOf("{{") >= 0)
+				url = Mustache.render(url, msg)
+		}
+		const options = {
+			method: msg.method ?? this.#options.method ?? "GET",
+			headers
+		}
 		if (undefined !== body) {
 			if ("object" === typeof body) {
 				if (!(body instanceof ArrayBuffer)) {
@@ -67,12 +77,17 @@ class HTTPRequestNode extends Node {
 			}
 			else
 				body = body.toString();
+
+			options.body = body;
 		}
 
-		fetch("http://" + url, {
-			method: msg.method ?? this.#options.method ?? "GET",
-			headers,
-		})
+		if (url.startsWith("http:"))
+			;
+		else if (url.startsWith("https:"))
+			throw new Error("HTTPS not yet implemented");
+		else
+			url = "http://" + url;
+		fetch(url, options)
 		.then(response => {
 			msg.statusCode = response.status;
 			msg.headers = {/* ["x-node-red-request-node"]: this.id */};		//@@ what is this?

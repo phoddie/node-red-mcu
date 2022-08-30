@@ -1137,6 +1137,25 @@ class CompatibiltyNode extends Node {
 	static type = "Node-RED Compatibility";
 }
 
+// when Compatibility node moves to separate module, move process global there too
+globalThis.process = class {
+	static hrtime(prev) {
+		const now = Date.now();
+		let seconds = Math.floor(now / 1000);
+		let nanoseconds = (now % 1000) * 1_000_000;
+		if (!prev)
+			return [seconds, nanoseconds];
+
+		seconds -= prev[0];
+		nanoseconds -= prev[1];
+		if (nanoseconds < 0) {
+			seconds--
+			nanoseconds += 1_000_000_000;
+		}
+		return [seconds, nanoseconds];
+	}
+}
+
 globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 	const options = JSON.parse(script);
 	const node = flows.get(options.flow)?.getNode(options.id);

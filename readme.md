@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated August 29, 2022<br>
+Updated September 3, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -434,6 +434,28 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] "Connect to"
 - [ ] "Listen on"
 
+### UDP In
+- [X] "Listen for udp messages"
+- [X] Listen port
+- [X] ipv4
+- [X] Output String, Buffer, Base64 encoded string
+- [ ] "Listen for multicast messages"
+- [ ] ipv6
+
+Implemented using `UDP` I/O class from ECMA-419.
+
+### UDP Out
+- [X] "Send udp message"
+- [X] Send address and port in node or from message
+- [X] ipv4
+- [X] Bind to "local random port" and "local port" number
+- [X] "Decode Base64 encoded payload'
+- [ ] "Send broadcast message"
+- [ ] "Send multicast message"
+- [ ] ipv6
+
+Implemented using `UDP` I/O class from ECMA-419.
+
 ### Range
 - [X] Scale property value
 - [X] Round to integer
@@ -566,7 +588,7 @@ Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. The Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec may not make sense.
-- **Network nodes**. The TCP and UDP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
+- **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
 - **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.

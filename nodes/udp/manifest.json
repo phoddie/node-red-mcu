@@ -1,0 +1,9 @@
+{
+	"include": [
+		"$(MODULES)/data/base64/manifest.json"
+	],
+	"modules": {
+		"*": "./udpnodes"
+	},
+	"preload": "udpnodes"
+}

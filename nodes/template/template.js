@@ -35,7 +35,8 @@ class Template extends Node {
 		this.#output = config.output;
 	}
 	onMessage(msg) {
-		let template = this.#template ?? msg.template, result;
+		const template = this.#template ?? msg.template;
+		let result = template;
 		if ("mustache" === this.#syntax)
 			result = Mustache.render(template, msg);
 		if ("json" === this.#output) {

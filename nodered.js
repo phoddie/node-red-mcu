@@ -631,7 +631,7 @@ class SplitNode extends Node {
 			throw new Error("buffer unimplemented")
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;
-			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt};
+			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt, id: RED.util.generateId()};
 			msg.parts = parts;
 			for (let i = 0; i < length; i += arraySplt) {
 				msg.payload = (1 === arraySplt) ? payload[i] : payload.slice(i, i + arraySplt);
@@ -642,7 +642,7 @@ class SplitNode extends Node {
 		else if ("object" === typeof payload) {
 			const names = Object.getOwnPropertyNames(payload);
 			const length = names.length;
-			const parts = {type: "object", count: length};
+			const parts = {type: "object", count: length, id: RED.util.generateId()};
 			msg.parts = parts;
 			for (let i = 0, addname = this.#addname; i < length; i += 1) {
 				const key = names[i];
@@ -657,7 +657,7 @@ class SplitNode extends Node {
 		else {	// string
 			payload = payload.toString().split(this.#splt);
 			const length = payload.length;
-			const parts = {type: "string", count: length, ch: this.#splt};
+			const parts = {type: "string", count: length, ch: this.#splt, id: RED.util.generateId()};
 			msg.parts = parts;
 			for (let i = 0; i < length; i += 1) {
 				msg.payload = payload[i];

@@ -41,19 +41,29 @@ class RED {
 	static util = class {
 		static cloneMessage = structuredClone;
 		static compareObjects = deepEqual;
-		static evaluateNodeProperty(inputField, inputFieldType, node, msg) {
+		static evaluateNodeProperty(inputField, inputFieldType, node, msg, callback) {
 			throw new Error;
 		}
 		static generateId = generateId;
 		static getMessageProperty(msg, property) {
+			if (property.startsWith("msg."))
+				property = property.slice(4);
+			return this.getObjectProperty(msg, property);
 		}
-		static getObjectProperty(msg, property) {
+		static getObjectProperty(obj, property) {
+			if (property.indexOf(".") >= 0)
+				throw new Error("unimplemented");
+			return obj[property];
 		}
-		static setMessageProperty(msg, prop, value, createMissing) {
-			throw new Error;
+		static setMessageProperty(msg, property, value, createMissing) {
+			if (property.startsWith("msg."))
+				property = property.slice(4);
+			return this.setObjectProperty(msg, property, value, createMissing);
 		}
-		static setObjectProperty(msg, prop, value, createMissing) {
-			throw new Error;
+		static setObjectProperty(obj, property, value, createMissing) {
+			if ((property.indexOf(".") >= 0) || createMissing)
+				throw new Error;
+			obj[property] = value;
 		}
 	}
 	static nodes = class {

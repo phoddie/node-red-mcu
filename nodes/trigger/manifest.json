@@ -1,0 +1,12 @@
+{
+	"modules": {
+		"trigger": "./89-trigger",
+		"*": [
+			"../template/mustache"
+		]
+	},
+	"preload": [
+		"trigger",
+		"mustache"
+	]
+}

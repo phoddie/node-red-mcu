@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 3, 2022<br>
+Updated September 6, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -548,6 +548,18 @@ See the MCU Sensor module's [documentation](./nodes/sensor/readme.md) for furthe
 
 **Note:** The Delay node is the full Node-RED implementation (with a small, optional change to reduce its RAM footprint). This is possible by using the Compatibility Node.
 
+### Trigger
+- [X] Everything
+- [ ] Except async flow. and global. targets
+
+**Note:** The Trigger node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
+
+### Join
+- [X] Everything
+- [ ] Except reduce (which depends on JSONata)
+
+**Note:** The Join node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
+
 ### Compatibility Node
 The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
 
@@ -572,31 +584,27 @@ This prototype is a breadth-first effort to implement all the steps required to 
 
 The compatibility goal should be to provide the same behaviors as much as possible so that existing Node-RED developers can apply their knowledge and experience to embedded MCUs without encountered confusing and unnecessary differences. The goal is not to provide all the features of Node-RED, as some are impractical or impossible on the target class of devices.
 
-### Transformation
-In this prototype, the nodes and flows exported by Node-RED are converted from JSON to JavaScript instances on the embedded device. This is a relatively heavy operation, involving several passes over the project structure and evaluating JavaScript code. Almost all of this work could be done as a build step on the development computer prior to deploy. Done well, this would free up additional RAM for the project, allow projects to start running faster, and detect use of unsupported Node-RED features earlier. This work should be done sooner than later, as it will change the class definition for the nodes.
-
-- [X] Create JavaScript tool to convert Node-RED JSON to JavaScript source code
 - [ ] Integrate embedded conversion into Deploy feature of Node-RED (excellent work is being done here by @@ralphwetzel with the [node-red-mcu-plugin](https://github.com/ralphwetzel/node-red-mcu-plugin))
 
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.
-- [ ] Should messages sent between nodes should be sent asynchronously to avoid JavaScript stack overflows on long chains of nodes (what does Node-RED do here?)
+- [X] Should messages sent between nodes should be sent asynchronously to avoid JavaScript stack overflows on long chains of nodes (what does Node-RED do here?)
 - [ ] Implement support to instantiate nodes from a [Mod](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/mods.md). This would allow updated flows to be installed on embedded devices in seconds.
 
 ### Nodes
 Possible future work on built-in nodes:
 
 - **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
-- **Function nodes**. The Trigger nodes appear to be essential. For the most part they should be straightforward to implement, though some of the behaviors are non-trivial. Exec may not make sense.
+- **Function nodes**. Exec may not make sense.
 - **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
-- **Sequence nodes**. The Join, Sort, and Batch nodes should be possible to support. Like the Function nodes, some are quite sophisticated.
+- **Sequence nodes**. The Sort and Batch nodes should be possible to support. Like the Function nodes, they are quite sophisticated.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 
 The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, a Preferences node, Display node, etc.
 
 ### Challenging Dependencies
-Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. Fortunately, it seems like the Function object can do the same, just less conveniently.
+Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. (Note: I now have JSONata building and running some simple test cases. The code size and memory footprint are large. Further exploration is needed to evaluate if JSONata is a viable option to enable, but at least it looks possible)
 
 The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
 

@@ -1,0 +1,8 @@
+{
+	"modules": {
+		"join": "./17-join"
+	},
+	"preload": [
+		"join"
+	]
+}

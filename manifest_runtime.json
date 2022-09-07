@@ -13,6 +13,8 @@
 		"./nodes/websocketnodes/manifest.json",
 		"./nodes/lower-case/manifest.json",
 		"./nodes/delay/manifest.json",
+		"./nodes/join/manifest.json",
+		"./nodes/trigger/manifest.json",
 		"./nodes/sensor/manifest.json",
 		"./nodes/file/manifest.json",
 		"./nodes/template/manifest.json",

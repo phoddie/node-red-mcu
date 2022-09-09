@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 6, 2022<br>
+Updated September 8, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -293,8 +293,9 @@ This section lists the supported nodes. The implemented features are checked.
 - [X] Report uncaught exceptions to Catch nodes
 - [X] Import modules (Setup)
 - [ ] When "On Start" returns Promise, queue received messages until ready
-- [ ] Does not wrap `setTimeout` (and friends) to automatically clear on stop
 - [ ] `env(()` to access flow's environment variables
+
+Function node implements support for calling `done()` if function's source code does not appear to do so. The check for the presence of `node.done()` is simpler than full Node-RED. Perhaps in the future Node-RED can export this setting in the flow so `nodered2mcu` doesn't need to try to duplicate it.
 
 ### Inject
 - [X] Injects multiple properties
@@ -325,6 +326,9 @@ This section lists the supported nodes. The implemented features are checked.
 ### Status
 - [X] "Report status from all nodes"
 - [X] "Report status from selected nodes"
+
+### Complete
+- [X] Implemented
 
 ### GPIO In
 Implemented using "rpi-gpio in" node
@@ -511,9 +515,9 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] Plain text template format
 - [X] Output as Plain text
 - [X] Output as parsed JSON
+- [X] msg.template
 - [ ] Output as parsed YAML
 - [ ] msg.* property (always msg.payload)
-- [ ] msg.template (need a working example)
 
 The Template node uses the [mustache.js](https://github.com/janl/mustache.js) module.
 
@@ -555,8 +559,8 @@ See the MCU Sensor module's [documentation](./nodes/sensor/readme.md) for furthe
 **Note:** The Trigger node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
 
 ### Join
-- [X] Everything
-- [ ] Except reduce (which depends on JSONata)
+- [X] Everything...
+- [ ] ...except reduce (which depends on JSONata)
 
 **Note:** The Join node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
 
@@ -573,7 +577,7 @@ The Node-RED nodes, including the `lower-case` example, are written as CommonJS 
 - [X] `node.send()` and `send()` to send messages
 - [X] `.log()`, `.warn()`, and `.error()`
 - [X] `.status()`
-- [ ] `done` and `.done()`
+- [X] `done` and `.done()`
 
 While a degree of source code compatibility is provided, the Compatibility Node does not attempt to emulate the (substantial) Node.js runtime. Consequently, it only runs nodes compatible with the features available in the Moddable SDK runtime. Nodes must be added to the Node-RED manifest to be included in the build. See the `lower-case` example in this repository for an example.
 
@@ -588,13 +592,12 @@ The compatibility goal should be to provide the same behaviors as much as possib
 
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.
-- [X] Should messages sent between nodes should be sent asynchronously to avoid JavaScript stack overflows on long chains of nodes (what does Node-RED do here?)
+- [X] Messages sent between nodes sent asynchronously to avoid JavaScript stack overflows on long chains of nodes. This also appears to match full Node-RED's message queuing behavior.
 - [ ] Implement support to instantiate nodes from a [Mod](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/mods.md). This would allow updated flows to be installed on embedded devices in seconds.
 
 ### Nodes
 Possible future work on built-in nodes:
 
-- **Common nodes**. The Complete node appears to require Node-RED runtime behaviors beyond what this exploration now implements. It should be implemented sooner to ensure that the object design can support all the fundamental behaviors required.
 - **Function nodes**. Exec may not make sense.
 - **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
 - **Sequence nodes**. The Sort and Batch nodes should be possible to support. Like the Function nodes, they are quite sophisticated.

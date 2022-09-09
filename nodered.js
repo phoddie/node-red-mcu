@@ -65,6 +65,9 @@ class RED {
 				throw new Error;
 			obj[property] = value;
 		}
+		static prepareJSONataExpression() {
+			throw new Error;
+		}
 	}
 	static nodes = class {
 		static registerType(id, Node) {
@@ -90,8 +93,9 @@ class RED {
 			}
 			return Class;
 		}
-		static enqueue(msg, target) {
+		static enqueue(msg, target, done) {
 			msg._target = target;
+			msg._done = done;
 			if (msgQueue.first) {
 				msgQueue.last._next = msg;
 				msgQueue.last = msg;
@@ -107,10 +111,11 @@ class RED {
 			let current = msgQueue.first;
 			msgQueue.first = msgQueue.last = undefined;
 			while (current) {
-				const next = current._next, target = current._target;
+				const next = current._next, target = current._target, done = current._done;
 				delete current._next; 
 				delete current._target; 
-				target.receive(current);
+				delete current._done; 
+				target.receive(current, done);
 				current = next;
 			}
 		}
@@ -181,11 +186,9 @@ class Flow extends Map {
 	addNode(node) {
 		super.set(node.id, node);
 	}
-	getNode(id) {
-		return super.get(id);
-	}
-	nodes() {
-		return super.values();
+	static {
+		this.prototype.getNode = this.prototype.get;
+		this.prototype.nodes = this.prototype.values;
 	}
 }
 
@@ -207,7 +210,7 @@ export class Node {
 		if (!wires?.length)
 			return;
 
-		this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target))); 
+		this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target)));
 	}
 	onMessage(msg) {
 	}
@@ -225,19 +228,23 @@ export class Node {
 					continue;
 
 				m._msgid ??= util.generateId();
-				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++)
-					RED.mcu.enqueue(util.cloneMessage(m), wires[i]); 
+				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++) {
+					const clone = util.cloneMessage(m);
+					RED.mcu.enqueue(clone, wires[i], wires[i].makeDone(clone)); 
+				}
 			}
 		}
 		else {
 			msg._msgid ??= util.generateId();
-			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++)
-				RED.mcu.enqueue(util.cloneMessage(msg), wires[i]); 
+			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++) {
+				const clone = util.cloneMessage(msg);
+				RED.mcu.enqueue(clone, wires[i], wires[i].makeDone(clone)); 
+			}
 		}
 	}
-	receive(msg) {
+	receive(msg, done) {
 		//@@ queue if not ready
-		const result = this.onMessage(msg);
+		const result = this.onMessage(msg, done);
 		if (result)
 			return this.send(result);
 	}
@@ -261,7 +268,7 @@ export class Node {
 		}
 	}
 	done(msg) {
-		debugger;
+		this.makeDone(msg)();
 	}
 	log(msg) {
 		this.trace(msg);
@@ -308,6 +315,17 @@ export class Node {
 	}
 	get flow() {
 		return this.#flow.context;
+	}
+	makeDone(msg) {
+		const source = this;
+		return function(error) {
+			for (const node of source.#flow.nodes()) {
+				if ((node instanceof CompleteNode) && node.inScope(source.id)) {
+					const clone = RED.util.cloneMessage(msg);
+					RED.mcu.enqueue(clone, node, node.makeDone(clone));
+				}
+			}
+		}
 	}
 	onCommand(options) {
 		trace(`Node ${this.id} ignored: ${options.command}\n`);
@@ -450,6 +468,28 @@ class StatusNode extends Node {
 	}
 }
 
+class CompleteNode extends Node {
+	#scope;
+
+	onStart(config) {
+		super.onStart(config);
+
+		this.#scope = config.scope;
+	}
+	onMessage(msg, done) {
+		done();
+		return msg;
+	}
+	inScope(id) {
+		return this.#scope.includes(id);
+	}
+
+	static type = "complete";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
 class InjectNode extends Node {
 	onStart(config) {
 		super.onStart(config);
@@ -469,14 +509,19 @@ class InjectNode extends Node {
 }
 
 class FunctionNode extends Node {
-	context = new Context;
 	#func;
 	#libs;
+	#doDone;
 
 	constructor(id, flow, name) {
 		super(id, flow, name);
-		this.context.global = globalContext;
-		this.context.flow = flow.context;
+		Object.defineProperties(this, {
+			context: {value: new Context}
+		});
+		Object.defineProperties(this.context, {
+			global: {value: globalContext},
+			flow: {value: flow.context}
+		});
 	}
 	onStart(config) {
 		super.onStart(config);
@@ -489,6 +534,7 @@ class FunctionNode extends Node {
 		}
 
 		this.#func = config.func ?? nop;
+		this.#doDone = config.doDone;
 
 		try {
 			const context = this.context;
@@ -499,11 +545,16 @@ class FunctionNode extends Node {
 			this.error(e);
 		}
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		try {
 			const context = this.context;
 			const func = this.#func;
-			msg = func(msg, this, context, context.flow, context.global, this.#libs);
+			const node = Object.create(this, {
+				done: {value: done},
+			});
+				msg = func(msg, node, context, context.flow, context.global, this.#libs);
+			if (this.#doDone)
+				done();
 			if (msg)
 				this.send(msg);
 		}
@@ -1119,9 +1170,8 @@ class CompatibiltyNode extends Node {
 
 		this.#module(config);
 	}
-	onMessage(msg) {
-		//@@ real done, not nop
-		this.#events.input?.forEach(input => input.call(this, msg, this.#send, nop));
+	onMessage(msg, done) {
+		this.#events.input?.forEach(input => input.call(this, msg, this.#send, done));
 	}
 	on(event, handler) {
 		if (!CompatibilityEvents.includes(event))

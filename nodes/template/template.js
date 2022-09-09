@@ -34,7 +34,7 @@ class Template extends Node {
 		this.#syntax = config.syntax;
 		this.#output = config.output;
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		const template = this.#template ?? msg.template;
 		let result = template;
 		if ("mustache" === this.#syntax)
@@ -49,6 +49,7 @@ class Template extends Node {
 			}
 		}
 		msg.payload = result;
+		done();
 		return msg; 
 	}
 

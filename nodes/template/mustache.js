@@ -52,9 +52,8 @@ function testRegExp (re, string) {
   return regExpTest.call(re, string);
 }
 
-var nonSpaceRe;
+const nonSpaceRe = /\S/;
 function isWhitespace (string) {
-  initRe();
   return !testRegExp(nonSpaceRe, string);
 }
 
@@ -76,20 +75,11 @@ function escapeHtml (string) {
 }
 
 
-var whiteRe;
-var spaceRe;
-var equalsRe;
-var curlyRe;
-var tagRe;
-function initRe() {
-	if (whiteRe) return;
-	whiteRe = /\s*/;
-	spaceRe = /\s+/;
-	equalsRe = /\s*=/;
-	curlyRe = /\s*\}/;
-	tagRe = /#|\^|\/|>|\{|&|=|!/;
-	nonSpaceRe = /\S/;
-}
+const whiteRe = /\s*/;
+const spaceRe = /\s+/;
+const equalsRe = /\s*=/;
+const curlyRe = /\s*\}/;
+const tagRe = /#|\^|\/|>|\{|&|=|!/;
 
 /**
  * Breaks up the given `template` string into a tree of tokens. If the `tags`
@@ -200,7 +190,6 @@ function parseTemplate (template, tags) {
     hasTag = true;
 
     // Get the tag type.
-    initRe();
     type = scanner.scan(tagRe) || 'name';
     scanner.scan(whiteRe);
 

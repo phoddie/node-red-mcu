@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 8, 2022<br>
+Updated September 13, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -610,6 +610,17 @@ The built-in nodes are useful for compatibility with the standard Node-RED behav
 Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. (Note: I now have JSONata building and running some simple test cases. The code size and memory footprint are large. Further exploration is needed to evaluate if JSONata is a viable option to enable, but at least it looks possible)
 
 The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
+
+## Implementation Notes
+
+### Complete and Catch Nodes
+The Complete and Catch nodes receive messages from one or more nodes referenced by their `scope` property. This organization reflects the UI of the Node-RED Editor, where the user configures the scope of Complete and Catch nodes by selecting the nodes they reference. From a runtime perspective, this organization is inefficient as it requires each node receiving a message to check if the node is in-scope for any Complete or Catch nodes.
+
+The full Node-RED runtime optimizes this by building a map at start-up for the Complete and Catch nodes for each node and then consulting that map for each message. In Node-RED MCU Edition, the organization is inverted by `nodered2mcu`. Each node that is in scope for Complete and Catch nodes, has a list of references to those nodes, similar to the `wires` node list used for a node's outputs. This simplifies the runtime beyond the full Node-RED runtime. It also eliminates the need to create a closure for each `done()` for nodes that are not in scope of any Complete or Catch nodes.
+
+The transformation and optimization of the Complete and Catch node structure by `nodered2mcu` is a bit obscure but the benefits are not: the runtime memory use and load are reduced so flows run more efficiently on constrained hardware.
+
+Status nodes may benefit from a similar optimization. This is an area for future exploration.
 
 ## Thank You
 This exploration was motivated by an extended conversation with [Nick O'Leary](https://github.com/knolleary) who patiently explained Node-RED to me at OpenJS World 2022. That clear and patient discussion gave me grounding to begin this effort.

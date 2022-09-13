@@ -207,10 +207,20 @@ export class Node {
 	}
 	onStart(config) {
 		const wires = config.wires;
-		if (!wires?.length)
-			return;
-
-		this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target)));
+		if (wires) {
+			this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target)));
+			if (!config.dones && !config.errors)
+				return;
+		}
+		else {
+			if (!config.dones && !config.errors)
+				return;
+			this.#outputs = [];
+		}
+		if (config.dones)
+			this.#outputs.dones = config.dones.map(target => this.#flow.getNode(target));
+		if (config.errors)
+			this.#outputs.errors = config.errors.map(target => this.#flow.getNode(target));
 	}
 	onMessage(msg) {
 	}
@@ -277,32 +287,7 @@ export class Node {
 		this.trace(msg);
 	}
 	error(error, msg) {
-		msg = {
-			...msg,
-			error: {
-				message: error.toString(),
-				source: {
-					id: this.id,
-					type: this.constructor.type,
-					name: this.name,
-					count: 0	
-				}
-			}
-		};
-
-		const uncaught = [];
-		for (const node of this.#flow.nodes()) {
-			if (!(node instanceof CatchNode))
-				continue;
-			if (node.uncaught)
-				uncaught.push(node);
-			else
-				node.onCatch(msg);
-		}
-		if (!msg.error.source.count) {
-			for (let i = 0, length = uncaught.length; i < length; i++)
-				uncaught[i].onCatch(msg);
-		}
+		throw new Error("use done(error)");
 	}
 	debug(msg) {
 		this.trace(msg);
@@ -317,15 +302,28 @@ export class Node {
 		return this.#flow.context;
 	}
 	makeDone(msg) {
-		const source = this;
-		return function(error) {
-			for (const node of source.#flow.nodes()) {
-				if ((node instanceof CompleteNode) && node.inScope(source.id)) {
+		if (this.#outputs.dones || this.#outputs.errors) {
+			const source = this;
+			return function(error) {
+				if (error) {
+					msg.error = {
+						message: error.toString(),
+						source: {
+							id: source.id,
+							type: source.constructor.type,
+							name: source.name ?? "",
+							count: 0	
+						}
+					}
+				}
+				for (let i = 0, dones = error ? source.#outputs.errors : source.#outputs.dones, length = dones ? dones.length : 0; i < length; i++) {
 					const clone = RED.util.cloneMessage(msg);
-					RED.mcu.enqueue(clone, node, node.makeDone(clone));
+					RED.mcu.enqueue(clone, dones[i], dones[i].makeDone(clone));
 				}
 			}
 		}
+		
+		return nop;
 	}
 	onCommand(options) {
 		trace(`Node ${this.id} ignored: ${options.command}\n`);
@@ -428,19 +426,9 @@ class DebugNode extends Node {
 }
 
 class CatchNode extends Node {
-	#scope;
-
-	onStart(config) {
-		super.onStart(config);
-
-		this.#scope = config.scope;
-		Object.defineProperty(this, "uncaught", {value: config.uncaught ?? false});
-	}
-	onCatch(msg) {
-		if (!this.#scope || this.#scope.includes(msg.error.source.id)) {
-			msg.error.source.count += 1;
-			this.send(msg);
-		}
+	onMessage(msg, done) {
+		done();
+		return msg;
 	}
 
 	static type = "catch";
@@ -469,19 +457,9 @@ class StatusNode extends Node {
 }
 
 class CompleteNode extends Node {
-	#scope;
-
-	onStart(config) {
-		super.onStart(config);
-
-		this.#scope = config.scope;
-	}
 	onMessage(msg, done) {
 		done();
 		return msg;
-	}
-	inScope(id) {
-		return this.#scope.includes(id);
 	}
 
 	static type = "complete";
@@ -542,7 +520,7 @@ class FunctionNode extends Node {
 			initialize?.(this, context, context.flow, context.global, this.#libs);
 		}
 		catch (e) {
-			this.error(e);
+			this.error(e);		//@@ what's the right way to handle this?
 		}
 	}
 	onMessage(msg, done) {
@@ -551,15 +529,20 @@ class FunctionNode extends Node {
 			const func = this.#func;
 			const node = Object.create(this, {
 				done: {value: done},
+				error: {value: (error, msg) => {
+					this.debug(error.toString());
+					if (msg)
+						done(msg);
+				}}
 			});
-				msg = func(msg, node, context, context.flow, context.global, this.#libs);
+			msg = func(msg, node, context, context.flow, context.global, this.#libs);
 			if (this.#doDone)
 				done();
 			if (msg)
 				this.send(msg);
 		}
 		catch (e) {
-			this.error(e);
+			done(e);
 		}
 	}
 
@@ -803,7 +786,7 @@ class JSONNode extends Node {
 		this.#property = config.property;
 		this.#indent = config.pretty ? 4 : 0;
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		if (msg.schema)
 			throw new Error("schema unimplemented")
 
@@ -824,7 +807,8 @@ class JSONNode extends Node {
 				value = JSON.parse(value);
 			}
 			catch (e) {
-				this.error(e);
+				done(e);
+				return;
 			}
 		}
 		

@@ -22,7 +22,7 @@ This effort is intended to evaluate whether it is feasible to support Node-RED o
 Efficiency is essential for resource constrained device, but it is not a priority yet. For the current goal of determining if it is realistic to support Node-RED on MCUs, the projects just need to run, not run optimally. 
 
 ## Method
-The conversion from Node-RED JSON objects to JavaScript objects happens in two separate phase. The first phase happens during the process of building a Node-RED MCU project; the second phase, while running the project.
+The conversion from Node-RED JSON objects to JavaScript objects happens in two separate phase. The first phase happens while building a Node-RED MCU project; the second phase, while running the project.
 
 The following sections look at some examples of the transform, starting from the Node-RED configuration of each object.
 
@@ -188,8 +188,9 @@ createNode("change", "734223794d10f7cc", "", flow);
 node.onStart({
 	wires: [["e34b347db64fcdc8"]],
 	onMessage: function (msg) {
-		msg.DEBUGGER = msg.payload;
+		let temp = msg.payload;
 		delete msg.payload
+		msg.DEBUGGER = temp;
 		this.flow.set("one", "one one one one");
 		return msg;
 	},
@@ -553,8 +554,8 @@ See the MCU Sensor module's [documentation](./nodes/sensor/readme.md) for furthe
 **Note:** The Delay node is the full Node-RED implementation (with a small, optional change to reduce its RAM footprint). This is possible by using the Compatibility Node.
 
 ### Trigger
-- [X] Everything
-- [ ] Except async flow. and global. targets
+- [X] Everything...
+- [ ] ...except async flow. and global. targets
 
 **Note:** The Trigger node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
 

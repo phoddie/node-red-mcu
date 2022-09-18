@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 13, 2022<br>
+Updated September 17, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -564,6 +564,14 @@ See the MCU Sensor module's [documentation](./nodes/sensor/readme.md) for furthe
 
 **Note:** The Join node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
 
+### Sort
+- [X] Everything...
+- [ ] ...except JSONata expressions
+
+Further optimizations should be possible by having `nodered2mcu` generate a targeted handle for simple cases (sorting property of a single message, no JSONata, etc.).
+
+**Note:** The Sort node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
+
 ### Compatibility Node
 The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
 
@@ -600,7 +608,7 @@ Possible future work on built-in nodes:
 
 - **Function nodes**. Exec may not make sense.
 - **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
-- **Sequence nodes**. The Sort and Batch nodes should be possible to support. Like the Function nodes, they are quite sophisticated.
+- **Sequence nodes**. The Batch node should be possible to support, likely be adapting the full Node-RED implementation.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 

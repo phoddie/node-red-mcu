@@ -14,6 +14,7 @@
 		"./nodes/lower-case/manifest.json",
 		"./nodes/delay/manifest.json",
 		"./nodes/join/manifest.json",
+		"./nodes/sort/manifest.json",
 		"./nodes/trigger/manifest.json",
 		"./nodes/sensor/manifest.json",
 		"./nodes/file/manifest.json",

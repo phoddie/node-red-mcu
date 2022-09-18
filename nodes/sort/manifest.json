@@ -1,0 +1,8 @@
+{
+	"modules": {
+		"sort": "./18-sort"
+	},
+	"preload": [
+		"sort"
+	]
+}

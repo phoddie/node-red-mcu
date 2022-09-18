@@ -23,7 +23,15 @@
 	"platforms": {
 		"esp32": {
 			"creation": {
-				"static": 98304,
+				"static": 0,
+				"chunk": {
+					"initial": 81920,
+					"incremental": 0
+				},
+				"heap": {
+					"initial": 5120,
+					"incremental": 0
+				},
 				"keys": {
 					"available": 512
 				}

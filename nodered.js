@@ -38,6 +38,9 @@ class RED {
 	static settings = Object.freeze({
 	});
 
+	static _(msg, obj) {	// https://nodered.org/docs/creating-nodes/i18n
+		return msg;		// not localizing
+	}
 	static util = class {
 		static cloneMessage = structuredClone;
 		static compareObjects = deepEqual;

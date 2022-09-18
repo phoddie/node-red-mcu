@@ -309,6 +309,8 @@ export class Node {
 			const source = this;
 			return function(error) {
 				if (error) {
+					if (msg.error)
+						msg._error = msg.error;		// "If the message already had a msg.error property when the node reported the error, that property will be moved to msg._error."
 					msg.error = {
 						message: error.toString(),
 						source: {

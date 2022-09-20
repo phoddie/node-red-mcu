@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 17, 2022<br>
+Updated September 19, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -212,7 +212,7 @@ Based on this investigation, bringing Node-RED to MCUs seems both possible and d
 - Help spread the world. 
 - Give it a try. Share what you find – what works and what doesn't.
 - Help implement some of the incomplete features of the initial node suite
-- Implement additional notes
+- Implement additional nodes
 - Help move the Node-RED Embedded Edition APIs to better match those in Node-RED
 - Implement Node-RED nodes for features of the hardware using ECMA-419
 - Implement Node-RED nodes for feature for the Moddable SDK
@@ -573,6 +573,11 @@ Further optimizations should be possible by having `nodered2mcu` generate a targ
 
 **Note:** The Sort node is based on the full Node-RED implementation with a few changes to take advantage of the `nodered2mcu` preprocessor. This is possible by using the Compatibility Node.
 
+### Batch
+- [X] Everything
+
+**Note:** The Batch node is based on the full Node-RED implementation with some optimizations. This is possible by using the Compatibility Node.
+
 ### Compatibility Node
 The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
 
@@ -609,7 +614,6 @@ Possible future work on built-in nodes:
 
 - **Function nodes**. Exec may not make sense.
 - **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
-- **Sequence nodes**. The Batch node should be possible to support, likely be adapting the full Node-RED implementation.
 - **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 

@@ -1,0 +1,8 @@
+{
+	"modules": {
+		"batch": "./19-batch"
+	},
+	"preload": [
+		"batch"
+	]
+}

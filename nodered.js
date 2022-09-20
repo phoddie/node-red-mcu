@@ -334,10 +334,8 @@ export class Node {
 		trace(`Node ${this.id} ignored: ${options.command}\n`);
 	}
 
-	static type = "comment";
 	static {
 		this.noOutputs = Object.freeze([]);
-		RED.nodes.registerType(this.type, this);
 	}
 }
 
@@ -347,6 +345,13 @@ class UnknownNode extends Node {
 	send() {}
 
 	static type = "unknown";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
+class CommentNode extends UnknownNode {
+	static type = "comment";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

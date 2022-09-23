@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 19, 2022<br>
+Updated September 22, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -483,6 +483,7 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] "stopping after first match"
 - [X] ==, !=, <, <=, >, >=, is between, is true, is false, is null, is not null, is of type, otherwise, has key
 - [X] flow., global., expression
+- [X] "recreate message sequences"
 - [ ] env variable
 - [ ] is of type: buffer
 - [ ] contains, matches regexp, is empty, is not empty, sequence rules, JSONata exp

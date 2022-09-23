@@ -576,10 +576,82 @@ class ChangeNode extends Node {
 }
 
 class SwitchNode extends Node {
+	#sequences;
+
 	onStart(config) {
 		super.onStart(config);
 
-		Object.defineProperty(this, "onMessage", {value: config.onMessage});
+		if (config.onMessage)
+			Object.defineProperty(this, "onMessage", {value: config.onMessage});
+		else
+			Object.defineProperty(this, "compare", {value: config.compare});
+	}
+	onMessage(msg) {
+		const parts = msg.parts;
+		if ((undefined === parts?.id) || (undefined === parts.index))
+			return this.compare(msg);
+		
+		const sequences = this.#sequences ??= new Map;
+		let sequence = sequences.get(parts.id);
+		if (!sequence) {
+			sequence = [];
+			sequences.set(parts.id, sequence)
+		}
+		sequence.push(msg);
+	
+		if (undefined === sequence.count) {
+			if (undefined === parts.count)
+				return;
+
+			sequence.count = parts.count;
+		}
+	
+		if (sequence.count !== sequence.length)
+			return;
+	
+		sequences.delete(parts.id)
+
+		// initialize state for each output
+		const outputCount = this.outputCount;
+		const ids = [];
+		const counts = []
+		const onwards = []
+		const indices = []
+		for (let i = 0; i < outputCount; i++) {
+			ids[i] = RED.util.generateId();
+			counts[i] = 0;
+			indices[i] = 0;
+		}
+
+		// process each message
+		for (let i = 0, length = sequence.length; i < length; i++) {
+			const msg = sequence[i];
+			const result = this.compare(msg);
+			onwards[i] = result;
+			for (let j = 0; j < result.length; j++) {
+				if (result[j])
+					counts[j] += 1;
+			}
+		}
+
+		// send messages in order received
+		for (let i = 0, length = sequence.length; i < length; i++) {
+			const msg = sequence.shift();
+			const result = onwards.shift();
+			for (let j = 0, first = true; j < result.length; j++) {
+				if (!result[j])
+					continue;
+
+				if (!first)
+					msg = result[j] = RED.util.cloneMessage(msg);
+				msg._msgid = RED.util.generateId();
+				msg.parts.id = ids[j];
+				msg.parts.index = indices[j]++;
+				msg.parts.count = counts[j];
+				first = false;
+			}
+			this.send(result);
+		}
 	}
 
 	static type = "switch";

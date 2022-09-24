@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 22, 2022<br>
+Updated September 24, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -549,6 +549,11 @@ The File Read node is implemented using the Moddable SDK of integration LittleFS
 
 See the MCU Sensor module's [documentation](./nodes/sensor/readme.md) for further details.
 
+### CSV
+- [X] Everything
+
+**Note:** The CSV node is the full Node-RED implementation with small changes to reduce its RAM footprint. This is possible by using the Compatibility Node.
+
 ### Delay
 - [X] Everything
 
@@ -615,7 +620,7 @@ Possible future work on built-in nodes:
 
 - **Function nodes**. Exec may not make sense.
 - **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
-- **Parser**. CSV should be possible to support, but the others (HTML, YAML, XML) are likely impractical.
+- **Parser**. XML may be possible. HTML, YAML are likely impractical. 
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 
 The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, a Preferences node, Display node, etc.

@@ -1,0 +1,8 @@
+{
+	"modules": {
+		"csv": "./70-CSV"
+	},
+	"preload": [
+		"csv"
+	]
+}

@@ -12,6 +12,7 @@
 		"./nodes/httprequest/manifest.json",
 		"./nodes/websocketnodes/manifest.json",
 		"./nodes/lower-case/manifest.json",
+		"./nodes/csv/manifest.json",
 		"./nodes/delay/manifest.json",
 		"./nodes/join/manifest.json",
 		"./nodes/batch/manifest.json",

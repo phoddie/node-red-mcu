@@ -2,7 +2,11 @@ import { Node } from "nodered";
 import {
 	REDButton,
 	REDDropDown,
+	REDGauge,
+	REDNumeric,
+	REDSlider,
 	REDSpacer,
+	REDSwitch,
 	REDTextRowLeft,
 	REDTextRowCenter,
 	REDTextRowRight,
@@ -71,6 +75,11 @@ function position(group, control) {
 		lines[top].fill(1, x, right);
 }
 
+function registerConstructor(type, constructor) {
+	constructor.type = type;
+	RED.nodes.registerType(type, constructor);
+}
+
 class UINode extends Node {
 	constructor(id, flow, name) {
 		super(id, flow, name);
@@ -82,16 +91,33 @@ class UINode extends Node {
 	}
 }
 
+class UIBaseNode extends Node {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onStart(config) {
+		super.onStart(config);
+	}
+}
+registerConstructor("ui_base", UIBaseNode);
+
 class UIControlNode extends UINode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
 	onStart(config) {
 		super.onStart(config);
-		this.width = parseInt(config.width);
-		this.height = parseInt(config.height);
 		const groupNode = RED.nodes.getNode(config.group);
 		insert(groupNode.controls, this);
+		this.width = parseInt(config.width);
+		this.height = parseInt(config.height);
+		if (this.width == 0)
+			this.width = groupNode.width;
+		if (this.height == 0)
+			this.height = this.defaultHeight;
+	}
+	get defaultHeight() {
+		return 1;
 	}
 }
 
@@ -112,26 +138,157 @@ class UIButtonNode extends UIControlNode {
 		this.send(this.msg);
 	}
 }
-RED.nodes.registerType("ui_button", UIButtonNode);
+registerConstructor("ui_button", UIButtonNode);
 
 class UIDropDownNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
+	onChanged(tracking) {
+		this.msg.payload = this.options[this.selection].value;
+		this.send(this.msg);
+	}
+	onMessage(msg) {
+		this.selection = this.options.findIndex(option => option.value == msg.payload);
+		this.container.delegate("onUpdate");
+		if (this.passthru && (this.msg._msgid != msg._msgid))
+			this.send(msg);
+	}
 	onStart(config) {
 		super.onStart(config);
 		this.label = config.label;
-		this.options = config.options.map(option => { 
-			return { label:option.label, msg: { payload:option.value, topic:config.topic } }; 
-		});
-		this.place = config.place;
+		this.options = config.options;
+		this.passthru = config.passthru;
+		this.placeHolder = config.place;
+		this.selection = -1;
+		
 		this.Template = REDDropDown;
+		
+		this.msg = { topic: config.topic }
 	}
 	onSelect(index) {
 		this.send(this.options[index].msg);
 	}
 }
-RED.nodes.registerType("ui_dropdown", UIDropDownNode);
+registerConstructor("ui_dropdown", UIDropDownNode);
+
+class UIGaugeNode extends UIControlNode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onMessage(msg) {
+		const { min, max } = this;
+		let value = Number(msg.payload);
+		if (value < min)
+			value = min;
+		else if (value > max)
+			value = max;
+		this.value = value;
+		this.container.delegate("onUpdate");
+	}
+	onStart(config) {
+		super.onStart(config);
+		this.colors = config.colors;
+		const min = this.min = config.min;
+		const max = this.max = config.max;
+		let seg1 = config.seg1;
+		let seg2 = config.seg2;
+		if ((seg1 != "") && (seg2 != "")) {
+			seg1 =  Math.min(max, Math.max(min, Number(seg1)));
+			seg2 =  Math.min(max, Math.max(min, Number(seg2)));
+			this.seg1 = Math.min(seg1, seg2);
+			this.seg2 = Math.max(seg1, seg2);
+		}
+		else {
+			this.seg1 = undefined;
+			this.seg2 = undefined;
+		}
+		this.title = config.title;
+		this.value = this.min;
+		this.Template = REDGauge;
+	}
+	get defaultHeight() {
+		return Math.round(this.width * 2 / 3);
+	}
+}
+registerConstructor("ui_gauge", UIGaugeNode);
+
+class UINumericNode extends UIControlNode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onChanged(tracking) {
+		this.msg.payload = this.value;
+		this.send(this.msg);
+	}
+	onMessage(msg) {
+		const { min, max, step } = this;
+		let value = parseInt(msg.payload);
+		if (value < min)
+			value = min;
+		else if (value > max)
+			value = max;
+		else
+			value = Math.round(value / step) * step;
+		this.value = value;
+		this.container.delegate("onUpdate");
+		if (this.passthru && (this.msg._msgid != msg._msgid))
+			this.send(msg);
+	}
+	onStart(config) {
+		super.onStart(config);
+		this.label = config.label;
+		this.min = config.min;
+		this.max = config.max;
+		this.step = config.step;
+		this.passthru = config.passthru;
+		this.value = this.min;
+		this.wrap = config.wrap;
+		
+		this.Template = REDNumeric;
+		
+		this.msg = { topic: config.topic }
+	}
+}
+registerConstructor("ui_numeric", UINumericNode);
+
+class UISliderNode extends UIControlNode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onChanged(tracking) {
+		this.msg.payload = this.value;
+		this.send(this.msg);
+	}
+	onMessage(msg) {
+		const { min, max, step } = this;
+		let value = parseInt(msg.payload);
+		if (value < min)
+			value = min;
+		else if (value > max)
+			value = max;
+		else
+			value = Math.round(value / step) * step;
+		this.value = value;
+		this.container.delegate("onUpdate");
+		if (this.passthru && (this.msg._msgid != msg._msgid))
+			this.send(msg);
+	}
+	onStart(config) {
+		super.onStart(config);
+		this.label = config.label;
+		this.min = config.min;
+		this.max = config.max;
+		this.step = config.step;
+		this.passthru = config.passthru;
+		this.value = this.min;
+		
+		this.Template = REDSlider;
+		
+		this.msg = { topic: config.topic }
+	}
+}
+registerConstructor("ui_slider", UISliderNode);
 
 class UISpacerNode extends UIControlNode {
 	constructor(id, flow, name) {
@@ -142,18 +299,54 @@ class UISpacerNode extends UIControlNode {
 		this.Template = REDSpacer;
 	}
 }
-RED.nodes.registerType("ui_spacer", UISpacerNode);
+registerConstructor("ui_spacer", UISpacerNode);
+
+class UISwitchNode extends UIControlNode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onChanged(tracking) {
+		this.msg.payload = this.options[this.selection].value;
+		this.send(this.msg);
+	}
+	onMessage(msg) {
+		this.selection = this.options.findIndex(option => option.value == msg.payload);
+		if (this.selection < 0)
+			this.selection = 0;
+		this.container.delegate("onUpdate");
+		if (this.passthru && (this.msg._msgid != msg._msgid))
+			this.send(msg);
+	}
+	onStart(config) {
+		super.onStart(config);
+		this.label = config.label;
+		this.options = [
+			{ value:config.offvalue, type:config.offvalueType },
+			{ value:config.onvalue, type:config.onvalueType },
+		];
+		this.passthru = config.passthru;
+		this.selection = 0;
+		
+		this.Template = REDSwitch;
+		
+		this.msg = { topic: config.topic }
+	}
+}
+registerConstructor("ui_switch", UISwitchNode);
 
 class UITextNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
 	onMessage(msg) {
-		this.container.delegate("onMessage", msg.payload);
+		this.value = msg.payload;
+		this.container.delegate("onUpdate");
 	}
 	onStart(config) {
 		super.onStart(config);
 		this.label = config.label;
+		this.value = "";
+		
 		switch (config.layout) {
 		case "row-left": this.Template = REDTextRowLeft; break;
 		case "row-center": this.Template = REDTextRowCenter; break;
@@ -161,10 +354,9 @@ class UITextNode extends UIControlNode {
 		case "col-center": this.Template = REDTextColumnCenter; break;
 		default: this.Template = REDTextRowSpread; break;
 		}
-		
 	}
 }
-RED.nodes.registerType("ui_text", UITextNode);
+registerConstructor("ui_text", UITextNode);
 
 class UIGroupNode extends UINode {
 	constructor(id, flow, name) {
@@ -180,7 +372,7 @@ class UIGroupNode extends UINode {
 		insert(tabNode.groups, this);
 	}
 }
-RED.nodes.registerType("ui_group", UIGroupNode);
+registerConstructor("ui_group", UIGroupNode);
 
 class UITabNode extends UINode {
 	constructor(id, flow, name) {
@@ -192,7 +384,9 @@ class UITabNode extends UINode {
 		insert(model.tabs, this);
 	}
 }
-RED.nodes.registerType("ui_tab", UITabNode);
+registerConstructor("ui_tab", UITabNode);
+
+export { UIControlNode, registerConstructor } 
 
 export default function() {
 	model.tabs.forEach(tab => {
@@ -201,10 +395,6 @@ export default function() {
 			if (group.disp)
 				group.lines.push(new Uint8Array(group.width).fill(1));
 			group.controls.forEach(control => {
-				if (control.width == 0)
-					control.width = group.width;
-				if (control.height == 0)
-					control.height = 1;
 				position(group, control);	
 			});
 			group.height = group.lines.length;

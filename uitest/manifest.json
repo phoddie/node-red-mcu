@@ -40,7 +40,9 @@
 			"$(MODDABLE)/examples/assets/fonts/OpenSans-Semibold-18",
 			"./assets/button",
 			"./assets/glyphs",
-			"./assets/popup"
+			"./assets/popup",
+			"./assets/slider",
+			"./assets/switch"
 		]
 	}
 }

@@ -68,8 +68,19 @@ class RED {
 				throw new Error;
 			obj[property] = value;
 		}
+		static ensureString(s) {
+			const type = typeof s;
+			if ("string" === type)
+				return s;
+			if ("object" === type) {
+				if (s instanceof Uint8Array)
+					return s.toString();
+				return JSON.stringify(s);
+			}
+			return "" + s;
+		}
 		static prepareJSONataExpression() {
-			throw new Error;
+			throw new Error("unimplemented");
 		}
 	}
 	static nodes = class {
@@ -625,8 +636,7 @@ class SwitchNode extends Node {
 
 		// process each message
 		for (let i = 0, length = sequence.length; i < length; i++) {
-			const msg = sequence[i];
-			const result = this.compare(msg);
+			const result = this.compare(sequence[i]);
 			onwards[i] = result;
 			for (let j = 0; j < result.length; j++) {
 				if (result[j])

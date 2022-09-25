@@ -1,8 +1,11 @@
 import { Node } from "nodered";
 import {
+	buildTheme,
 	REDButton,
 	REDDropDown,
 	REDGauge,
+	REDGaugeCompass,
+	REDGaugeDonut,
 	REDNumeric,
 	REDSlider,
 	REDSpacer,
@@ -97,6 +100,7 @@ class UIBaseNode extends Node {
 	}
 	onStart(config) {
 		super.onStart(config);
+		buildTheme(config.theme);
 	}
 }
 registerConstructor("ui_base", UIBaseNode);
@@ -111,13 +115,12 @@ class UIControlNode extends UINode {
 		insert(groupNode.controls, this);
 		this.width = parseInt(config.width);
 		this.height = parseInt(config.height);
+	}
+	measure(groupNode) {
 		if (this.width == 0)
 			this.width = groupNode.width;
 		if (this.height == 0)
-			this.height = this.defaultHeight;
-	}
-	get defaultHeight() {
-		return 1;
+			this.height = 1;
 	}
 }
 
@@ -205,10 +208,20 @@ class UIGaugeNode extends UIControlNode {
 		}
 		this.title = config.title;
 		this.value = this.min;
-		this.Template = REDGauge;
+		switch (config.gtype) {
+		case "compass": this.Template = REDGaugeCompass; break;
+		case "donut": this.Template = REDGaugeDonut; break;
+		default: this.Template = REDGauge; break;
+		}
 	}
-	get defaultHeight() {
-		return Math.round(this.width * 2 / 3);
+	measure(groupNode) {
+		if (this.width == 0)
+			this.width = groupNode.width;
+		if (this.height == 0) {
+			this.height = groupNode.width >> 1;
+			if (this.title)
+				this.height++;
+		}
 	}
 }
 registerConstructor("ui_gauge", UIGaugeNode);
@@ -395,6 +408,7 @@ export default function() {
 			if (group.disp)
 				group.lines.push(new Uint8Array(group.width).fill(1));
 			group.controls.forEach(control => {
+				control.measure(group);
 				position(group, control);	
 			});
 			group.height = group.lines.length;

@@ -3,19 +3,6 @@ import {} from "piu/shape";
 import {Outline} from "commodetto/outline";
 import { HorizontalScrollerBehavior, VerticalScrollerBehavior } from "ScrollerBehaviors";
 
-const BLACK = "black";
-const TRANSPARENT = "transparent";
-const WHITE = "white";
-
-const GRAY_2 = "#1b1c26";
-const GRAY_3 = "#2d2f40";
-const GRAY_4 = "#3e4259";
-
-
-const COLOR = "#192eab";
-const LITE_COLOR = "#6573c7";
-const OFF_WHITE = "#E0E0E0";
-
 const textures = {
 	button: { path:"button.png" },
 	glyphs: { path:"glyphs.png" },
@@ -23,55 +10,86 @@ const textures = {
 	slider: { path:"slider.png" },
 	switch: { path:"switch.png" },
 };
-const theme = Object.freeze({
-	skins: {
-		placeHolder: { stroke:"red", left:1, right:1, top:1, bottom:1 },
-
-		tab: { fill:BLACK },
-		tabMenu: { fill:GRAY_3, stroke:GRAY_4, bottom:1 },
-		tabMenuBackground: { fill:"#00000080" },
-		tabMenuIcon: { texture:textures.glyphs, color:[GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], x:0, y:0, width:40, height:40 },
-		tabMenuItem: { fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,COLOR] },
-		tabMenuItemIcon: { texture:textures.glyphs, color:[GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], x:200, y:0, width:40, height:40 },
-		tabTitle: { fill:[TRANSPARENT,GRAY_2,GRAY_2,COLOR], stroke:BLACK, bottom:1 },
-		
-		group: { fill:GRAY_2, stroke:GRAY_4, bottom:1 },
-		groupIcon: { texture:textures.glyphs, color:[OFF_WHITE,OFF_WHITE,OFF_WHITE,WHITE], x:40, y:0, width:40, height:40, variants:40 },
-		groupTitle: { fill:GRAY_3, stroke:GRAY_4, bottom:1 },
-		
-		button: { texture:textures.button, color: [TRANSPARENT,GRAY_4,GRAY_4,COLOR], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 },
-		
-		dropDown: { texture:textures.popup, color: [TRANSPARENT,GRAY_4,GRAY_4,COLOR], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 },
-		dropDownIcon: { texture:textures.glyphs, color:[GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], x:160, y:0, width:40, height:40 },
-
-		numericLeft: { texture:textures.popup, color: [TRANSPARENT,GRAY_4,GRAY_4,COLOR], x:0, y:0, width:40, height:60, top:20, bottom:20 },
-		numericCenter: { texture:textures.popup, color: [TRANSPARENT,GRAY_4,GRAY_4,COLOR], x:20, y:0, width:20, height:60, left:0, right:0, top:20, bottom:20 },
-		numericRight: { texture:textures.popup, color: [TRANSPARENT,GRAY_4,GRAY_4,COLOR], x:20, y:0, width:40, height:60, top:20, bottom:20 },
-		numericLess: { texture:textures.glyphs, color: [GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], x:240, y:0, width:40, height:40 },
-		numericMore: { texture:textures.glyphs, color: [GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], x:280, y:0, width:40, height:40 },
-
-		sliderBar: { texture:textures.slider, color: [GRAY_4,COLOR], x:0, y:0, width:80, height:40, left:20, right:20 },
-		sliderThumb: { texture:textures.slider, color: [OFF_WHITE,WHITE], x:80, y:0, width:40, height:40 },
-		
-		switchBar: { texture:textures.switch, color: [TRANSPARENT,GRAY_4,COLOR], x:0, y:0, width:60, height:40 },
-		switchThumb: { texture:textures.switch, color: [OFF_WHITE,WHITE], x:60, y:0, width:40, height:40 },
-	},
-	styles: {
-		tabTitle: { font:"600 18px Open Sans", color:[OFF_WHITE,OFF_WHITE,OFF_WHITE,WHITE], horizontal:"left", left:10 },
-		tabMenuItem: { font:"600 18px Open Sans", color:[GRAY_4,OFF_WHITE,OFF_WHITE,WHITE], horizontal:"left", right:10 },
-		groupTitle: { font:"600 18px Open Sans", color:[OFF_WHITE,OFF_WHITE,OFF_WHITE,WHITE], horizontal:"left", left:10 },
-		button: { font:"600 18px Open Sans", color:[GRAY_4,OFF_WHITE,OFF_WHITE,WHITE] },
-		
-		textName: { font:"18px Open Sans", color:OFF_WHITE },
-		textValue: { font:"600 18px Open Sans", color:OFF_WHITE },
-		textNameLeft: { font:"18px Open Sans", color:OFF_WHITE, horizontal:"left", left:10 },
-		textValueLeft: { font:"600 18px Open Sans", color:OFF_WHITE, horizontal:"left", left:10 },
-		textNameRight: { font:"18px Open Sans", color:OFF_WHITE, horizontal:"right", right:10 },
-		textValueRight: { font:"600 18px Open Sans", color:OFF_WHITE, horizontal:"right", right:10 },
-	},
-}, true);
-
 const UNIT = 40;
+
+function buildTheme(theme) {
+	const gray = "#949494";
+	const TRANSPARENT = "transparent";
+	const WHITE = "white";
+
+	const base = theme.themeState["base-color"].value;
+
+	const page = theme.themeState["page-backgroundColor"].value;
+	const sideBar = theme.themeState["page-sidebar-backgroundColor"].value;
+	const title = theme.themeState["page-titlebar-backgroundColor"].value;
+	
+	const group = theme.themeState["group-backgroundColor"].value;
+	const groupBorder = theme.themeState["group-borderColor"].value;
+	const groupText = theme.themeState["group-textColor"].value;
+	
+	const widget = theme.themeState["widget-backgroundColor"].value;
+	const widgetBorder = theme.themeState["widget-borderColor"].value;
+	const widgetText = theme.themeState["widget-textColor"].value;
+
+	const halfGray = blendColors(0.5,group,gray);
+	const halfWidget = blendColors(0.5,group,widget);
+	
+	const hilite = blendColors(0.75,group,base);
+		
+	const result = {
+		gaugeBackground: halfGray,
+		skins: {},
+		styles: {
+			textName: new Style({ font:"18px Open Sans", color:widgetText, left:5, right:5 }),
+			textValue: new Style({ font:"600 18px Open Sans", color:widgetText, left:5, right:5 }),
+			textNameLeft: new Style({ font:"18px Open Sans", color:widgetText, horizontal:"left", left:10 }),
+			textValueLeft: new Style({ font:"600 18px Open Sans", color:widgetText, horizontal:"left", left:10 }),
+			textNameRight: new Style({ font:"18px Open Sans", color:widgetText, horizontal:"right", right:10 }),
+			textValueRight: new Style({ font:"600 18px Open Sans", color:widgetText, horizontal:"right", right:10 }),
+		}
+	};
+	
+	result.skins.menuBackground = new Skin({ fill:blendColors(0.5,TRANSPARENT,page) }),
+	result.skins.tab = new Skin({ fill:page });
+	
+	result.skins.title = new Skin({ fill:[TRANSPARENT,title,title,hilite] });
+	result.styles.title = new Style({ font:"600 18px Open Sans", color:WHITE, horizontal:"left" });
+	result.skins.titleIcon = new Skin({ texture:textures.glyphs, color:WHITE, x:0, y:0, width:40, height:40 });
+	result.skins.titleMenu = new Skin({ fill:sideBar, stroke:title, left:1, right:1, top:1, bottom:1 }),
+	result.skins.titleMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,title] });
+	result.styles.titleMenuItem = new Style({ font:"600 18px Open Sans", color:[halfGray,groupText,groupText,WHITE], horizontal:"left" });
+	result.skins.titleMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,groupText,groupText,WHITE], x:200, y:0, width:40, height:40 });
+	
+	result.skins.group = new Skin({ fill:group, stroke:groupBorder, bottom:1 });
+	result.styles.group = new Style({ font:"600 18px Open Sans", color:[groupText,groupText,groupText,groupText], horizontal:"left" });
+	result.skins.groupIcon = new Skin({ texture:textures.glyphs, color:[groupText,groupText,groupText,groupText], x:40, y:0, width:40, height:40, variants:40 });
+	
+	result.skins.button = new Skin({ texture:textures.button, color:[TRANSPARENT,widget,widget,hilite], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
+	result.styles.button = new Style({ font:"600 18px Open Sans", color:[halfGray,WHITE,WHITE,WHITE] });
+	
+// 	result.skins.dropDown = new Skin({ texture:textures.popup, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,hilite], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
+	result.skins.dropDown = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,hilite], stroke:[TRANSPARENT,halfGray,halfGray,hilite], left:1, right:1, top:1, bottom:1 }),
+	result.styles.dropDown = new Style({ font:"600 18px Open Sans", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.skins.dropDownIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:160, y:0, width:40, height:40 });
+	result.skins.dropDownMenu = new Skin({ fill:group, stroke:widget, left:1, right:1, top:1, bottom:1 }),
+	result.skins.dropDownMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget] });
+	result.styles.dropDownMenuItem = new Style({ font:"600 18px Open Sans", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.skins.dropDownMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:200, y:0, width:40, height:40 });
+	
+	result.skins.numericLeft = new Skin({ texture:textures.button, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,hilite], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
+	result.skins.numericLess = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:240, y:0, width:40, height:40 });
+	result.skins.numericRight = new Skin({ texture:textures.button, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,hilite], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
+	result.skins.numericMore = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:280, y:0, width:40, height:40 });
+	
+	result.skins.sliderBar = new Skin({ texture:textures.slider, color:[halfGray,halfWidget], x:0, y:0, width:80, height:40, left:20, right:20 });
+	result.skins.sliderThumb = new Skin({ texture:textures.slider, color:widget, x:80, y:0, width:40, height:40 });
+	
+	result.skins.switchBar = new Skin({ texture:textures.switch, color: [TRANSPARENT,halfGray,halfWidget], x:0, y:0, width:60, height:40 });
+	result.skins.switchThumb = new Skin({ texture:textures.switch, color: [TRANSPARENT,gray,widget], x:60, y:0, width:40, height:40 });
+	
+	result.skins.compass = new Skin({ fill:widget, stroke:widget });
+	globalThis.REDTheme = result;
+}
 
 class ButtonBehavior extends Behavior {
 	changeState(container, state) {
@@ -137,14 +155,14 @@ class PopupMenuItemBehavior extends ButtonBehavior {
 }
 
 let REDButton = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, skin:theme.skins.button, clip:true, active:true,
+	left:$.left, width:$.width, top:$.top, height:$.height, skin:REDTheme.skins.button, clip:true, active:true,
 	Behavior: class extends ButtonBehavior {
 		onTap(button) {
 			this.data.onTap();
 		}
 	},
 	contents: [
-		Label($, { style:theme.styles.button, string:$.label }),
+		Label($, { style:REDTheme.styles.button, string:$.label }),
 	],
 }));
 
@@ -152,9 +170,7 @@ class REDDropDownBehavior extends ButtonBehavior {
 	onCreate(container, data) {
 		super.onCreate(container, data);
 		data.container = container;
-		let style = globalThis.menuItemStyle;
-		if (!style)
-			style = globalThis.menuItemStyle = new Style(theme.styles.tabMenuItem);
+		let style = REDTheme.styles.dropDownMenuItem;
 		let size = style.measure(data.placeHolder);
 		let width = size.width;
 		data.options.forEach(option => {
@@ -190,26 +206,26 @@ class REDDropDownBehavior extends ButtonBehavior {
 	onUpdate(container) {
 		const data = this.data;
 		const selection = data.selection;
-		container.first.next.string = (selection < 0) ? data.placeHolder : data.options[selection].label;
+		container.first.string = (selection < 0) ? data.placeHolder : data.options[selection].label;
 	}
 }
 
 let REDDropDown = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.textNameLeft, string:$.label }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
 		Row($, {
-			left:0, width:0, top:0, bottom:0, skin:theme.skins.dropDown, active:true, Behavior: REDDropDownBehavior,
+			width:0, top:0, bottom:0, skin:REDTheme.skins.dropDown, active:true, Behavior: REDDropDownBehavior,
 			contents: [
-				Content($, { width:UNIT, top:0, bottom:0, skin:theme.skins.dropDownIcon  }),
-				Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.tabMenuItem }),
+				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.dropDown }),
+				Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.dropDownIcon  }),
 			],
-		}),
+		})
 	],
 }));
 
 let REDDropDownMenu = Layout.template($ => ({
-	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:theme.skins.tabMenuBackground,
+	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
 	Behavior: class extends PopupMenuBehavior {	
 		onFitVertically(layout, value) {
 			let data = this.data;
@@ -234,13 +250,13 @@ let REDDropDownMenu = Layout.template($ => ({
 			container.coordinates = { left:button.x, width:button.width, top:y, height:height };
 			scroller.coordinates = { left:0, width:button.width, top:0, height:height };
 			if (data.selection >= 0)
-				scroller.first.content(data.selection).first.visible = true;
+				scroller.first.content(data.selection).last.visible = true;
 			return value;
 		}
 	},
 	contents: [
 		Container($, {
-			clip:true, skin:theme.skins.dropDown, state:1,
+			clip:true, skin:REDTheme.skins.dropDownMenu, state:1,
 			contents:[
 				Scroller($, { active:true, backgroundTouch:true, Behavior:VerticalScrollerBehavior, 
 					contents:[
@@ -255,11 +271,11 @@ let REDDropDownMenu = Layout.template($ => ({
 }));
 
 let REDDropDownMenuItem = Row.template($ => ({
-	left:0, right:0, height:UNIT, skin:theme.skins.tabMenuItem, active:true,
+	left:0, right:0, height:UNIT, skin:REDTheme.skins.dropDownMenuItem, active:true,
 	Behavior: PopupMenuItemBehavior,
 	contents: [
-		Content($, { width:UNIT, top:0, bottom:0, skin:theme.skins.tabMenuItemIcon, visible:false  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.tabMenuItem, string:$.label }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.dropDownMenuItem, string:$.label }),
+		Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.dropDownMenuItemIcon, visible:false  }),
 	],
 }));
 
@@ -269,23 +285,22 @@ class REDGaugeBehavior extends Behavior {
 		data.container = container;
 		
 		const shape = container.first;
-		shape.skin = new Skin({fill:GRAY_4, stroke:data.colors});
+		shape.skin = new Skin({fill:REDTheme.gaugeBackground, stroke:data.colors});
 	}
 	onDisplaying(container) {
 		this.onUpdate(container);
 	}
 	onUpdate(container) {
 		const data = this.data;
-		const { min, max, value, seg1, seg2 } = data;
+		const { min, max, value, seg1, seg2, title } = data;
 		const fraction = (value - min) / (max - min);
 		const { width, height } = container;
 		const shape = container.first;
 		const label = container.last;
 		
 		const x = width >> 1;
-		const y = height - 10;
-		let r = height - 50;
-		if (r > x) r = x;
+		const y = height;
+		const r = Math.min(x, y);
 		
 		if (shape.fillOutline == null) {
 			const path = new Outline.CanvasPath;
@@ -304,11 +319,111 @@ class REDGaugeBehavior extends Behavior {
 };
 
 let REDGauge = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior: REDGaugeBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
-		Shape(1, { left:0, right:0, top:0, bottom:0 } ),
-		Label($, { left:0, right:0, top:0, height:40, style:theme.styles.textName, string:$.title }),
-		Label($, { left:0, right:0, bottom:0, height:40, style:theme.styles.textValue }),
+		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Container($, {
+			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeBehavior,
+			contents: [
+				Shape($, { left:0, right:0, top:0, bottom:0 } ),
+				Label($, { left:0, right:0, bottom:0, height:40, style:REDTheme.styles.textValue }),
+			],
+		}),
+	],
+}));
+
+class REDGaugeCompassBehavior extends Behavior {
+	onCreate(container, data) {
+		this.data = data;
+		data.container = container;
+	}
+	onDisplaying(container) {
+		this.onUpdate(container);
+	}
+	onUpdate(container) {
+		const data = this.data;
+		const { min, max, value, seg1, seg2, title } = data;
+		const fraction = (value - min) / (max - min);
+		const { width, height } = container;
+		const shape = container.first;
+		const label = container.last;
+		
+		const x = width >> 1;
+		const y = height >> 1;
+		let r = Math.min(x, y);
+		
+		if (shape.fillOutline == null) {
+			const path = new Outline.CanvasPath;
+			path.arc(x, y, r - 12, 0, 2 * Math.PI);
+			shape.fillOutline = Outline.stroke(path, 6, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		}
+		const path = new Outline.CanvasPath;
+		let angle = (2 * Math.PI * fraction) - (Math.PI / 2);
+		path.moveTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
+		r -= 25;
+		angle -= Math.PI / 12;
+		path.lineTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
+		angle += Math.PI / 6;
+		path.lineTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
+		path.closePath();
+		shape.strokeOutline = Outline.fill(path);
+
+		label.string = value;
+	}
+};
+let REDGaugeCompass = Column.template($ => ({
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
+	contents: [
+		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Container($, {
+			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeCompassBehavior,
+			contents: [
+				Shape($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.compass }),
+				Label($, { left:0, right:0, height:40, style:REDTheme.styles.textValue }),
+			],
+		}),
+	],
+}));
+
+class REDGaugeDonutBehavior extends REDGaugeBehavior {
+	onUpdate(container) {
+		const data = this.data;
+		const { min, max, value, seg1, seg2, title } = data;
+		const fraction = (value - min) / (max - min);
+		const { width, height } = container;
+		const shape = container.first;
+		const label = container.last;
+		
+		const x = width >> 1;
+		const y = height >> 1;
+		const r = Math.min(x, y);
+		
+		if (shape.fillOutline == null) {
+			const path = new Outline.CanvasPath;
+			path.arc(x, y, r - 10, 0, 2 * Math.PI);
+			shape.fillOutline = Outline.stroke(path, 20, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		}
+		const path = new Outline.CanvasPath;
+		path.arc(x, y, r - 10, 3 * Math.PI / 2, (3 * Math.PI / 2) + (2 * Math.PI * fraction) );
+		shape.strokeOutline = Outline.stroke(path, 20, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		if ((seg1 !== undefined) && (seg2 !== undefined))
+			shape.state = (value <= seg1) ? 0 : (value <= seg2) ? 1 : 2;
+		else
+			shape.state = fraction * 2;
+		label.string = value;
+	}
+};
+let REDGaugeDonut = Column.template($ => ({
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
+	contents: [
+		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Container($, {
+			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeDonutBehavior,
+			contents: [
+				Shape($, { left:0, right:0, top:0, bottom:0 } ),
+				Label($, { left:0, right:0, height:40, style:REDTheme.styles.textValue }),
+			],
+		}),
 	],
 }));
 
@@ -348,21 +463,21 @@ class REDNumericButtonBehavior extends ButtonBehavior {
 let REDNumeric = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.textNameLeft, string:$.label }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
 		Row($, {
 			width:3*UNIT, height:UNIT, Behavior: REDNumericBehavior,
 			contents: [
 				Container(-1, {
-					width:UNIT, height:UNIT, skin:theme.skins.numericLeft, active:true, Behavior: REDNumericButtonBehavior,
+					width:UNIT, height:UNIT, skin:REDTheme.skins.numericLeft, active:true, Behavior: REDNumericButtonBehavior,
 					contents: [
-						Content($, { width:UNIT, height:UNIT, skin:theme.skins.numericLess }),
+						Content($, { width:UNIT, height:UNIT, skin:REDTheme.skins.numericLess }),
 					],
 				}),
-				Label($, { width:UNIT, height:UNIT, skin:theme.skins.numericCenter, style:theme.styles.textValue, state:1 }),
+				Label($, { width:UNIT, height:UNIT, style:REDTheme.styles.textValue, state:1 }),
 				Container(1, {
-					width:UNIT, height:UNIT, skin:theme.skins.numericRight, active:true, Behavior: REDNumericButtonBehavior,
+					width:UNIT, height:UNIT, skin:REDTheme.skins.numericRight, active:true, Behavior: REDNumericButtonBehavior,
 					contents: [
-						Content($, { width:UNIT, height:UNIT, skin:theme.skins.numericMore }),
+						Content($, { width:UNIT, height:UNIT, skin:REDTheme.skins.numericMore }),
 					],
 				}),
 			],
@@ -421,13 +536,13 @@ class REDSliderBehavior extends Behavior {
 let REDSlider = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
-		$.label ? Label($, { height:UNIT, style:theme.styles.textNameLeft, string:$.label }) : null,
+		$.label ? Label($, { height:UNIT, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
 		Container($, {
 			left:0, right:0, height:UNIT, active:true, Behavior: REDSliderBehavior,
 			contents: [
-				Content($, { left:0, right:0, top:0, bottom:0, skin:theme.skins.sliderBar }),
-				Content($, { left:0, width:0, top:0, bottom:0, skin:theme.skins.sliderBar, state:1 }),
-				Content($, { left:0, width:UNIT, top:0, bottom:0, skin:theme.skins.sliderThumb  }),
+				Content($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.sliderBar }),
+				Content($, { left:0, width:0, top:0, bottom:0, skin:REDTheme.skins.sliderBar, state:1 }),
+				Content($, { left:0, width:UNIT, top:0, bottom:0, skin:REDTheme.skins.sliderThumb  }),
 			],
 		}),
 	],
@@ -449,8 +564,7 @@ class REDSwitchBehavior extends Behavior {
 		else
 			offset = Math.round(offset);
 		this.offset = offset;
-		bar.state = container.active ? 1 + (this.offset / this.size) : 0;
-		button.state = container.active ? 1 : 0;
+		bar.state = button.state = container.active ? 1 + (this.offset / this.size) : 0;
 		button.x = bar.x + this.offset + 1;
 	}
 	onCreate(container, data) {
@@ -522,12 +636,12 @@ class REDSwitchBehavior extends Behavior {
 let REDSwitch = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.textNameLeft, string:$.label }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
 		Container($, {
 			width:60, height:UNIT, active:true, Behavior:REDSwitchBehavior,
 			contents: [
-				Content($, { left:0, right:0, top:0, bottom:0, skin:theme.skins.switchBar }),
-				Content($, { left:0, width:UNIT, top:0, bottom:0, skin:theme.skins.sliderThumb  }),
+				Content($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.switchBar }),
+				Content($, { left:0, width:UNIT, top:0, bottom:0, skin:REDTheme.skins.switchThumb  }),
 			],
 		}),
 	],
@@ -553,8 +667,8 @@ let REDTextRowLeft = Container.template($ => ({
 		Row($, { 
 			left:0, top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:theme.styles.textNameLeft, string:$.label }),
-				Label($, { top:0, bottom:0, style:theme.styles.textValueLeft, string:"" }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueLeft, string:"" }),
 			],
 		}),
 	],
@@ -567,8 +681,8 @@ let REDTextRowCenter = Container.template($ => ({
 		Row($, { 
 			top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:theme.styles.textName, string:$.label }),
-				Label($, { top:0, bottom:0, style:theme.styles.textValue, string:"" }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textName, string:$.label }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
 	],
@@ -581,8 +695,8 @@ let REDTextRowRight = Container.template($ => ({
 		Row($, { 
 			right:0, top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:theme.styles.textNameRight, string:$.label }),
-				Label($, { top:0, bottom:0, style:theme.styles.textValueRight, string:"" }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textNameRight, string:$.label }),
+				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
 	],
@@ -595,8 +709,8 @@ let REDTextRowSpread = Container.template($ => ({
 		Row($, { 
 			left:0, right:0, top:0, bottom:0,
 			contents: [
-				Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.textNameLeft, string:$.label }),
-				Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.textValueRight, string:"" }),
+				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
+				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
 	],
@@ -609,15 +723,15 @@ let REDTextColumnCenter = Container.template($ => ({
 		Column($, { 
 			left:0, right:0,
 			contents: [
-				Label($, { left:0, right:0, style:theme.styles.textName, string:$.label }),
-				Label($, { left:0, right:0, style:theme.styles.textValue, string:"" }),
+				Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }),
+				Label($, { left:0, right:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
 	],
 }));
 
 let REDGroupTitle = Row.template($ => ({
-	left:0, right:0, top:0, height:UNIT, skin:theme.skins.groupTitle,
+	left:0, right:0, top:0, height:UNIT,
 	Behavior: class extends ButtonBehavior {
 		changeState(container, state) {
 			super.changeState(container, state);
@@ -644,8 +758,8 @@ let REDGroupTitle = Row.template($ => ({
 		}
 	},
 	contents: [
-		Content($, { width:($.collapse) ? UNIT : 0, top:0, bottom:0, skin:theme.skins.groupIcon, variant:2  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.groupTitle, string:$.name }),
+		Content($, { width:($.collapse) ? UNIT : 0, top:0, bottom:0, skin:REDTheme.skins.groupIcon, variant:2  }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.group, string:$.name }),
 	],
 }));
 
@@ -653,7 +767,7 @@ let REDGroupScroller = Scroller.template($ => ({
 	left:0, right:0, height:$.height, active:true, backgroundTouch:true, Behavior:HorizontalScrollerBehavior, clip:true,
 	contents: [
 		Container($, {
-			left:0, width:$.width, top:0, bottom:0, skin:theme.skins.group,
+			left:0, width:$.width, top:0, bottom:0, skin:REDTheme.skins.group,
 			contents: [
 				$.disp ? new REDGroupTitle($) : null,
 				$.controls.map($$ => new $$.Template($$)),
@@ -676,7 +790,7 @@ let REDTabScroller = Scroller.template($ => ({
 
 
 let REDTabTitle = Row.template($ => ({
-	left:0, right:0, top:0, height:UNIT, skin:theme.skins.tabTitle,
+	left:0, right:0, top:0, height:UNIT, skin:REDTheme.skins.title,
 	Behavior: class extends ButtonBehavior {
 		onCreate(container, $) {
 			this.data = $;
@@ -714,13 +828,13 @@ let REDTabTitle = Row.template($ => ({
 		}
 	},
 	contents: [
-		Content($, { width:($.tabs.length > 1) ? UNIT : 0, top:0, bottom:0, skin:theme.skins.tabMenuIcon  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.tabTitle }),
+		Content($, { width:($.tabs.length > 1) ? UNIT : 0, top:0, bottom:0, skin:REDTheme.skins.titleIcon  }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title }),
 	],
 }));
 
 let REDTabMenu = Layout.template($ => ({
-	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:theme.skins.tabMenuBackground,
+	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
 	Behavior: class extends PopupMenuBehavior {	
 		onFitVertically(layout, value) {
 			let data = this.data;
@@ -737,7 +851,7 @@ let REDTabMenu = Layout.template($ => ({
 	},
 	contents: [
 		Container($, { contents:[
-			Scroller($, { clip:true, active:true, skin:theme.skins.tabMenu, contents:[
+			Scroller($, { clip:true, active:true, skin:REDTheme.skins.titleMenu, contents:[
 				Column($, { left:0, right:0, top:0, 
 					contents: $.items.map($$ => new REDTabMenuItem($$)),
 				}),
@@ -747,16 +861,16 @@ let REDTabMenu = Layout.template($ => ({
 }));
 
 let REDTabMenuItem = Row.template($ => ({
-	left:0, right:0, height:UNIT, skin:theme.skins.tabMenuItem, active:true,
+	left:0, right:0, height:UNIT, skin:REDTheme.skins.titleMenuItem, active:true,
 	Behavior: PopupMenuItemBehavior,
 	contents: [
-		Content($, { width:UNIT, top:0, bottom:0, skin:theme.skins.tabMenuItemIcon, visible:false  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:theme.styles.tabMenuItem, string:$.title }),
+		Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleMenuItemIcon, visible:false  }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.titleMenuItem, string:$.title }),
 	],
 }));
 
 let REDApplication = Application.template($ => ({
-	skin:theme.skins.tab,
+	skin:REDTheme.skins.tab,
 	Behavior: class extends Behavior {
 		onCreate(application, $) {
 		}
@@ -774,10 +888,13 @@ let REDApplication = Application.template($ => ({
 }));
 
 export {
+	buildTheme,
 	REDApplication,
 	REDButton,
 	REDDropDown,
 	REDGauge,
+	REDGaugeCompass,
+	REDGaugeDonut,
 	REDNumeric,
 	REDSlider,
 	REDSpacer,

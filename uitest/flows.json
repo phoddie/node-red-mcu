@@ -31,7 +31,7 @@
         "type": "ui_tab",
         "name": "Controls",
         "icon": "dashboard",
-        "order": 3,
+        "order": 1,
         "disabled": false,
         "hidden": false
     },
@@ -39,7 +39,7 @@
         "id": "48a0040e60e54d16",
         "type": "ui_base",
         "theme": {
-            "name": "theme-dark",
+            "name": "theme-light",
             "lightTheme": {
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
@@ -63,44 +63,44 @@
             },
             "themeState": {
                 "base-color": {
-                    "default": "#097479",
-                    "value": "#097479",
+                    "default": "#0094CE",
+                    "value": "#0094CE",
                     "edited": true
                 },
                 "page-titlebar-backgroundColor": {
-                    "value": "#097479",
+                    "value": "#0094CE",
                     "edited": true
                 },
                 "page-backgroundColor": {
-                    "value": "#111111",
+                    "value": "#fafafa",
                     "edited": true
                 },
                 "page-sidebar-backgroundColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "group-textColor": {
-                    "value": "#0eb8c0",
+                    "value": "#1bbfff",
                     "edited": true
                 },
                 "group-borderColor": {
-                    "value": "#555555",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "group-backgroundColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "widget-textColor": {
-                    "value": "#eeeeee",
+                    "value": "#111111",
                     "edited": true
                 },
                 "widget-backgroundColor": {
-                    "value": "#097479",
+                    "value": "#0094ce",
                     "edited": true
                 },
                 "widget-borderColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "base-font": {
@@ -139,7 +139,7 @@
         "type": "ui_tab",
         "name": "Layouts",
         "icon": "dashboard",
-        "order": 2,
+        "order": 3,
         "disabled": false,
         "hidden": false
     },
@@ -148,7 +148,7 @@
         "type": "ui_group",
         "name": "Donut",
         "tab": "306de0316587af0a",
-        "order": 3,
+        "order": 2,
         "disp": true,
         "width": "6",
         "collapse": true,
@@ -180,7 +180,7 @@
         "type": "ui_tab",
         "name": "Gauges",
         "icon": "dashboard",
-        "order": 1,
+        "order": 2,
         "disabled": false,
         "hidden": false
     },
@@ -189,7 +189,7 @@
         "type": "ui_group",
         "name": "Gauge",
         "tab": "306de0316587af0a",
-        "order": 2,
+        "order": 1,
         "disp": true,
         "width": "6",
         "collapse": true,
@@ -252,7 +252,7 @@
         "type": "ui_group",
         "name": "Compass",
         "tab": "306de0316587af0a",
-        "order": 1,
+        "order": 3,
         "disp": true,
         "width": "6",
         "collapse": true,
@@ -311,11 +311,11 @@
         "order": 1,
         "width": "2",
         "height": "1",
-        "passthru": false,
+        "passthru": true,
         "label": "left",
         "tooltip": "",
         "color": "",
-        "bgcolor": "",
+        "bgcolor": "red",
         "className": "",
         "icon": "",
         "payload": "LEFT",
@@ -343,7 +343,7 @@
         "label": "right",
         "tooltip": "",
         "color": "",
-        "bgcolor": "",
+        "bgcolor": "blue",
         "className": "",
         "icon": "",
         "payload": "RIGHT",
@@ -354,7 +354,8 @@
         "y": 620,
         "wires": [
             [
-                "d84dc02b185e4d4f"
+                "d84dc02b185e4d4f",
+                "b64d7331af94f704"
             ]
         ]
     },
@@ -367,11 +368,11 @@
         "order": 4,
         "width": "2",
         "height": "1",
-        "passthru": false,
+        "passthru": true,
         "label": "center",
         "tooltip": "",
-        "color": "",
-        "bgcolor": "",
+        "color": "green",
+        "bgcolor": "#CCCCCC",
         "className": "",
         "icon": "",
         "payload": "CENTER",
@@ -382,6 +383,7 @@
         "y": 580,
         "wires": [
             [
+                "32fdf6d1acc39c2d",
                 "d84dc02b185e4d4f"
             ]
         ]
@@ -540,7 +542,7 @@
         "order": 3,
         "width": 0,
         "height": 0,
-        "wrap": false,
+        "wrap": true,
         "passthru": true,
         "topic": "topic",
         "topicType": "msg",
@@ -683,12 +685,12 @@
         "width": 0,
         "height": 0,
         "passthru": true,
-        "outs": "all",
+        "outs": "end",
         "topic": "topic",
         "topicType": "msg",
         "min": 0,
-        "max": 10,
-        "step": 1,
+        "max": "1000",
+        "step": "100",
         "className": "",
         "x": 170,
         "y": 760,
@@ -763,10 +765,10 @@
         "name": "",
         "group": "81d8722f9f3c6658",
         "order": 1,
-        "width": "6",
-        "height": "3",
+        "width": "0",
+        "height": "0",
         "gtype": "donut",
-        "title": "segments",
+        "title": "sectors",
         "label": "units",
         "format": "{{value}}",
         "min": 0,
@@ -821,7 +823,7 @@
         "height": "3",
         "gtype": "compass",
         "title": "",
-        "label": "units",
+        "label": "",
         "format": "{{value}}",
         "min": 0,
         "max": 10,

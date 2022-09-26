@@ -128,13 +128,20 @@ class UIButtonNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
+	onMessage(msg) {
+		if (this.passthru && (this.msg._msgid != msg._msgid))
+			this.send(this.msg);
+	}
 	onStart(config) {
 		super.onStart(config);
+		this.bgcolor = config.bgcolor;
+		this.color = config.color;
 		this.label = config.label;
 		this.msg = {
 			payload: config.payload,
 			topic: config.topic,
 		}
+		this.passthru = config.passthru;
 		this.Template = REDButton;
 	}
 	onTap() {
@@ -169,9 +176,6 @@ class UIDropDownNode extends UIControlNode {
 		
 		this.msg = { topic: config.topic }
 	}
-	onSelect(index) {
-		this.send(this.options[index].msg);
-	}
 }
 registerConstructor("ui_dropdown", UIDropDownNode);
 
@@ -192,6 +196,7 @@ class UIGaugeNode extends UIControlNode {
 	onStart(config) {
 		super.onStart(config);
 		this.colors = config.colors;
+		this.label = config.label;
 		const min = this.min = config.min;
 		const max = this.max = config.max;
 		let seg1 = config.seg1;
@@ -230,7 +235,7 @@ class UINumericNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
-	onChanged(tracking) {
+	onChanged() {
 		this.msg.payload = this.value;
 		this.send(this.msg);
 	}
@@ -289,6 +294,7 @@ class UISliderNode extends UIControlNode {
 	}
 	onStart(config) {
 		super.onStart(config);
+		this.continuous = config.outs == "all";
 		this.label = config.label;
 		this.min = config.min;
 		this.max = config.max;

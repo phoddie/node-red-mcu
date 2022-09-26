@@ -1,6 +1,7 @@
 import {} from "piu/MC";
 import {} from "piu/shape";
 import {Outline} from "commodetto/outline";
+
 import { HorizontalScrollerBehavior, VerticalScrollerBehavior } from "ScrollerBehaviors";
 
 const textures = {
@@ -159,7 +160,30 @@ class PopupMenuItemBehavior extends ButtonBehavior {
 	}
 }
 
-class REDButtonBehavior extends ButtonBehavior {
+class REDBehavior extends Behavior {
+	onCreate(container, data) {
+		this.data = data;
+		data.container = container;
+	}
+	onDisplaying(container) {
+		this.onUpdate(container);
+	}
+	onUndisplaying(container) {
+		this.data.container = null;
+	}
+	onUpdate(container) {
+	}
+}
+
+class REDButtonBehavior extends REDBehavior {
+	changeState(container, state) {
+		container.state = state;
+		var content = container.first;
+		while (content) {
+			content.state = state;
+			content = content.next;
+		}
+	}
 	onCreate(container, data) {
 		super.onCreate(container, data);
 		let { bgcolor, color } = data;
@@ -172,11 +196,24 @@ class REDButtonBehavior extends ButtonBehavior {
 			container.skin = new Skin({ texture:textures.button, color:[REDTheme.colors.transparent,bgcolor,bgcolor,blendColors(0.25,bgcolor,color)], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
 		}
 	}
+	onDisplaying(container) {
+		super.onDisplaying(container);
+		this.changeState(container, container.active ? 1 : 0);
+	}
 	onTap(container) {
 		this.data.onTap();
 	}
+	onTouchBegan(container, id, x, y, ticks) {
+		this.changeState(container, 3);
+	}
+	onTouchCancelled(container, id, x, y, ticks) {
+		this.changeState(container, 1);
+	}
+	onTouchEnded(container, id, x, y, ticks) {
+		this.changeState(container, 1);
+		this.onTap(container);
+	}
 }
-
 let REDButton = Container.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, skin:REDTheme.skins.button, clip:true, active:true, Behavior: REDButtonBehavior,
 	contents: [
@@ -184,10 +221,9 @@ let REDButton = Container.template($ => ({
 	],
 }));
 
-class REDDropDownBehavior extends ButtonBehavior {
+class REDDropDownBehavior extends REDButtonBehavior {
 	onCreate(container, data) {
 		super.onCreate(container, data);
-		data.container = container;
 		let style = REDTheme.styles.dropDownMenuItem;
 		let size = style.measure(data.placeHolder);
 		let width = size.width;
@@ -199,10 +235,6 @@ class REDDropDownBehavior extends ButtonBehavior {
 		width = (Math.floor(width / UNIT) + 1) * UNIT;
 		width += UNIT;
 		container.coordinates = {left:0, width, top:0, bottom:0};
-	}
-	onDisplaying(container) {
-		super.onDisplaying(container);
-		this.onUpdate(container);
 	}
 	onMenuSelected(container, index) {
 		if ((index >= 0) && (this.selection != index)) {
@@ -227,7 +259,6 @@ class REDDropDownBehavior extends ButtonBehavior {
 		container.first.string = (selection < 0) ? data.placeHolder : data.options[selection].label;
 	}
 }
-
 let REDDropDown = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
@@ -241,7 +272,6 @@ let REDDropDown = Row.template($ => ({
 		})
 	],
 }));
-
 let REDDropDownMenu = Layout.template($ => ({
 	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
 	Behavior: class extends PopupMenuBehavior {	
@@ -287,7 +317,6 @@ let REDDropDownMenu = Layout.template($ => ({
 		}),
 	],
 }));
-
 let REDDropDownMenuItem = Row.template($ => ({
 	left:0, right:0, height:UNIT, skin:REDTheme.skins.dropDownMenuItem, active:true,
 	Behavior: PopupMenuItemBehavior,
@@ -297,16 +326,11 @@ let REDDropDownMenuItem = Row.template($ => ({
 	],
 }));
 
-class REDGaugeBehavior extends Behavior {
+class REDGaugeBehavior extends REDBehavior {
 	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-		
+		super.onCreate(container, data);
 		const shape = container.first;
 		shape.skin = new Skin({fill:REDTheme.colors.gauge, stroke:data.colors});
-	}
-	onDisplaying(container) {
-		this.onUpdate(container);
 	}
 	onUpdate(container) {
 		const data = this.data;
@@ -335,13 +359,12 @@ class REDGaugeBehavior extends Behavior {
 		label.string = value;
 	}
 };
-
 let REDGauge = Container.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
 		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
 		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeBehavior,
+			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeBehavior,
 			contents: [
 				Shape($, { left:0, right:0, top:0, bottom:0 } ),
 				Column($, {
@@ -356,14 +379,7 @@ let REDGauge = Container.template($ => ({
 	],
 }));
 
-class REDGaugeCompassBehavior extends Behavior {
-	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-	}
-	onDisplaying(container) {
-		this.onUpdate(container);
-	}
+class REDGaugeCompassBehavior extends REDBehavior {
 	onUpdate(container) {
 		const data = this.data;
 		const { min, max, value, seg1, seg2, title } = data;
@@ -400,7 +416,7 @@ let REDGaugeCompass = Column.template($ => ({
 	contents: [
 		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
 		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeCompassBehavior,
+			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeCompassBehavior,
 			contents: [
 				Shape($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.compass }),
 				Column($, {
@@ -448,7 +464,7 @@ let REDGaugeDonut = Column.template($ => ({
 	contents: [
 		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
 		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior: REDGaugeDonutBehavior,
+			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeDonutBehavior,
 			contents: [
 				Shape($, { left:0, right:0, top:0, bottom:0 } ),
 				Column($, {
@@ -463,14 +479,7 @@ let REDGaugeDonut = Column.template($ => ({
 	],
 }));
 
-class REDNumericBehavior extends Behavior {
-	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-	}
-	onDisplaying(container) {
-		this.onUpdate(container);
-	}
+class REDNumericBehavior extends REDBehavior {
 	onTrack(container, direction) {
 		const data = this.data;
 		const { min, max, step, wrap } = data;
@@ -491,7 +500,6 @@ class REDNumericBehavior extends Behavior {
 		container.first.next.string = this.data.value;
 	}
 };
-
 class REDNumericButtonBehavior extends ButtonBehavior {
 	onFinished(container) {
 		let count = this.count;
@@ -522,23 +530,22 @@ class REDNumericButtonBehavior extends ButtonBehavior {
 		container.bubble("onTrack", this.data);
 	}
 };
-
 let REDNumeric = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
 		Row($, {
-			width:3*UNIT, height:UNIT, Behavior: REDNumericBehavior,
+			width:3*UNIT, height:UNIT, Behavior:REDNumericBehavior,
 			contents: [
 				Container(-1, {
-					width:UNIT, height:UNIT, skin:REDTheme.skins.numericLeft, active:true, Behavior: REDNumericButtonBehavior,
+					width:UNIT, height:UNIT, skin:REDTheme.skins.numericLeft, active:true, Behavior:REDNumericButtonBehavior,
 					contents: [
 						Content($, { width:UNIT, height:UNIT, skin:REDTheme.skins.numericLess }),
 					],
 				}),
 				Label($, { width:UNIT, height:UNIT, style:REDTheme.styles.textValue, state:1 }),
 				Container(1, {
-					width:UNIT, height:UNIT, skin:REDTheme.skins.numericRight, active:true, Behavior: REDNumericButtonBehavior,
+					width:UNIT, height:UNIT, skin:REDTheme.skins.numericRight, active:true, Behavior:REDNumericButtonBehavior,
 					contents: [
 						Content($, { width:UNIT, height:UNIT, skin:REDTheme.skins.numericMore }),
 					],
@@ -548,14 +555,7 @@ let REDNumeric = Row.template($ => ({
 	],
 }));
 
-class REDSliderBehavior extends Behavior {
-	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-	}
-	onDisplaying(container) {
-		this.onUpdate(container);
-	}
+class REDSliderBehavior extends REDBehavior {
 	onTouchBegan(container, id, x, y, ticks) {
 		container.captureTouch(id, x, y, ticks);
 		this.onTouchMoved(container, id, x, y, ticks);
@@ -596,13 +596,12 @@ class REDSliderBehavior extends Behavior {
 		button.x = x + offset;
 	}
 };
-
 let REDSlider = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
 		$.label ? Label($, { height:UNIT, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
 		Container($, {
-			left:0, right:0, height:UNIT, active:true, Behavior: REDSliderBehavior,
+			left:0, right:0, height:UNIT, active:true, Behavior:REDSliderBehavior,
 			contents: [
 				Content($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.sliderBar }),
 				Content($, { left:0, width:0, top:0, bottom:0, skin:REDTheme.skins.sliderBar, state:1 }),
@@ -616,8 +615,7 @@ let REDSpacer = Content.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height
 }));
 
-
-class REDSwitchBehavior extends Behavior {
+class REDSwitchBehavior extends REDBehavior {
 	changeOffset(container, offset) {
 		var bar = container.first;
 		var button = bar.next;
@@ -631,15 +629,11 @@ class REDSwitchBehavior extends Behavior {
 		bar.state = button.state = container.active ? 1 + (this.offset / this.size) : 0;
 		button.x = bar.x + this.offset + 1;
 	}
-	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-	}
 	onDisplaying(container) {
 		var bar = container.first;
 		var button = bar.next;
 		this.size = bar.width - button.width;
-		this.onUpdate(container);
+		super.onDisplaying(container);
 	}
 	onTimeChanged(container) {
 		this.changeOffset(container, this.anchor + Math.round(this.delta * container.fraction));
@@ -696,7 +690,6 @@ class REDSwitchBehavior extends Behavior {
 		this.changeOffset(container, this.data.selection ? this.size : 0);
 	}
 };
-
 let REDSwitch = Row.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
@@ -711,22 +704,13 @@ let REDSwitch = Row.template($ => ({
 	],
 }));
 
-class REDTextBehavior extends Behavior {
-	onCreate(container, data) {
-		this.data = data;
-		data.container = container;
-	}
-	onDisplaying(container) {
-		this.onUpdate(container);
-	}
+class REDTextBehavior extends REDBehavior {
 	onUpdate(container) {
 		container.first.last.string = this.data.value;
 	}
 }
-
 let REDTextRowLeft = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	Behavior: REDTextBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDTextBehavior,
 	contents: [
 		Row($, { 
 			left:0, top:0, bottom:0,
@@ -737,10 +721,8 @@ let REDTextRowLeft = Container.template($ => ({
 		}),
 	],
 }));
-
 let REDTextRowCenter = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	Behavior: REDTextBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDTextBehavior,
 	contents: [
 		Row($, { 
 			top:0, bottom:0,
@@ -751,10 +733,8 @@ let REDTextRowCenter = Container.template($ => ({
 		}),
 	],
 }));
-
 let REDTextRowRight = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	Behavior: REDTextBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDTextBehavior,
 	contents: [
 		Row($, { 
 			right:0, top:0, bottom:0,
@@ -765,10 +745,8 @@ let REDTextRowRight = Container.template($ => ({
 		}),
 	],
 }));
-
 let REDTextRowSpread = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	Behavior: REDTextBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDTextBehavior,
 	contents: [
 		Row($, { 
 			left:0, right:0, top:0, bottom:0,
@@ -779,10 +757,8 @@ let REDTextRowSpread = Container.template($ => ({
 		}),
 	],
 }));
-
 let REDTextColumnCenter = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	Behavior: REDTextBehavior,
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDTextBehavior,
 	contents: [
 		Column($, { 
 			left:0, right:0,
@@ -826,7 +802,6 @@ let REDGroupTitle = Row.template($ => ({
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.group, string:$.name }),
 	],
 }));
-
 let REDGroupScroller = Scroller.template($ => ({
 	left:0, right:0, height:$.height, active:true, backgroundTouch:true, Behavior:HorizontalScrollerBehavior, clip:true,
 	contents: [
@@ -839,19 +814,6 @@ let REDGroupScroller = Scroller.template($ => ({
 		}),
 	]
 }));
-
-let REDTabScroller = Scroller.template($ => ({
-	left:0, right:0, top:0, bottom:0, clip:true, active:true, backgroundTouch:true, Behavior:VerticalScrollerBehavior,
-	contents: [
-		Column($, {
-			left:0, right:0, top:0,
-			contents: [
-				$.groups.map($$ => new REDGroupScroller($$))
-			],
-		}),
-	]
-}));
-
 
 let REDTabTitle = Row.template($ => ({
 	left:0, right:0, top:0, height:UNIT, skin:REDTheme.skins.title,
@@ -878,8 +840,8 @@ let REDTabTitle = Row.template($ => ({
 				data.selection = selection;
 				
 				container.first.next.string = tab.name;
-				container = container.next;
-				container.replace(container.first, new REDTabScroller(tab));
+				
+				application.behavior.goTo(tab);
 			}
 		}
 		onTap(container) {
@@ -895,7 +857,6 @@ let REDTabTitle = Row.template($ => ({
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title }),
 	],
 }));
-
 let REDTabMenu = Layout.template($ => ({
 	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
 	Behavior: class extends PopupMenuBehavior {	
@@ -922,7 +883,6 @@ let REDTabMenu = Layout.template($ => ({
 		]}),
 	],
 }));
-
 let REDTabMenuItem = Row.template($ => ({
 	left:0, right:0, height:UNIT, skin:REDTheme.skins.titleMenuItem, active:true,
 	Behavior: PopupMenuItemBehavior,
@@ -932,13 +892,38 @@ let REDTabMenuItem = Row.template($ => ({
 	],
 }));
 
-let REDApplication = Application.template($ => ({
-	skin:REDTheme.skins.tab,
-	Behavior: class extends Behavior {
-		onCreate(application, $) {
+let REDTabScroller = Scroller.template($ => ({
+	left:0, right:0, top:0, bottom:0, clip:true, active:true, backgroundTouch:true, Behavior:VerticalScrollerBehavior,
+	contents: [
+		Column($, {
+			left:0, right:0, top:0,
+			contents: [
+				$.groups.map($$ => new REDGroupScroller($$))
+			],
+		}),
+	]
+}));
+
+class REDApplicationBehavior extends Behavior {
+	display(application, tab) {
+		const container = application.last;
+		container.distribute("onUndisplaying");
+		container.replace(container.first, new REDTabScroller(tab));
+		this.currentTab = tab;
+		application.purge();
+	}
+	goTo(tab) {
+		if (this.currentTab != tab) {
+			application.defer("display", tab);
 		}
-	},
-	
+	}
+	onCreate(application, $) {
+		this.model = $;
+		this.currentTab = $.tabs[0];
+	}
+}
+let REDApplication = Application.template($ => ({
+	skin:REDTheme.skins.tab, Behavior: REDApplicationBehavior,
 	contents: [
 		new REDTabTitle($),
 		Container($, {

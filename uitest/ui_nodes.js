@@ -33,51 +33,6 @@ function insert(items, item) {
 	items.push(item);
 }
 
-function position(group, control) {
-	const lines = group.lines;
-	function isEmpty(x, y) {
-		if (y >= lines.length)
-			return true;
-		const line = lines[y];
-		if (x >= line.length)
-			return false;
-		return line[x] ? false : true;
-	}
-	const groupWidth = group.width;
-	const groupHeight = lines.length;
-	const width = control.width;
-	const height = control.height;
-	let x, y, left, top, right, bottom;
-	let done = false;
-	for (y = 0; y <= groupHeight; y++) {
-		for (x = 0; x < groupWidth; x++) {
-			if (isEmpty(x, y)) {
-				done = true;
-				bottom = y + height;
-				right = x + width;
-				for (top = y; top < bottom; top++) {
-					for (left = x; left < right; left++) {
-						if (!isEmpty(left, top)) {
-							done = false;
-							break;
-						}
-					}
-				}
-			}
-			if (done)
-				break;
-		}
-		if (done)
-			break;
-	}
-	control.left = x;
-	control.top = y;
-	for (top = groupHeight; top < bottom; top++)
-		lines.push(new Uint8Array(groupWidth));
-	for (top = y; top < bottom; top++)
-		lines[top].fill(1, x, right);
-}
-
 function registerConstructor(type, constructor) {
 	constructor.type = type;
 	RED.nodes.registerType(type, constructor);
@@ -89,7 +44,6 @@ class UINode extends Node {
 	}
 	onStart(config) {
 		super.onStart(config);
-		this.type = config.type;
 		this.order = parseInt(config.order);
 	}
 }
@@ -116,11 +70,55 @@ class UIControlNode extends UINode {
 		this.width = parseInt(config.width);
 		this.height = parseInt(config.height);
 	}
-	measure(groupNode) {
+	measure(group) {
 		if (this.width == 0)
-			this.width = groupNode.width;
+			this.width = group.width;
 		if (this.height == 0)
 			this.height = 1;
+	}
+	position(group) {
+		const lines = group.lines;
+		function isEmpty(x, y) {
+			if (y >= lines.length)
+				return true;
+			const line = lines[y];
+			if (x >= line.length)
+				return false;
+			return line[x] ? false : true;
+		}
+		const groupWidth = group.width;
+		const groupHeight = lines.length;
+		const width = this.width;
+		const height = this.height;
+		let x, y, left, top, right, bottom;
+		let done = false;
+		for (y = 0; y <= groupHeight; y++) {
+			for (x = 0; x < groupWidth; x++) {
+				if (isEmpty(x, y)) {
+					done = true;
+					bottom = y + height;
+					right = x + width;
+					for (top = y; top < bottom; top++) {
+						for (left = x; left < right; left++) {
+							if (!isEmpty(left, top)) {
+								done = false;
+								break;
+							}
+						}
+					}
+				}
+				if (done)
+					break;
+			}
+			if (done)
+				break;
+		}
+		this.left = x;
+		this.top = y;
+		for (top = groupHeight; top < bottom; top++)
+			lines.push(new Uint8Array(groupWidth));
+		for (top = y; top < bottom; top++)
+			lines[top].fill(1, x, right);
 	}
 }
 
@@ -154,13 +152,13 @@ class UIDropDownNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
-	onChanged(tracking) {
+	onChanged() {
 		this.msg.payload = this.options[this.selection].value;
 		this.send(this.msg);
 	}
 	onMessage(msg) {
 		this.selection = this.options.findIndex(option => option.value == msg.payload);
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 		if (this.passthru && (this.msg._msgid != msg._msgid))
 			this.send(msg);
 	}
@@ -191,7 +189,7 @@ class UIGaugeNode extends UIControlNode {
 		else if (value > max)
 			value = max;
 		this.value = value;
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 	}
 	onStart(config) {
 		super.onStart(config);
@@ -219,11 +217,11 @@ class UIGaugeNode extends UIControlNode {
 		default: this.Template = REDGauge; break;
 		}
 	}
-	measure(groupNode) {
+	measure(group) {
 		if (this.width == 0)
-			this.width = groupNode.width;
+			this.width = group.width;
 		if (this.height == 0) {
-			this.height = groupNode.width >> 1;
+			this.height = group.width >> 1;
 			if (this.title)
 				this.height++;
 		}
@@ -249,7 +247,7 @@ class UINumericNode extends UIControlNode {
 		else
 			value = Math.round(value / step) * step;
 		this.value = value;
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 		if (this.passthru && (this.msg._msgid != msg._msgid))
 			this.send(msg);
 	}
@@ -274,7 +272,7 @@ class UISliderNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
-	onChanged(tracking) {
+	onChanged() {
 		this.msg.payload = this.value;
 		this.send(this.msg);
 	}
@@ -288,7 +286,7 @@ class UISliderNode extends UIControlNode {
 		else
 			value = Math.round(value / step) * step;
 		this.value = value;
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 		if (this.passthru && (this.msg._msgid != msg._msgid))
 			this.send(msg);
 	}
@@ -324,7 +322,7 @@ class UISwitchNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
-	onChanged(tracking) {
+	onChanged() {
 		this.msg.payload = this.options[this.selection].value;
 		this.send(this.msg);
 	}
@@ -332,7 +330,7 @@ class UISwitchNode extends UIControlNode {
 		this.selection = this.options.findIndex(option => option.value == msg.payload);
 		if (this.selection < 0)
 			this.selection = 0;
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 		if (this.passthru && (this.msg._msgid != msg._msgid))
 			this.send(msg);
 	}
@@ -359,7 +357,7 @@ class UITextNode extends UIControlNode {
 	}
 	onMessage(msg) {
 		this.value = msg.payload;
-		this.container.delegate("onUpdate");
+		this.container?.delegate("onUpdate");
 	}
 	onStart(config) {
 		super.onStart(config);
@@ -405,8 +403,6 @@ class UITabNode extends UINode {
 }
 registerConstructor("ui_tab", UITabNode);
 
-export { UIControlNode, registerConstructor } 
-
 export default function() {
 	model.tabs.forEach(tab => {
 		tab.groups.forEach(group => {
@@ -415,7 +411,7 @@ export default function() {
 				group.lines.push(new Uint8Array(group.width).fill(1));
 			group.controls.forEach(control => {
 				control.measure(group);
-				position(group, control);	
+				control.position(group);	
 			});
 			group.height = group.lines.length;
 			delete group.lines;

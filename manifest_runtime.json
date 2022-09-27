@@ -22,7 +22,8 @@
 		"./nodes/file/manifest.json",
 		"./nodes/template/manifest.json",
 		"./nodes/udp/manifest.json",
-		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json"
+		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json",
+		"./nodes/openweathermap/manifest.json"
 	],
 	"modules": {
 		"*": [

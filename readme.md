@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 24, 2022<br>
+Updated September 26, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -583,6 +583,18 @@ Further optimizations should be possible by having `nodered2mcu` generate a targ
 - [X] Everything
 
 **Note:** The Batch node is based on the full Node-RED implementation with some optimizations. This is possible by using the Compatibility Node.
+
+### openweathermap
+- [X] "Current weather for"
+- [X] "5 day forecast for"
+- [X] Location by Coordinates
+- [X] Location by City / Country
+- [X] Language
+- [ ] "Combined current weather/forecast for" (requires TLS)
+
+The API key is not exported by the Node-RED editor. Currently it must be entered manually in the source code of the weather node.
+
+**Note:** The [openweathermap node](https://flows.nodered.org/node/node-red-node-openweathermap) is the full Node-RED implementation with modifications to use `fetch` and to reduce its RAM footprint. This is possible by using the Compatibility Node.
 
 ### Compatibility Node
 The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.

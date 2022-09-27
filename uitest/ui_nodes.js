@@ -19,6 +19,7 @@ import {
 }  from "./ui_templates";
 
 const model = {
+	selection: 0,
 	tabs:[],
 };
 
@@ -54,6 +55,7 @@ class UIBaseNode extends Node {
 	}
 	onStart(config) {
 		super.onStart(config);
+		model.showTitleBar = config.site.hideToolbar == "false";
 		buildTheme(config.theme);
 	}
 }
@@ -404,7 +406,10 @@ class UITabNode extends UINode {
 registerConstructor("ui_tab", UITabNode);
 
 export default function() {
+	model.enableTitleBar = model.tabs.length > 1;
 	model.tabs.forEach(tab => {
+		tab.enableTitleBar = model.enableTitleBar;
+		tab.showTitleBar = model.showTitleBar;
 		tab.groups.forEach(group => {
 			group.lines = [];
 			if (group.disp)

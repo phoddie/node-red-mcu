@@ -815,80 +815,29 @@ let REDGroupScroller = Scroller.template($ => ({
 	]
 }));
 
+let REDTab = Container.template($ => ({
+	left:0, right:0, top:0, bottom:0,
+	contents: [
+		$.showTitleBar ? new REDTabTitle($) : null,
+		Container($, {
+			left:0, right:0, top:$.showTitleBar ? UNIT : 0, bottom:0, skin:REDTheme.skins.tab,
+			contents: [
+				new REDTabScroller($)
+			],
+		}),
+	]
+}));
+
 let REDTabTitle = Row.template($ => ({
-	left:0, right:0, top:0, height:UNIT, skin:REDTheme.skins.title,
+	left:0, right:0, top:0, height:UNIT, skin:REDTheme.skins.title, active:$.enableTitleBar,
 	Behavior: class extends ButtonBehavior {
-		onCreate(container, $) {
-			this.data = $;
-			if ($.tabs.length > 1)
-				container.active = true;
-		}
-		onDisplaying(container) {
-			super.onDisplaying(container);
-			let data = this.data;
-			data.button = container;
-			data.selection = 0;
-			let current = data.tabs[data.selection];
-			container.first.next.string = current.name;
-		}
-		onMenuSelected(container, index) {
-			if (index > 0) {
-				let data = this.data;
-				let selection = data.items[index].value;
-				let tabs = data.tabs;
-				let tab = tabs[selection];
-				data.selection = selection;
-				
-				container.first.next.string = tab.name;
-				
-				application.behavior.goTo(tab);
-			}
-		}
 		onTap(container) {
-			let data = this.data;
-			data.items = data.tabs.map((tab, index) => ({ title: tab.name, value:index }));
-			const deletions = data.items.splice(data.selection, 1);
-			data.items = deletions.concat(data.items);
-			application.add(new REDTabMenu(data));
+			container.bubble("onSelectTab");
 		}
 	},
 	contents: [
-		Content($, { width:($.tabs.length > 1) ? UNIT : 0, top:0, bottom:0, skin:REDTheme.skins.titleIcon  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title }),
-	],
-}));
-let REDTabMenu = Layout.template($ => ({
-	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
-	Behavior: class extends PopupMenuBehavior {	
-		onFitVertically(layout, value) {
-			let data = this.data;
-			let button = data.button;
-			let container = layout.first;
-			let scroller = container.first;
-			let size = scroller.first.measure();
-			let height = Math.min(size.height, application.height);
-			container.coordinates = { left:0, right:0, top:0, height:height }
-			scroller.coordinates = { left:0, right:0, top:0, height:height }
-			scroller.first.first.first.visible = true;
-			return value;
-		}
-	},
-	contents: [
-		Container($, { contents:[
-			Scroller($, { clip:true, active:true, skin:REDTheme.skins.titleMenu, contents:[
-				Column($, { left:0, right:0, top:0, 
-					contents: $.items.map($$ => new REDTabMenuItem($$)),
-				}),
-			]}),
-		]}),
-	],
-}));
-let REDTabMenuItem = Row.template($ => ({
-	left:0, right:0, height:UNIT, skin:REDTheme.skins.titleMenuItem, active:true,
-	Behavior: PopupMenuItemBehavior,
-	contents: [
-		Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleMenuItemIcon, visible:false  }),
-		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.titleMenuItem, string:$.title }),
+		$.enableTitleBar ? Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleIcon }) : null,
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title, string:$.name }),
 	],
 }));
 
@@ -904,34 +853,73 @@ let REDTabScroller = Scroller.template($ => ({
 	]
 }));
 
+let REDTabMenu = Layout.template($ => ({
+	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,
+	Behavior: class extends PopupMenuBehavior {	
+		onFitVertically(layout, value) {
+			let data = this.data;
+			let container = layout.first;
+			let scroller = container.first;
+			let column = scroller.first;
+			let row = column.content(data.selection);
+			let size = column.measure();
+			let height = Math.min(size.height, application.height);
+			container.coordinates = { left:0, right:0, top:0, height:height }
+			scroller.coordinates = { left:0, right:0, top:0, height:height }
+			row.first.visible = true;
+			return value;
+		}
+	},
+	contents: [
+		Container($, { contents:[
+			Scroller($, { clip:true, active:true, skin:REDTheme.skins.titleMenu, contents:[
+				Column($, { left:0, right:0, top:0, 
+					contents: $.tabs.map($$ => new REDTabMenuItem($$)),
+				}),
+			]}),
+		]}),
+	],
+}));
+let REDTabMenuItem = Row.template($ => ({
+	left:0, right:0, height:UNIT, skin:REDTheme.skins.titleMenuItem, active:true,
+	Behavior: PopupMenuItemBehavior,
+	contents: [
+		Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleMenuItemIcon, visible:false  }),
+		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.titleMenuItem, string:$.name }),
+	],
+}));
+
 class REDApplicationBehavior extends Behavior {
-	display(application, tab) {
-		const container = application.last;
+	display(application, selection) {
+		const container = application.first;
+		const data = this.data;
 		container.distribute("onUndisplaying");
-		container.replace(container.first, new REDTabScroller(tab));
-		this.currentTab = tab;
+		application.replace(application.first, new REDTab(data.tabs[selection]));
+		data.selection = selection;
 		application.purge();
 	}
 	goTo(tab) {
-		if (this.currentTab != tab) {
-			application.defer("display", tab);
-		}
+		const data = this.data;
+		const selection = data.tabs.indexOf(tab);
+		if (data.selection != selection)
+			application.defer("display", selection);
 	}
 	onCreate(application, $) {
-		this.model = $;
-		this.currentTab = $.tabs[0];
+		this.data = $;
+	}
+	onMenuSelected(application, selection) {
+		if ((selection >= 0) && (this.data.selection != selection))
+			application.defer("display", selection);
+	}
+	onSelectTab(application) {
+		this.data.button = application;
+		application.add(new REDTabMenu(this.data));
 	}
 }
 let REDApplication = Application.template($ => ({
 	skin:REDTheme.skins.tab, Behavior: REDApplicationBehavior,
 	contents: [
-		new REDTabTitle($),
-		Container($, {
-			left:0, right:0, top:UNIT, bottom:0,
-			contents: [
-				new REDTabScroller($.tabs[0])
-			],
-		}),
+		new REDTab($.tabs[$.selection])
 	]
 }));
 

@@ -4,9 +4,6 @@ import {
 	buildTheme,
 	REDButton,
 	REDDropDown,
-	REDGauge,
-	REDGaugeCompass,
-	REDGaugeDonut,
 	REDNumeric,
 	REDSlider,
 	REDSpacer,
@@ -179,58 +176,6 @@ class UIDropDownNode extends UIControlNode {
 	}
 }
 registerConstructor("ui_dropdown", UIDropDownNode);
-
-class UIGaugeNode extends UIControlNode {
-	constructor(id, flow, name) {
-		super(id, flow, name);
-	}
-	onMessage(msg) {
-		const { min, max } = this;
-		let value = Number(msg.payload);
-		if (value < min)
-			value = min;
-		else if (value > max)
-			value = max;
-		this.value = value;
-		this.container?.delegate("onUpdate");
-	}
-	onStart(config) {
-		super.onStart(config);
-		this.colors = config.colors;
-		this.label = config.label;
-		const min = this.min = config.min;
-		const max = this.max = config.max;
-		let seg1 = config.seg1;
-		let seg2 = config.seg2;
-		if ((seg1 != "") && (seg2 != "")) {
-			seg1 =  Math.min(max, Math.max(min, Number(seg1)));
-			seg2 =  Math.min(max, Math.max(min, Number(seg2)));
-			this.seg1 = Math.min(seg1, seg2);
-			this.seg2 = Math.max(seg1, seg2);
-		}
-		else {
-			this.seg1 = undefined;
-			this.seg2 = undefined;
-		}
-		this.title = config.title;
-		this.value = this.min;
-		switch (config.gtype) {
-		case "compass": this.Template = REDGaugeCompass; break;
-		case "donut": this.Template = REDGaugeDonut; break;
-		default: this.Template = REDGauge; break;
-		}
-	}
-	measure(group) {
-		if (this.width == 0)
-			this.width = group.width;
-		if (this.height == 0) {
-			this.height = group.width >> 1;
-			if (this.title)
-				this.height++;
-		}
-	}
-}
-registerConstructor("ui_gauge", UIGaugeNode);
 
 class UINumericNode extends UIControlNode {
 	constructor(id, flow, name) {
@@ -439,3 +384,5 @@ export default function() {
 	});
 	return model;
 }
+
+export { UIControlNode, registerConstructor };

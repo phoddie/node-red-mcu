@@ -1,16 +1,14 @@
 import {} from "piu/MC";
-import {} from "piu/shape";
-import {Outline} from "commodetto/outline";
 
 import { HorizontalScrollerBehavior, VerticalScrollerBehavior } from "ScrollerBehaviors";
 
-const textures = {
+const textures = Object.freeze({
 	button: { path:"button.png" },
 	glyphs: { path:"glyphs.png" },
 	popup: { path:"popup.png" },
 	slider: { path:"slider.png" },
 	switch: { path:"switch.png" },
-};
+}, true);
 const UNIT = 40;
 
 function buildTheme(theme) {
@@ -323,159 +321,6 @@ let REDDropDownMenuItem = Row.template($ => ({
 	contents: [
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.dropDownMenuItem, string:$.label }),
 		Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.dropDownMenuItemIcon, visible:false  }),
-	],
-}));
-
-class REDGaugeBehavior extends REDBehavior {
-	onCreate(container, data) {
-		super.onCreate(container, data);
-		const shape = container.first;
-		shape.skin = new Skin({fill:REDTheme.colors.gauge, stroke:data.colors});
-	}
-	onUpdate(container) {
-		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
-		const fraction = (value - min) / (max - min);
-		const { width, height } = container;
-		const shape = container.first;
-		const label = container.last.first;
-		
-		const x = width >> 1;
-		const y = height;
-		const r = Math.min(x, y);
-		
-		if (shape.fillOutline == null) {
-			const path = new Outline.CanvasPath;
-			path.arc(x, y, r - 20, Math.PI, 0);
-			shape.fillOutline = Outline.stroke(path, 40, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		}
-		const path = new Outline.CanvasPath;
-		path.arc(x, y, r - 20, Math.PI, Math.PI * (1 +  fraction) );
-		shape.strokeOutline = Outline.stroke(path, 40, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		if ((seg1 !== undefined) && (seg2 !== undefined))
-			shape.state = (value <= seg1) ? 0 : (value <= seg2) ? 1 : 2;
-		else
-			shape.state = fraction * 2;
-		label.string = value;
-	}
-};
-let REDGauge = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	contents: [
-		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
-		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeBehavior,
-			contents: [
-				Shape($, { left:0, right:0, top:0, bottom:0 } ),
-				Column($, {
-					left:0, right:0, bottom:0,
-					contents: [
-						Label($, { left:0, right:0, style:REDTheme.styles.textValue }),
-						$.label ? Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }) : null,
-					],
-				}),
-			],
-		}),
-	],
-}));
-
-class REDGaugeCompassBehavior extends REDBehavior {
-	onUpdate(container) {
-		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
-		const fraction = (value - min) / (max - min);
-		const { width, height } = container;
-		const shape = container.first;
-		const label = container.last.first;
-		
-		const x = width >> 1;
-		const y = height >> 1;
-		let r = Math.min(x, y);
-		
-		if (shape.fillOutline == null) {
-			const path = new Outline.CanvasPath;
-			path.arc(x, y, r - 12, 0, 2 * Math.PI);
-			shape.fillOutline = Outline.stroke(path, 6, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		}
-		const path = new Outline.CanvasPath;
-		let angle = (2 * Math.PI * fraction) - (Math.PI / 2);
-		path.moveTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
-		r -= 25;
-		angle -= Math.PI / 12;
-		path.lineTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
-		angle += Math.PI / 6;
-		path.lineTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
-		path.closePath();
-		shape.strokeOutline = Outline.fill(path);
-
-		label.string = value;
-	}
-};
-let REDGaugeCompass = Column.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	contents: [
-		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
-		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeCompassBehavior,
-			contents: [
-				Shape($, { left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.compass }),
-				Column($, {
-					left:0, right:0,
-					contents: [
-						Label($, { left:0, right:0, style:REDTheme.styles.textValue }),
-						$.label ? Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }) : null,
-					],
-				}),
-			],
-		}),
-	],
-}));
-
-class REDGaugeDonutBehavior extends REDGaugeBehavior {
-	onUpdate(container) {
-		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
-		const fraction = (value - min) / (max - min);
-		const { width, height } = container;
-		const shape = container.first;
-		const label = container.last.first;
-		
-		const x = width >> 1;
-		const y = height >> 1;
-		const r = Math.min(x, y);
-		
-		if (shape.fillOutline == null) {
-			const path = new Outline.CanvasPath;
-			path.arc(x, y, r - 10, 0, 2 * Math.PI);
-			shape.fillOutline = Outline.stroke(path, 20, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		}
-		const path = new Outline.CanvasPath;
-		path.arc(x, y, r - 10, 3 * Math.PI / 2, (3 * Math.PI / 2) + (2 * Math.PI * fraction) );
-		shape.strokeOutline = Outline.stroke(path, 20, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		if ((seg1 !== undefined) && (seg2 !== undefined))
-			shape.state = (value <= seg1) ? 0 : (value <= seg2) ? 1 : 2;
-		else
-			shape.state = fraction * 2;
-		label.string = value;
-	}
-};
-let REDGaugeDonut = Column.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
-	contents: [
-		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
-		Container($, {
-			left:0, right:0, top:0, bottom:0, Behavior:REDGaugeDonutBehavior,
-			contents: [
-				Shape($, { left:0, right:0, top:0, bottom:0 } ),
-				Column($, {
-					left:0, right:0,
-					contents: [
-						Label($, { left:0, right:0, style:REDTheme.styles.textValue }),
-						$.label ? Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }) : null,
-					],
-				}),
-			],
-		}),
 	],
 }));
 
@@ -926,11 +771,9 @@ let REDApplication = Application.template($ => ({
 export {
 	buildTheme,
 	REDApplication,
+	REDBehavior,
 	REDButton,
 	REDDropDown,
-	REDGauge,
-	REDGaugeCompass,
-	REDGaugeDonut,
 	REDNumeric,
 	REDSlider,
 	REDSpacer,

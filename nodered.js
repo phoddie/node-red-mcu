@@ -1013,7 +1013,7 @@ class MQTTBrokerNode extends Node {
 		this.#options = {
 			host: config.broker,
 			port: parseInt(config.port),
-			id: config.clientid ? config.clientid : "node-red-" + this.id,	//@@
+			id: config.clientid ? config.clientid : "node-red-" + this.id + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000),		//@@ revisit this
 			keepalive: (parseInt(config.keepalive) || 60) * 1000,
 			clean: true === config.cleansession
 		};
@@ -1026,22 +1026,12 @@ class MQTTBrokerNode extends Node {
 		this.#mqtt = new device.network.mqtt.io({
 			...device.network.mqtt,
 			...this.#options,
-			onControl: msg => {
-				if (MQTTClient.CONNACK === msg.operation) {
-					if (this.#subscriptions.length) {
-						this.#mqtt?.write(null, {
-							operation: MQTTClient.SUBSCRIBE,
-							items: this.#subscriptions.map(item => {return {topic: item.topic, QoS: item.QoS}})
-						});
-					}
-				}
-			},
 			onReadable: (count, options) => {
 				if (options.more)
 					throw new Error("fragmented receive unimplemented!");
 
 				const payload = this.#mqtt.read(count);
-				const msg = {topic: options.topic, QoS: options.QoS};
+				const msg = {topic: options.topic, QoS: Number(options.QoS)};
 				if (options.retain) msg.retain = true;
 
 				const topic = options.topic.split("/");
@@ -1100,7 +1090,7 @@ class MQTTBrokerNode extends Node {
 						items: this.#subscriptions.map(subscription => {
 							return {
 								topic: subscription.topic,
-								QoS: subscription.QoS
+								QoS: Number(subscription.QoS)
 							};
 						})
 					};
@@ -1126,7 +1116,7 @@ class MQTTBrokerNode extends Node {
 
 		this.#writable = this.#mqtt.write(payload, {
 			topic: msg.topic,
-			QoS: msg.QoS,
+			QoS: Number(msg.QoS),
 			retain: msg.retain
 		});
 	}
@@ -1180,7 +1170,7 @@ class MQTTInNode extends Node {
 
 		this.#topic = config.topic;
 		this.#format = config.datatype;
-		this.#QoS = config.qos;
+		this.#QoS = Number(config.qos);		//@@ nodered2mcu
 
 		this.#broker.subscribe(this, this.#topic, this.#format, this.#QoS); 
 	}

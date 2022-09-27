@@ -46,12 +46,12 @@ function buildTheme(theme) {
 		},
 		skins: {},
 		styles: {
-			textName: new Style({ font:"18px Open Sans", color:widgetText, left:5, right:5 }),
-			textValue: new Style({ font:"600 18px Open Sans", color:widgetText, left:5, right:5 }),
-			textNameLeft: new Style({ font:"18px Open Sans", color:widgetText, horizontal:"left", left:10 }),
-			textValueLeft: new Style({ font:"600 18px Open Sans", color:widgetText, horizontal:"left", left:10 }),
-			textNameRight: new Style({ font:"18px Open Sans", color:widgetText, horizontal:"right", right:10 }),
-			textValueRight: new Style({ font:"600 18px Open Sans", color:widgetText, horizontal:"right", right:10 }),
+			textName: new Style({ font:"18px Roboto", color:widgetText, left:5, right:5 }),
+			textValue: new Style({ font:"medium 18px Roboto", color:widgetText, left:5, right:5 }),
+			textNameLeft: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10 }),
+			textValueLeft: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"left", left:10 }),
+			textNameRight: new Style({ font:"18px Roboto", color:widgetText, horizontal:"right", right:10 }),
+			textValueRight: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"right", right:10 }),
 		}
 	};
 	
@@ -59,27 +59,27 @@ function buildTheme(theme) {
 	result.skins.tab = new Skin({ fill:page });
 	
 	result.skins.title = new Skin({ fill:[TRANSPARENT,title,title,blendColors(0.25,title,WHITE)] });
-	result.styles.title = new Style({ font:"600 18px Open Sans", color:WHITE, horizontal:"left" });
+	result.styles.title = new Style({ font:"medium 18px Roboto", color:WHITE, horizontal:"left" });
 	result.skins.titleIcon = new Skin({ texture:textures.glyphs, color:WHITE, x:0, y:0, width:40, height:40 });
 	result.skins.titleMenu = new Skin({ fill:sideBar, stroke:title, left:1, right:1, top:1, bottom:1 }),
 	result.skins.titleMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,title] });
-	result.styles.titleMenuItem = new Style({ font:"600 18px Open Sans", color:[halfGray,groupText,groupText,WHITE], horizontal:"left" });
+	result.styles.titleMenuItem = new Style({ font:"medium 18px Roboto", color:[halfGray,groupText,groupText,WHITE], horizontal:"left" });
 	result.skins.titleMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,groupText,groupText,WHITE], x:200, y:0, width:40, height:40 });
 	
 	result.skins.group = new Skin({ fill:group, stroke:groupBorder, bottom:1 });
-	result.styles.group = new Style({ font:"600 18px Open Sans", color:[groupText,groupText,groupText,groupText], horizontal:"left" });
+	result.styles.group = new Style({ font:"medium 18px Roboto", color:[groupText,groupText,groupText,groupText], horizontal:"left" });
 	result.skins.groupIcon = new Skin({ texture:textures.glyphs, color:[groupText,groupText,groupText,groupText], x:40, y:0, width:40, height:40, variants:40 });
 	
 	result.skins.button = new Skin({ texture:textures.button, color:[TRANSPARENT,widget,widget,blendColors(0.25,widget,WHITE)], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
-	result.styles.button = new Style({ font:"600 18px Open Sans", color:[halfGray,WHITE,WHITE,WHITE] });
+	result.styles.button = new Style({ font:"medium 18px Roboto", color:[halfGray,WHITE,WHITE,WHITE] });
 	
 // 	result.skins.dropDown = new Skin({ texture:textures.popup, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
 	result.skins.dropDown = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], stroke:[TRANSPARENT,halfGray,halfGray,widget], left:1, right:1, top:1, bottom:1 }),
-	result.styles.dropDown = new Style({ font:"600 18px Open Sans", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.styles.dropDown = new Style({ font:"medium 18px Roboto", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
 	result.skins.dropDownIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:160, y:0, width:40, height:40 });
 	result.skins.dropDownMenu = new Skin({ fill:group, stroke:widget, left:1, right:1, top:1, bottom:1 }),
 	result.skins.dropDownMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget] });
-	result.styles.dropDownMenuItem = new Style({ font:"600 18px Open Sans", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.styles.dropDownMenuItem = new Style({ font:"medium 18px Roboto", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
 	result.skins.dropDownMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:200, y:0, width:40, height:40 });
 	
 	result.skins.numericLeft = new Skin({ texture:textures.button, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
@@ -188,7 +188,7 @@ class REDButtonBehavior extends REDBehavior {
 		super.onCreate(container, data);
 		let { bgcolor, color } = data;
 		if (color) {
-			container.first.style = new Style({ font:"600 18px Open Sans", color:[REDTheme.colors.halfGray,color,color,color] });
+			container.first.style = new Style({ font:"medium 18px Roboto", color:[REDTheme.colors.halfGray,color,color,color] });
 		}
 		if (bgcolor || color) {
 			if (!bgcolor) bgcolor = REDTheme.colors.widget;
@@ -217,7 +217,7 @@ class REDButtonBehavior extends REDBehavior {
 let REDButton = Container.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, skin:REDTheme.skins.button, clip:true, active:true, Behavior: REDButtonBehavior,
 	contents: [
-		Label($, { style:REDTheme.styles.button, string:$.label }),
+		Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.label }),
 	],
 }));
 
@@ -715,7 +715,7 @@ let REDTextRowLeft = Container.template($ => ({
 		Row($, { 
 			left:0, top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
+				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
 				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueLeft, string:"" }),
 			],
 		}),
@@ -727,7 +727,7 @@ let REDTextRowCenter = Container.template($ => ({
 		Row($, { 
 			top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textName, string:$.label }),
+				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textName, string:$.label }) : null,
 				Label($, { top:0, bottom:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
@@ -739,7 +739,7 @@ let REDTextRowRight = Container.template($ => ({
 		Row($, { 
 			right:0, top:0, bottom:0,
 			contents: [
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textNameRight, string:$.label }),
+				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textNameRight, string:$.label }) : null,
 				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
@@ -751,7 +751,7 @@ let REDTextRowSpread = Container.template($ => ({
 		Row($, { 
 			left:0, right:0, top:0, bottom:0,
 			contents: [
-				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }),
+				$.label ? Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
 				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
@@ -763,7 +763,7 @@ let REDTextColumnCenter = Container.template($ => ({
 		Column($, { 
 			left:0, right:0,
 			contents: [
-				Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }),
+				$.label ? Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }) : null,
 				Label($, { left:0, right:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
@@ -798,7 +798,7 @@ let REDGroupTitle = Row.template($ => ({
 		}
 	},
 	contents: [
-		Content($, { width:($.collapse) ? UNIT : 0, top:0, bottom:0, skin:REDTheme.skins.groupIcon, variant:2  }),
+		$.collapse ? Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.groupIcon, variant:2  }) : Content($, { width:10 }),
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.group, string:$.name }),
 	],
 }));
@@ -836,7 +836,7 @@ let REDTabTitle = Row.template($ => ({
 		}
 	},
 	contents: [
-		$.enableTitleBar ? Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleIcon }) : null,
+		$.enableTitleBar ? Content($, { width:UNIT, top:0, bottom:0, skin:REDTheme.skins.titleIcon }) : Content($, { width:10 }),
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title, string:$.name }),
 	],
 }));

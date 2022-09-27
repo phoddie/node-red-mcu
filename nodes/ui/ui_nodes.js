@@ -1,3 +1,4 @@
+import Mustache from "mustache";
 import { Node } from "nodered";
 import {
 	buildTheme,
@@ -358,11 +359,12 @@ class UITextNode extends UIControlNode {
 		super(id, flow, name);
 	}
 	onMessage(msg) {
-		this.value = msg.payload;
+		this.value = Mustache.render(this.format, { msg });
 		this.container?.delegate("onUpdate");
 	}
 	onStart(config) {
 		super.onStart(config);
+		this.format = config.format;
 		this.label = config.label;
 		this.value = "";
 		

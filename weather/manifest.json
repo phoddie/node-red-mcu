@@ -1,6 +1,8 @@
 {
 	"include": [
-		"../nodes/ui/manifest.json"
+		"../nodes/ui/manifest.json",
+		"$(MODDABLE)/modules/io/manifest.json",
+		"../nodes/openweathermap/manifest.json"
 	],
 	"creation": {
 		"keys": {

@@ -8,14 +8,6 @@
         "env": []
     },
     {
-        "id": "bc56e146132df6dd",
-        "type": "tab",
-        "label": "Flow 2",
-        "disabled": false,
-        "info": "",
-        "env": []
-    },
-    {
         "id": "f99dbb54e09ec7c6",
         "type": "ui_group",
         "name": "Integer",
@@ -31,7 +23,7 @@
         "type": "ui_tab",
         "name": "Controls",
         "icon": "dashboard",
-        "order": 1,
+        "order": 3,
         "disabled": false,
         "hidden": false
     },
@@ -117,7 +109,7 @@
         },
         "site": {
             "name": "Node-RED Dashboard",
-            "hideToolbar": "true",
+            "hideToolbar": "false",
             "allowSwipe": "false",
             "lockMenu": "false",
             "allowTempTheme": "true",
@@ -139,7 +131,7 @@
         "type": "ui_tab",
         "name": "Layouts",
         "icon": "dashboard",
-        "order": 3,
+        "order": 5,
         "disabled": false,
         "hidden": false
     },
@@ -180,7 +172,7 @@
         "type": "ui_tab",
         "name": "Gauges",
         "icon": "dashboard",
-        "order": 2,
+        "order": 4,
         "disabled": false,
         "hidden": false
     },
@@ -270,8 +262,8 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 580,
+        "x": 580,
+        "y": 320,
         "wires": []
     },
     {
@@ -294,8 +286,8 @@
         "payloadType": "bool",
         "topic": "topic",
         "topicType": "msg",
-        "x": 130,
-        "y": 440,
+        "x": 170,
+        "y": 180,
         "wires": [
             [
                 "df4e01a9c747b679"
@@ -322,8 +314,8 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 290,
-        "y": 540,
+        "x": 330,
+        "y": 280,
         "wires": [
             [
                 "d84dc02b185e4d4f"
@@ -350,8 +342,8 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 290,
-        "y": 620,
+        "x": 330,
+        "y": 360,
         "wires": [
             [
                 "d84dc02b185e4d4f",
@@ -379,8 +371,8 @@
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
-        "x": 270,
-        "y": 580,
+        "x": 310,
+        "y": 320,
         "wires": [
             [
                 "32fdf6d1acc39c2d",
@@ -428,8 +420,8 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 90,
-        "y": 340,
+        "x": 130,
+        "y": 80,
         "wires": [
             [
                 "efe90ffd9eb54e38"
@@ -449,8 +441,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-spread",
         "className": "",
-        "x": 550,
-        "y": 340,
+        "x": 590,
+        "y": 80,
         "wires": []
     },
     {
@@ -472,8 +464,8 @@
         "max": 10,
         "step": 1,
         "className": "",
-        "x": 250,
-        "y": 340,
+        "x": 290,
+        "y": 80,
         "wires": [
             [
                 "dee604704ce8e8d9"
@@ -506,8 +498,8 @@
         "offcolor": "",
         "animate": false,
         "className": "",
-        "x": 310,
-        "y": 460,
+        "x": 350,
+        "y": 200,
         "wires": [
             [
                 "e8a9a6900d828e54"
@@ -527,8 +519,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-spread",
         "className": "",
-        "x": 510,
-        "y": 460,
+        "x": 550,
+        "y": 200,
         "wires": []
     },
     {
@@ -551,8 +543,8 @@
         "max": "10",
         "step": 1,
         "className": "",
-        "x": 400,
-        "y": 340,
+        "x": 440,
+        "y": 80,
         "wires": [
             [
                 "e83b955c3883dc84",
@@ -580,8 +572,8 @@
         "payloadType": "bool",
         "topic": "topic",
         "topicType": "msg",
-        "x": 130,
-        "y": 480,
+        "x": 170,
+        "y": 220,
         "wires": [
             [
                 "df4e01a9c747b679"
@@ -601,8 +593,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-left",
         "className": "",
-        "x": 410,
-        "y": 720,
+        "x": 450,
+        "y": 460,
         "wires": []
     },
     {
@@ -618,8 +610,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-spread",
         "className": "",
-        "x": 410,
-        "y": 880,
+        "x": 450,
+        "y": 620,
         "wires": []
     },
     {
@@ -635,8 +627,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-center",
         "className": "",
-        "x": 410,
-        "y": 760,
+        "x": 450,
+        "y": 500,
         "wires": []
     },
     {
@@ -652,8 +644,8 @@
         "format": "{{msg.payload}}",
         "layout": "row-right",
         "className": "",
-        "x": 410,
-        "y": 800,
+        "x": 450,
+        "y": 540,
         "wires": []
     },
     {
@@ -669,8 +661,8 @@
         "format": "{{msg.payload}}",
         "layout": "col-center",
         "className": "",
-        "x": 420,
-        "y": 840,
+        "x": 460,
+        "y": 580,
         "wires": []
     },
     {
@@ -692,8 +684,8 @@
         "max": "1000",
         "step": "100",
         "className": "",
-        "x": 170,
-        "y": 760,
+        "x": 210,
+        "y": 500,
         "wires": [
             [
                 "dd516d175c0283bd",
@@ -707,7 +699,7 @@
     {
         "id": "9bf7b72cb1d34dc9",
         "type": "ui_gauge",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "group": "6a674dd257ebd8d0",
         "order": 1,
@@ -727,14 +719,14 @@
         "seg1": "",
         "seg2": "",
         "className": "",
-        "x": 310,
-        "y": 140,
+        "x": 410,
+        "y": 740,
         "wires": []
     },
     {
         "id": "1664d3b9f7a61920",
         "type": "ui_slider",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "label": "slider",
         "tooltip": "",
@@ -750,8 +742,8 @@
         "max": 10,
         "step": 1,
         "className": "",
-        "x": 110,
-        "y": 140,
+        "x": 210,
+        "y": 740,
         "wires": [
             [
                 "9bf7b72cb1d34dc9"
@@ -761,7 +753,7 @@
     {
         "id": "c97c0d259dca8070",
         "type": "ui_gauge",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "group": "81d8722f9f3c6658",
         "order": 1,
@@ -781,14 +773,14 @@
         "seg1": "4",
         "seg2": "8",
         "className": "",
-        "x": 300,
-        "y": 220,
+        "x": 400,
+        "y": 820,
         "wires": []
     },
     {
         "id": "f46fcfd7c53d70ea",
         "type": "ui_slider",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "label": "slider",
         "tooltip": "",
@@ -804,8 +796,8 @@
         "max": 10,
         "step": 1,
         "className": "",
-        "x": 110,
-        "y": 220,
+        "x": 210,
+        "y": 820,
         "wires": [
             [
                 "c97c0d259dca8070"
@@ -815,7 +807,7 @@
     {
         "id": "02d7202d39793d28",
         "type": "ui_gauge",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "group": "e3d6a0f344ade5e1",
         "order": 1,
@@ -835,14 +827,14 @@
         "seg1": "4",
         "seg2": "8",
         "className": "",
-        "x": 300,
-        "y": 300,
+        "x": 400,
+        "y": 900,
         "wires": []
     },
     {
         "id": "b69b3d820e193990",
         "type": "ui_slider",
-        "z": "bc56e146132df6dd",
+        "z": "43412a74034aa593",
         "name": "",
         "label": "slider",
         "tooltip": "",
@@ -858,8 +850,8 @@
         "max": 10,
         "step": 1,
         "className": "",
-        "x": 110,
-        "y": 300,
+        "x": 210,
+        "y": 900,
         "wires": [
             [
                 "02d7202d39793d28"

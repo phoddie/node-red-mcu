@@ -1,0 +1,406 @@
+[
+    {
+        "id": "43412a74034aa593",
+        "type": "tab",
+        "label": "Flow 1",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "134e05da4fa1c70b",
+        "type": "ui_group",
+        "name": "Weather",
+        "tab": "417db2e7bbbcf049",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "417db2e7bbbcf049",
+        "type": "ui_tab",
+        "name": "Weather",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "ab16f25a757c1af3",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-dark",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#fffc41",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "reset": false
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#097479",
+                    "value": "#097479",
+                    "edited": true
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#097479",
+                    "edited": true
+                },
+                "page-backgroundColor": {
+                    "value": "#111111",
+                    "edited": true
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#333333",
+                    "edited": true
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": true
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": true
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": true
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": true
+                },
+                "widget-backgroundColor": {
+                    "value": "#097479",
+                    "edited": true
+                },
+                "widget-borderColor": {
+                    "value": "#333333",
+                    "edited": true
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "78d4db3db8dab12d",
+        "type": "ui_group",
+        "name": "Wind",
+        "tab": "417db2e7bbbcf049",
+        "order": 3,
+        "disp": true,
+        "width": "6",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "a9b4505b9f1594f6",
+        "type": "ui_group",
+        "name": "Temperature",
+        "tab": "417db2e7bbbcf049",
+        "order": 2,
+        "disp": true,
+        "width": "6",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "fc2fafb7c4087411",
+        "type": "ui_group",
+        "name": "More",
+        "tab": "417db2e7bbbcf049",
+        "order": 4,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "eb7725ab49e20119",
+        "type": "openweathermap",
+        "z": "43412a74034aa593",
+        "name": "",
+        "wtype": "current",
+        "lon": "",
+        "lat": "",
+        "city": "Brussels",
+        "country": "Belgium",
+        "language": "en",
+        "x": 280,
+        "y": 100,
+        "wires": [
+            [
+                "6aa53390a7db21b2",
+                "eea6aa4e9aedba85"
+            ]
+        ]
+    },
+    {
+        "id": "5008e365497ae76e",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "134e05da4fa1c70b",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Brussels",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 120,
+        "y": 100,
+        "wires": [
+            [
+                "eb7725ab49e20119"
+            ]
+        ]
+    },
+    {
+        "id": "6aa53390a7db21b2",
+        "type": "debug",
+        "z": "43412a74034aa593",
+        "name": "debug 2",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 600,
+        "y": 100,
+        "wires": []
+    },
+    {
+        "id": "575002a7dff369a4",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "134e05da4fa1c70b",
+        "order": 4,
+        "width": "0",
+        "height": "0",
+        "name": "Detail",
+        "label": "",
+        "format": "{{msg.payload.detail}}",
+        "layout": "row-right",
+        "className": "",
+        "x": 510,
+        "y": 200,
+        "wires": []
+    },
+    {
+        "id": "6e45bf74c1916315",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "134e05da4fa1c70b",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "name": "Main",
+        "label": "",
+        "format": "{{msg.payload.weather}}",
+        "layout": "row-right",
+        "className": "",
+        "x": 510,
+        "y": 160,
+        "wires": []
+    },
+    {
+        "id": "524167f1286b059c",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "a9b4505b9f1594f6",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Current",
+        "format": "{{msg.payload.tempc}}°C",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 280,
+        "wires": []
+    },
+    {
+        "id": "eea6aa4e9aedba85",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "prepare",
+        "func": "let input, output;\n\ninput = msg.payload.winddirection;\nif (input > 11.25 && input <= 33.75)\n    output = \"NNE\";\nelse if (input > 33.75 && input < 56.25)\n    output = \"NE\";\nelse if (input > 56.25 && input < 78.75)\n    output = \"ENE\";\nelse if (input > 78.75 && input < 101.25)\n    output = \"E\";\nelse if (input > 101.25 && input < 123.75)\n    output = \"ESE\";\nelse if (input > 123.75 && input < 146.25)\n    output = \"SE\";\nelse if (input > 146.25 && input < 168.75)\n    output = \"SSE\";\nelse if (input > 168.75 && input < 191.25)\n    output = \"S\";\nelse if (input > 191.25 && input < 213.75)\n    output = \"SSW\";\nelse if (input > 213.75 && input < 236.25)\n    output = \"SW\";\nelse if (input > 236.25 && input < 258.75)\n    output = \"WSW\";\nelse if (input > 258.75 && input < 281.25)\n    output = \"W\";\nelse if (input > 281.25 && input < 303.75)\n    output = \"WNW\";\nelse if (input > 303.75 && input < 326.25)\n    output = \"NW\";\nelse if (input > 326.25 && input < 348.75)\n    output = \"NNW\";\nelse\n    output = \"N\";\nmsg.payload.winddirection = output;\n\ninput = msg.payload.windspeed;\noutput = Math.round((input * 3600) / 1000)\nmsg.payload.windspeed = output;\n\ninput = msg.payload.icon;\nif (input == '01d') output = 'wi-wu-sunny'; // clear sky\nelse if (input == '02d') output = 'wi-wu-partlysunny'; // few clouds\nelse if (input == '03d') output = 'wi-wu-cloudy'; // scattered clouds\nelse if (input == '04d') output = 'wi-wu-cloudy'; // broken clouds\nelse if (input == '09d') output = 'wi-wu-sleet'; // shower rain\nelse if (input == '10d') output = 'wi-wu-rain'; // rain\nelse if (input == '11d') output = 'wi-wu-tstorms'; // thunderstorm\nelse if (input == '13d') output = 'wi-wu-snow'; // snow\nelse if (input == '50d') output = 'wi-wu-fog'; // mist\nelse if (input == '01n') output = 'wi-wu-nt_sunny'; // clear sky\nelse if (input == '02n') output = 'wi-wu-nt_partlysunny'; // few clouds\nelse if (input == '03n') output = 'wi-wu-nt_cloudy'; // scattered clouds\nelse if (input == '04n') output = 'wi-wu-nt_cloudy'; // broken clouds\nelse if (input == '09n') output = 'wi-wu-nt_sleet'; // shower rain\nelse if (input == '10n') output = 'wi-wu-nt_rain'; // rain\nelse if (input == '11n') output = 'wi-wu-nt_tstorms'; // thunderstorm\nelse if (input == '13n') output = 'wi-wu-nt_snow'; // snow\nelse if (input == '50n') output = 'wi-wu-nt_fog'; // mist\nmsg.payload.icon = output;\n\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 260,
+        "y": 280,
+        "wires": [
+            [
+                "014b1d685c1202da",
+                "d39a4d24e757682b",
+                "630790546c428c9b",
+                "fd5bd5cbf84ec881",
+                "524167f1286b059c",
+                "6e45bf74c1916315",
+                "575002a7dff369a4",
+                "48de7dd90567a08c",
+                "17da46c8447865b1"
+            ]
+        ]
+    },
+    {
+        "id": "014b1d685c1202da",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "78d4db3db8dab12d",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Direction",
+        "format": "{{msg.payload.winddirection}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 420,
+        "wires": []
+    },
+    {
+        "id": "d39a4d24e757682b",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "78d4db3db8dab12d",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Speed",
+        "format": "{{msg.payload.windspeed}} km/h",
+        "layout": "row-spread",
+        "className": "",
+        "x": 510,
+        "y": 460,
+        "wires": []
+    },
+    {
+        "id": "fd5bd5cbf84ec881",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "a9b4505b9f1594f6",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Maximum",
+        "format": "{{msg.payload.temp_maxc}}°C",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 360,
+        "wires": []
+    },
+    {
+        "id": "630790546c428c9b",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "a9b4505b9f1594f6",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Minimum",
+        "format": "{{msg.payload.temp_minc}}°C",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "48de7dd90567a08c",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "fc2fafb7c4087411",
+        "order": 3,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Humidity",
+        "format": "{{msg.payload.humidity}}%",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 540,
+        "wires": []
+    },
+    {
+        "id": "17da46c8447865b1",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "fc2fafb7c4087411",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "Pressure",
+        "format": "{{msg.payload.pressure}} hPa",
+        "layout": "row-spread",
+        "className": "",
+        "x": 520,
+        "y": 580,
+        "wires": []
+    }
+]

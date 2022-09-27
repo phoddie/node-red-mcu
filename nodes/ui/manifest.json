@@ -1,0 +1,39 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODDABLE)/examples/manifest_piu.json",
+		"$(MODDABLE)/modules/base/deepEqual/manifest.json",
+		"$(MODDABLE)/modules/base/structuredClone/manifest.json",
+		"$(MODDABLE)/modules/base/modules/manifest.json",
+		"$(MODDABLE)/modules/data/base64/manifest.json",
+		"$(MODDABLE)/modules/data/hex/manifest.json",
+		"$(MODDABLE)/modules/piu/MC/outline/manifest.json"
+	],
+	"modules": {
+		"*": [
+			"../../nodered",
+			"../template/mustache",
+			"./ScrollerBehaviors",
+			"./ui_nodes",
+			"./ui_templates"
+		]
+	},
+	"preload": [
+		"nodered",
+		"mustache",
+		"ScrollerBehaviors",
+		"ui_nodes",
+		"ui_templates"
+	],
+	"resources":{
+		"*-mask": [
+			"./assets/Roboto-Medium-18",
+			"./assets/Roboto-Regular-18",
+			"./assets/button",
+			"./assets/glyphs",
+			"./assets/popup",
+			"./assets/slider",
+			"./assets/switch"
+		]
+	}
+}

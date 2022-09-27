@@ -24,9 +24,10 @@
 
 */
 
+import {} from "nodered";
 import fetch from "fetch";
 
-const APIKEY = "";
+const APIKEY = "a36904cbc64a0d5c6183b85301d97538";
 
 function assignmentFunction(node, msg, lat, lon, city, country, language, callback) {
 	if (country && city) {

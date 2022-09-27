@@ -1,0 +1,248 @@
+[
+    {
+        "id": "ab16f25a757c1af3",
+        "type": "ui_base",
+        "theme": {
+            "name": "theme-light",
+            "lightTheme": {
+                "default": "#0094CE",
+                "baseColor": "#0094CE",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "darkTheme": {
+                "default": "#097479",
+                "baseColor": "#097479",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "edited": true,
+                "reset": false
+            },
+            "customTheme": {
+                "name": "Untitled Theme 1",
+                "default": "#4B7930",
+                "baseColor": "#fffc41",
+                "baseFont": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif",
+                "reset": false
+            },
+            "themeState": {
+                "base-color": {
+                    "default": "#0094CE",
+                    "value": "#0094CE",
+                    "edited": true
+                },
+                "page-titlebar-backgroundColor": {
+                    "value": "#0094CE",
+                    "edited": true
+                },
+                "page-backgroundColor": {
+                    "value": "#fafafa",
+                    "edited": true
+                },
+                "page-sidebar-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": true
+                },
+                "group-textColor": {
+                    "value": "#1bbfff",
+                    "edited": true
+                },
+                "group-borderColor": {
+                    "value": "#ffffff",
+                    "edited": true
+                },
+                "group-backgroundColor": {
+                    "value": "#ffffff",
+                    "edited": true
+                },
+                "widget-textColor": {
+                    "value": "#111111",
+                    "edited": true
+                },
+                "widget-backgroundColor": {
+                    "value": "#0094ce",
+                    "edited": true
+                },
+                "widget-borderColor": {
+                    "value": "#ffffff",
+                    "edited": true
+                },
+                "base-font": {
+                    "value": "-apple-system,BlinkMacSystemFont,Segoe UI,Roboto,Oxygen-Sans,Ubuntu,Cantarell,Helvetica Neue,sans-serif"
+                }
+            },
+            "angularTheme": {
+                "primary": "indigo",
+                "accents": "blue",
+                "warn": "red",
+                "background": "grey",
+                "palette": "light"
+            }
+        },
+        "site": {
+            "name": "Node-RED Dashboard",
+            "hideToolbar": "false",
+            "allowSwipe": "false",
+            "lockMenu": "false",
+            "allowTempTheme": "true",
+            "dateFormat": "DD/MM/YYYY",
+            "sizes": {
+                "sx": 48,
+                "sy": 48,
+                "gx": 6,
+                "gy": 6,
+                "cx": 6,
+                "cy": 6,
+                "px": 0,
+                "py": 0
+            }
+        }
+    },
+    {
+        "id": "ea624a14c02b0348",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "43f89edd025bb1b1",
+        "type": "ui_button",
+        "z": "ea624a14c02b0348",
+        "name": "",
+        "group": "9fc6f20edecaa025",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "OFF",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "false",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 250,
+        "y": 60,
+        "wires": [
+            [
+                "43d38d2a9c592a35"
+            ]
+        ]
+    },
+    {
+        "id": "631f838bb7eeba65",
+        "type": "ui_button",
+        "z": "ea624a14c02b0348",
+        "name": "",
+        "group": "9fc6f20edecaa025",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "ON",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "true",
+        "payloadType": "bool",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 250,
+        "y": 100,
+        "wires": [
+            [
+                "43d38d2a9c592a35"
+            ]
+        ]
+    },
+    {
+        "id": "41b8d78aa9aba8c8",
+        "type": "ui_slider",
+        "z": "ea624a14c02b0348",
+        "name": "",
+        "label": "",
+        "tooltip": "",
+        "group": "9fc6f20edecaa025",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "outs": "all",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 0,
+        "max": "100",
+        "step": 1,
+        "className": "",
+        "x": 250,
+        "y": 160,
+        "wires": [
+            [
+                "43d38d2a9c592a35"
+            ]
+        ]
+    },
+    {
+        "id": "43d38d2a9c592a35",
+        "type": "debug",
+        "z": "ea624a14c02b0348",
+        "name": "debug 3",
+        "active": true,
+        "tosidebar": true,
+        "console": false,
+        "tostatus": false,
+        "complete": "false",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 540,
+        "y": 80,
+        "wires": []
+    },
+    {
+        "id": "776cb8f2f3193ae1",
+        "type": "ui_spacer",
+        "z": "ea624a14c02b0348",
+        "name": "spacer",
+        "group": "9fc6f20edecaa025",
+        "order": 1,
+        "width": "6",
+        "height": "1"
+    },
+    {
+        "id": "21f47e7287a6711d",
+        "type": "ui_spacer",
+        "z": "ea624a14c02b0348",
+        "name": "spacer",
+        "group": "9fc6f20edecaa025",
+        "order": 4,
+        "width": "6",
+        "height": "1"
+    },
+    {
+        "id": "9fc6f20edecaa025",
+        "type": "ui_group",
+        "name": "Switch",
+        "tab": "39996de00a14cfeb",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "39996de00a14cfeb",
+        "type": "ui_tab",
+        "name": "Switch",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    }
+]

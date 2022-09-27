@@ -1,0 +1,23 @@
+{
+	"include": [
+		"../nodes/ui/manifest.json"
+	],
+	"creation": {
+		"keys": {
+			"available": 128
+		},
+		"stack": 1024
+	},
+	"modules": {
+		"*": [
+			"./main",
+			{
+				"source": "./flows",
+				"transform": "nodered2mcu"
+			}
+		]
+	},
+	"preload": [
+		"flows"
+	]
+}

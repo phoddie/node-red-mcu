@@ -56,7 +56,7 @@ function buildTheme(theme) {
 	result.skins.menuBackground = new Skin({ fill:blendColors(0.5,TRANSPARENT,page) }),
 	result.skins.tab = new Skin({ fill:page });
 	
-	result.skins.title = new Skin({ fill:[TRANSPARENT,title,title,blendColors(0.25,title,WHITE)] });
+	result.skins.title = new Skin({ fill:[title,title,title,blendColors(0.25,title,WHITE)] });
 	result.styles.title = new Style({ font:"medium 18px Roboto", color:WHITE, horizontal:"left" });
 	result.skins.titleIcon = new Skin({ texture:textures.glyphs, color:WHITE, x:0, y:0, width:40, height:40 });
 	result.skins.titleMenu = new Skin({ fill:sideBar, stroke:title, left:1, right:1, top:1, bottom:1 }),

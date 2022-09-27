@@ -300,8 +300,8 @@ export class Node {
 	warn(msg) {
 		this.trace(msg);
 	}
-	error(error, msg) {
-		throw new Error("use done(error)");
+	error(error, msg = {}) {
+		this.makeDone(msg)(error);
 	}
 	debug(msg) {
 		this.trace(msg);
@@ -1271,6 +1271,21 @@ class CompatibiltyNode extends Node {
 			events.splice(index, 1);
 
 		return this;
+	}
+	emit(event, msg) { 
+		if ("input" !== event)
+			throw new Error("unimplemented");
+
+		const events = this.#events[event];
+		if (!events)
+			return false;
+
+		events.forEach(input => {
+			const clone = RED.util.cloneMessage(msg);
+			RED.mcu.enqueue(clone, this, this.makeDone(clone));
+		});
+
+		return true;
 	}
 
 	static type = "Node-RED Compatibility";

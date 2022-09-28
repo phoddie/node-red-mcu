@@ -550,8 +550,12 @@ let REDSwitch = Row.template($ => ({
 }));
 
 class REDTextBehavior extends REDBehavior {
+	onUndisplaying(container) {
+		super.onUndisplaying(container);
+		delete this.data.VALUE;
+	}
 	onUpdate(container) {
-		container.first.last.string = this.data.value;
+		this.data.VALUE.string = this.data.value;
 	}
 }
 let REDTextRowLeft = Container.template($ => ({
@@ -561,7 +565,7 @@ let REDTextRowLeft = Container.template($ => ({
 			left:0, top:0, bottom:0,
 			contents: [
 				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueLeft, string:"" }),
+				Label($, { anchor:"VALUE", top:0, bottom:0, style:REDTheme.styles.textValueLeft, string:"" }),
 			],
 		}),
 	],
@@ -573,7 +577,7 @@ let REDTextRowCenter = Container.template($ => ({
 			top:0, bottom:0,
 			contents: [
 				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textName, string:$.label }) : null,
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textValue, string:"" }),
+				Label($, { anchor:"VALUE", top:0, bottom:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
 	],
@@ -585,7 +589,7 @@ let REDTextRowRight = Container.template($ => ({
 			right:0, top:0, bottom:0,
 			contents: [
 				$.label ? Label($, { top:0, bottom:0, style:REDTheme.styles.textNameRight, string:$.label }) : null,
-				Label($, { top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
+				Label($, { anchor:"VALUE", top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
 	],
@@ -597,7 +601,7 @@ let REDTextRowSpread = Container.template($ => ({
 			left:0, right:0, top:0, bottom:0,
 			contents: [
 				$.label ? Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textNameLeft, string:$.label }) : null,
-				Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
+				Label($, { anchor:"VALUE", left:0, right:0, top:0, bottom:0, style:REDTheme.styles.textValueRight, string:"" }),
 			],
 		}),
 	],
@@ -609,7 +613,7 @@ let REDTextColumnCenter = Container.template($ => ({
 			left:0, right:0,
 			contents: [
 				$.label ? Label($, { left:0, right:0, style:REDTheme.styles.textName, string:$.label }) : null,
-				Label($, { left:0, right:0, style:REDTheme.styles.textValue, string:"" }),
+				Label($, { anchor:"VALUE", left:0, right:0, style:REDTheme.styles.textValue, string:"" }),
 			],
 		}),
 	],

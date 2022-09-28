@@ -283,6 +283,22 @@ class UISpacerNode extends UIControlNode {
 }
 registerConstructor("ui_spacer", UISpacerNode);
 
+class UITemplateNode extends UIControlNode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onMessage(msg) {
+		this.payload = msg.payload;
+		this.container?.delegate("onUpdate");
+	}
+	onStart(config) {
+		super.onStart(config);
+		this.payload = "";
+		this.Template = this.lookupTemplate(config, REDSpacer);
+	}
+}
+registerConstructor("ui_template", UITemplateNode);
+
 class UISwitchNode extends UIControlNode {
 	constructor(id, flow, name) {
 		super(id, flow, name);

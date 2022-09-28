@@ -13,6 +13,7 @@
 	"modules": {
 		"*": [
 			"./main",
+			"./templates",
 			{
 				"source": "./flows",
 				"transform": "nodered2mcu"
@@ -20,6 +21,14 @@
 		]
 	},
 	"preload": [
+		"templates",
 		"flows"
-	]
+	],
+	"resources":{
+		"*-mask": [
+			"./assets/Roboto-Regular-24",
+			"./assets/Temperature-Bold-48",
+			"./assets/Weather-Regular-120"
+		]
+	}
 }

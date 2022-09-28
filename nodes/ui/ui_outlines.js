@@ -34,11 +34,13 @@ class UIGaugeNode extends UIControlNode {
 		}
 		this.title = config.title;
 		this.value = this.min;
+		let Template;
 		switch (config.gtype) {
-		case "compass": this.Template = REDGaugeCompass; break;
-		case "donut": this.Template = REDGaugeDonut; break;
-		default: this.Template = REDGauge; break;
+		case "compass": Template = REDGaugeCompass; break;
+		case "donut": Template = REDGaugeDonut; break;
+		default: Template = REDGauge; break;
 		}
+		this.Template = this.lookupTemplate(config, Template);
 	}
 	measure(group) {
 		if (this.width == 0)

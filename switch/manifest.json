@@ -11,6 +11,7 @@
 	"modules": {
 		"*": [
 			"./main",
+			"./templates",
 			{
 				"source": "./flows",
 				"transform": "nodered2mcu"
@@ -18,6 +19,15 @@
 		]
 	},
 	"preload": [
+		"templates",
 		"flows"
-	]
+	],
+	"resources":{
+		"*-mask": [
+			"./assets/brightness-bar",
+			"./assets/brightness-icon",
+			"./assets/power-bar",
+			"./assets/power-thumb"
+		]
+	}
 }

@@ -142,7 +142,7 @@
         "z": "ea624a14c02b0348",
         "name": "spacer",
         "group": "9fc6f20edecaa025",
-        "order": 3,
+        "order": 5,
         "width": "6",
         "height": "1"
     },
@@ -152,7 +152,7 @@
         "z": "ea624a14c02b0348",
         "name": "spacer",
         "group": "9fc6f20edecaa025",
-        "order": 5,
+        "order": 3,
         "width": "6",
         "height": "2"
     },
@@ -166,7 +166,7 @@
         "group": "9fc6f20edecaa025",
         "order": 2,
         "width": "6",
-        "height": "1",
+        "height": "2",
         "passthru": true,
         "outs": "all",
         "topic": "topic",
@@ -224,39 +224,13 @@
         "officon": "",
         "offcolor": "",
         "animate": false,
-        "className": "piu-switch-on-off",
+        "className": "piu-switch-power",
         "x": 250,
         "y": 100,
         "wires": [
             [
                 "43d38d2a9c592a35"
             ]
-        ]
-    },
-    {
-        "id": "86b24c563bd99aa1",
-        "type": "ui_button",
-        "z": "ea624a14c02b0348",
-        "name": "",
-        "group": "9fc6f20edecaa025",
-        "order": 5,
-        "width": "6",
-        "height": "1",
-        "passthru": false,
-        "label": "Color",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "",
-        "className": "piu-button-color",
-        "icon": "",
-        "payload": "",
-        "payloadType": "str",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 250,
-        "y": 160,
-        "wires": [
-            []
         ]
     }
 ]

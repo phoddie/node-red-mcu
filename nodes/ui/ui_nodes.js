@@ -16,6 +16,14 @@ import {
 	UNIT
 }  from "./ui_templates";
 
+
+const Templates = {
+};
+
+function registerTemplate(name, Template) {
+	Templates[name] = Template;
+}
+
 const model = {
 	selection: 0,
 	tabs:[],
@@ -69,6 +77,15 @@ class UIControlNode extends UINode {
 		insert(groupNode.controls, this);
 		this.width = parseInt(config.width);
 		this.height = parseInt(config.height);
+	}
+	lookupTemplate(config, Template) {
+		const name = config.className;
+		let result;
+		if (name)
+			result = Templates[name];
+		if (!result)
+			result = Template;
+		return result;
 	}
 	measure(group) {
 		if (this.width == 0)
@@ -140,7 +157,7 @@ class UIButtonNode extends UIControlNode {
 			topic: config.topic,
 		}
 		this.passthru = config.passthru;
-		this.Template = REDButton;
+		this.Template = this.lookupTemplate(config, REDButton);
 	}
 	onTap() {
 		this.send(this.msg);
@@ -170,7 +187,7 @@ class UIDropDownNode extends UIControlNode {
 		this.placeHolder = config.place;
 		this.selection = -1;
 		
-		this.Template = REDDropDown;
+		this.Template = this.lookupTemplate(config, REDDropDown);
 		
 		this.msg = { topic: config.topic }
 	}
@@ -209,7 +226,7 @@ class UINumericNode extends UIControlNode {
 		this.value = this.min;
 		this.wrap = config.wrap;
 		
-		this.Template = REDNumeric;
+		this.Template =  this.lookupTemplate(config, REDNumeric);
 		
 		this.msg = { topic: config.topic }
 	}
@@ -248,7 +265,7 @@ class UISliderNode extends UIControlNode {
 		this.passthru = config.passthru;
 		this.value = this.min;
 		
-		this.Template = REDSlider;
+		this.Template =  this.lookupTemplate(config, REDSlider);
 		
 		this.msg = { topic: config.topic }
 	}
@@ -292,7 +309,7 @@ class UISwitchNode extends UIControlNode {
 		this.passthru = config.passthru;
 		this.selection = 0;
 		
-		this.Template = REDSwitch;
+		this.Template = this.lookupTemplate(config, REDSwitch);
 		
 		this.msg = { topic: config.topic }
 	}
@@ -313,13 +330,15 @@ class UITextNode extends UIControlNode {
 		this.label = config.label;
 		this.value = "";
 		
+		let Template;
 		switch (config.layout) {
-		case "row-left": this.Template = REDTextRowLeft; break;
-		case "row-center": this.Template = REDTextRowCenter; break;
-		case "row-right": this.Template = REDTextRowRight; break;
-		case "col-center": this.Template = REDTextColumnCenter; break;
-		default: this.Template = REDTextRowSpread; break;
+		case "row-left": Template = REDTextRowLeft; break;
+		case "row-center": Template = REDTextRowCenter; break;
+		case "row-right": Template = REDTextRowRight; break;
+		case "col-center": Template = REDTextColumnCenter; break;
+		default: Template = REDTextRowSpread; break;
 		}
+		this.Template = this.lookupTemplate(config, Template);
 	}
 }
 registerConstructor("ui_text", UITextNode);
@@ -389,4 +408,4 @@ export default function() {
 	return model;
 }
 
-export { UIControlNode, registerConstructor };
+export { UIControlNode, registerConstructor, registerTemplate };

@@ -615,6 +615,18 @@ let REDTextColumnCenter = Container.template($ => ({
 	],
 }));
 
+let REDGroup = Container.template($ => ({
+	left:0, right:0, top:0, height:$.height, skin:REDTheme.skins.group, clip:true,
+	contents: [
+		$.disp ? new REDGroupTitle($) : null,
+		Container($, {
+			left:0, right:0, top:$.disp ? UNIT : 0, bottom:0,
+			contents: [
+				($.width > screen.width) ? new REDGroupScroller($) : new REDGroupContainer($)
+			],
+		}),
+	]
+}));
 let REDGroupTitle = Row.template($ => ({
 	left:0, right:0, top:0, height:UNIT,
 	Behavior: class extends ButtonBehavior {
@@ -623,9 +635,9 @@ let REDGroupTitle = Row.template($ => ({
 			if (state == 3)
 				container.first.variant = 1;
 			else {
-				const scroller = container.container.container;
+				const groupContainer = container.container;
 				const height = this.data.height;
-				container.first.variant = (scroller.height == height) ? 2 : 0;
+				container.first.variant = (groupContainer.height == height) ? 2 : 0;
 			}
 		}
 		onCreate(container, $) {
@@ -634,12 +646,12 @@ let REDGroupTitle = Row.template($ => ({
 				container.active = true;
 		}
 		onTap(container) {
-			const scroller = container.container.container;
+			const groupContainer = container.container;
 			const height = this.data.height;
-			if (scroller.height == height)
-				scroller.height = UNIT;
+			if (groupContainer.height == height)
+				groupContainer.height = UNIT;
 			else
-				scroller.height = height;
+				groupContainer.height = height;
 		}
 	},
 	contents: [
@@ -648,16 +660,16 @@ let REDGroupTitle = Row.template($ => ({
 	],
 }));
 let REDGroupScroller = Scroller.template($ => ({
-	left:0, right:0, height:$.height, active:true, backgroundTouch:true, Behavior:HorizontalScrollerBehavior, clip:true,
+	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, Behavior:HorizontalScrollerBehavior, clip:true,
 	contents: [
-		Container($, {
-			left:0, width:$.width, top:0, bottom:0, skin:REDTheme.skins.group,
-			contents: [
-				$.disp ? new REDGroupTitle($) : null,
-				$.controls.map($$ => new $$.Template($$)),
-			],
-		}),
+		new REDGroupContainer($),
 	]
+}));
+let REDGroupContainer = Container.template($ => ({
+	left:0, width:$.width, top:0, bottom:0,
+	contents: [
+		$.controls.map($$ => new $$.Template($$)),
+	],
 }));
 
 let REDTab = Container.template($ => ({
@@ -667,12 +679,11 @@ let REDTab = Container.template($ => ({
 		Container($, {
 			left:0, right:0, top:$.showTitleBar ? UNIT : 0, bottom:0, skin:REDTheme.skins.tab,
 			contents: [
-				new REDTabScroller($)
+				$.height > screen.height ? new REDTabScroller($) : new REDTabColumn($),
 			],
 		}),
 	]
 }));
-
 let REDTabTitle = Row.template($ => ({
 	left:0, right:0, top:0, height:UNIT, skin:REDTheme.skins.title, active:$.enableTitleBar,
 	Behavior: class extends ButtonBehavior {
@@ -685,18 +696,19 @@ let REDTabTitle = Row.template($ => ({
 		Label($, { left:0, right:0, top:0, bottom:0, style:REDTheme.styles.title, string:$.name }),
 	],
 }));
-
 let REDTabScroller = Scroller.template($ => ({
 	left:0, right:0, top:0, bottom:0, clip:true, active:true, backgroundTouch:true, Behavior:VerticalScrollerBehavior,
 	contents: [
-		Column($, {
-			left:0, right:0, top:0,
-			contents: [
-				$.groups.map($$ => new REDGroupScroller($$))
-			],
-		}),
+		new REDTabColumn($)
 	]
 }));
+let REDTabColumn = Column.template($ => ({
+	left:0, right:0, top:0,
+	contents: [
+		$.groups.map($$ => new REDGroup($$))
+	],
+}));
+
 
 let REDTabMenu = Layout.template($ => ({
 	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground,

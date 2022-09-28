@@ -355,19 +355,22 @@ registerConstructor("ui_tab", UITabNode);
 export default function() {
 	model.enableTitleBar = model.tabs.length > 1;
 	model.tabs.forEach(tab => {
+		let height = model.showTitleBar ? 1 : 0;
 		tab.enableTitleBar = model.enableTitleBar;
 		tab.showTitleBar = model.showTitleBar;
 		tab.groups.forEach(group => {
 			group.lines = [];
-			if (group.disp)
-				group.lines.push(new Uint8Array(group.width).fill(1));
 			group.controls.forEach(control => {
 				control.measure(group);
 				control.position(group);	
 			});
 			group.height = group.lines.length;
+			if (group.disp)
+				group.height++;
+			height += group.height;
 			delete group.lines;
 		});
+		tab.height = height;
 	});
 
 	model.tabs.forEach(tab => {
@@ -381,6 +384,7 @@ export default function() {
 				control.height *= UNIT;
 			});
 		});
+		tab.height *= UNIT;
 	});
 	return model;
 }

@@ -1,9 +1,17 @@
 [
     {
+        "id": "ea624a14c02b0348",
+        "type": "tab",
+        "label": "Flow 2",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
         "id": "ab16f25a757c1af3",
         "type": "ui_base",
         "theme": {
-            "name": "theme-light",
+            "name": "theme-dark",
             "lightTheme": {
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
@@ -27,44 +35,44 @@
             },
             "themeState": {
                 "base-color": {
-                    "default": "#0094CE",
-                    "value": "#0094CE",
+                    "default": "#097479",
+                    "value": "#097479",
                     "edited": true
                 },
                 "page-titlebar-backgroundColor": {
-                    "value": "#0094CE",
+                    "value": "#097479",
                     "edited": true
                 },
                 "page-backgroundColor": {
-                    "value": "#fafafa",
-                    "edited": true
-                },
-                "page-sidebar-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": true
-                },
-                "group-textColor": {
-                    "value": "#1bbfff",
-                    "edited": true
-                },
-                "group-borderColor": {
-                    "value": "#ffffff",
-                    "edited": true
-                },
-                "group-backgroundColor": {
-                    "value": "#ffffff",
-                    "edited": true
-                },
-                "widget-textColor": {
                     "value": "#111111",
                     "edited": true
                 },
+                "page-sidebar-backgroundColor": {
+                    "value": "#333333",
+                    "edited": true
+                },
+                "group-textColor": {
+                    "value": "#0eb8c0",
+                    "edited": true
+                },
+                "group-borderColor": {
+                    "value": "#555555",
+                    "edited": true
+                },
+                "group-backgroundColor": {
+                    "value": "#333333",
+                    "edited": true
+                },
+                "widget-textColor": {
+                    "value": "#eeeeee",
+                    "edited": true
+                },
                 "widget-backgroundColor": {
-                    "value": "#0094ce",
+                    "value": "#097479",
                     "edited": true
                 },
                 "widget-borderColor": {
-                    "value": "#ffffff",
+                    "value": "#333333",
                     "edited": true
                 },
                 "base-font": {
@@ -81,7 +89,7 @@
         },
         "site": {
             "name": "Node-RED Dashboard",
-            "hideToolbar": "false",
+            "hideToolbar": "true",
             "allowSwipe": "false",
             "lockMenu": "false",
             "allowTempTheme": "true",
@@ -99,68 +107,54 @@
         }
     },
     {
-        "id": "ea624a14c02b0348",
-        "type": "tab",
-        "label": "Flow 2",
+        "id": "39996de00a14cfeb",
+        "type": "ui_tab",
+        "name": "Switch",
+        "icon": "dashboard",
+        "order": 1,
         "disabled": false,
-        "info": "",
-        "env": []
+        "hidden": false
     },
     {
-        "id": "43f89edd025bb1b1",
-        "type": "ui_button",
+        "id": "9fc6f20edecaa025",
+        "type": "ui_group",
+        "name": "Switch",
+        "tab": "39996de00a14cfeb",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "776cb8f2f3193ae1",
+        "type": "ui_spacer",
         "z": "ea624a14c02b0348",
-        "name": "",
+        "name": "spacer",
         "group": "9fc6f20edecaa025",
-        "order": 2,
-        "width": "3",
-        "height": "1",
-        "passthru": false,
-        "label": "OFF",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "red",
-        "className": "",
-        "icon": "",
-        "payload": "false",
-        "payloadType": "bool",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 250,
-        "y": 60,
-        "wires": [
-            [
-                "43d38d2a9c592a35"
-            ]
-        ]
+        "order": 1,
+        "width": "6",
+        "height": "1"
     },
     {
-        "id": "631f838bb7eeba65",
-        "type": "ui_button",
+        "id": "21f47e7287a6711d",
+        "type": "ui_spacer",
         "z": "ea624a14c02b0348",
-        "name": "",
+        "name": "spacer",
         "group": "9fc6f20edecaa025",
         "order": 3,
-        "width": "3",
-        "height": "1",
-        "passthru": false,
-        "label": "ON",
-        "tooltip": "",
-        "color": "",
-        "bgcolor": "green",
-        "className": "",
-        "icon": "",
-        "payload": "true",
-        "payloadType": "bool",
-        "topic": "topic",
-        "topicType": "msg",
-        "x": 250,
-        "y": 100,
-        "wires": [
-            [
-                "43d38d2a9c592a35"
-            ]
-        ]
+        "width": "6",
+        "height": "1"
+    },
+    {
+        "id": "7b8bd1fbcc7cfb9a",
+        "type": "ui_spacer",
+        "z": "ea624a14c02b0348",
+        "name": "spacer",
+        "group": "9fc6f20edecaa025",
+        "order": 5,
+        "width": "6",
+        "height": "2"
     },
     {
         "id": "41b8d78aa9aba8c8",
@@ -170,9 +164,9 @@
         "label": "",
         "tooltip": "",
         "group": "9fc6f20edecaa025",
-        "order": 5,
-        "width": 0,
-        "height": 0,
+        "order": 2,
+        "width": "6",
+        "height": "1",
         "passthru": true,
         "outs": "all",
         "topic": "topic",
@@ -180,9 +174,9 @@
         "min": 0,
         "max": "100",
         "step": 1,
-        "className": "",
+        "className": "piu-slider-brightness",
         "x": 250,
-        "y": 160,
+        "y": 40,
         "wires": [
             [
                 "43d38d2a9c592a35"
@@ -206,43 +200,63 @@
         "wires": []
     },
     {
-        "id": "776cb8f2f3193ae1",
-        "type": "ui_spacer",
+        "id": "5244a1afe035d88f",
+        "type": "ui_switch",
         "z": "ea624a14c02b0348",
-        "name": "spacer",
-        "group": "9fc6f20edecaa025",
-        "order": 1,
-        "width": "6",
-        "height": "1"
-    },
-    {
-        "id": "21f47e7287a6711d",
-        "type": "ui_spacer",
-        "z": "ea624a14c02b0348",
-        "name": "spacer",
+        "name": "",
+        "label": "switch",
+        "tooltip": "",
         "group": "9fc6f20edecaa025",
         "order": 4,
         "width": "6",
-        "height": "1"
+        "height": "2",
+        "passthru": true,
+        "decouple": "false",
+        "topic": "topic",
+        "topicType": "msg",
+        "style": "",
+        "onvalue": "true",
+        "onvalueType": "bool",
+        "onicon": "",
+        "oncolor": "",
+        "offvalue": "false",
+        "offvalueType": "bool",
+        "officon": "",
+        "offcolor": "",
+        "animate": false,
+        "className": "piu-switch-on-off",
+        "x": 250,
+        "y": 100,
+        "wires": [
+            [
+                "43d38d2a9c592a35"
+            ]
+        ]
     },
     {
-        "id": "9fc6f20edecaa025",
-        "type": "ui_group",
-        "name": "Switch",
-        "tab": "39996de00a14cfeb",
-        "order": 1,
-        "disp": false,
+        "id": "86b24c563bd99aa1",
+        "type": "ui_button",
+        "z": "ea624a14c02b0348",
+        "name": "",
+        "group": "9fc6f20edecaa025",
+        "order": 5,
         "width": "6",
-        "collapse": false,
-        "className": ""
-    },
-    {
-        "id": "39996de00a14cfeb",
-        "type": "ui_tab",
-        "name": "Switch",
-        "icon": "dashboard",
-        "order": 1,
-        "disabled": false,
-        "hidden": false
+        "height": "1",
+        "passthru": false,
+        "label": "Color",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "piu-button-color",
+        "icon": "",
+        "payload": "",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 250,
+        "y": 160,
+        "wires": [
+            []
+        ]
     }
 ]

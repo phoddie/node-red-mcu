@@ -1195,10 +1195,12 @@ class MQTTOutNode extends Node {
 		if (undefined !== config.qos) this.#QoS = parseInt(config.qos);
 		if ((undefined !== config.retain) && ("" !== config.retain)) this.#retain = Boolean(config.retain);
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		let payload = msg.payload;
-		if (undefined === payload)
+		if (undefined === payload) {
+			done();
 			return;
+		}
 
 		if (payload instanceof ArrayBuffer)
 			;
@@ -1213,6 +1215,8 @@ class MQTTOutNode extends Node {
 			QoS: this.#QoS ?? msg.QoS ?? 0,
 			retain: this.#retain ?? msg.retain ?? false,
 		});
+	
+		done();
 	}
 
 	static type = "mqtt out";

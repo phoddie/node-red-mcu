@@ -23,9 +23,13 @@
 		"flows"
 	],
 	"resources":{
+		"*": [
+			"./assets/color-wheel"
+		],
 		"*-mask": [
 			"./assets/brightness-bar",
 			"./assets/brightness-icon",
+			"./assets/color-thumb",
 			"./assets/power-bar",
 			"./assets/power-thumb"
 		]

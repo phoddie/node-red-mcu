@@ -1,6 +1,6 @@
 [
     {
-        "id": "ea624a14c02b0348",
+        "id": "78b294c9dbbf5952",
         "type": "tab",
         "label": "Flow 2",
         "disabled": false,
@@ -107,7 +107,7 @@
         }
     },
     {
-        "id": "39996de00a14cfeb",
+        "id": "059652470bcecbd0",
         "type": "ui_tab",
         "name": "Switch",
         "icon": "dashboard",
@@ -116,10 +116,10 @@
         "hidden": false
     },
     {
-        "id": "9fc6f20edecaa025",
+        "id": "c12ad26221494ae8",
         "type": "ui_group",
         "name": "Switch",
-        "tab": "39996de00a14cfeb",
+        "tab": "059652470bcecbd0",
         "order": 1,
         "disp": false,
         "width": "6",
@@ -127,66 +127,9 @@
         "className": ""
     },
     {
-        "id": "776cb8f2f3193ae1",
-        "type": "ui_spacer",
-        "z": "ea624a14c02b0348",
-        "name": "spacer",
-        "group": "9fc6f20edecaa025",
-        "order": 1,
-        "width": "6",
-        "height": "1"
-    },
-    {
-        "id": "21f47e7287a6711d",
-        "type": "ui_spacer",
-        "z": "ea624a14c02b0348",
-        "name": "spacer",
-        "group": "9fc6f20edecaa025",
-        "order": 5,
-        "width": "6",
-        "height": "1"
-    },
-    {
-        "id": "7b8bd1fbcc7cfb9a",
-        "type": "ui_spacer",
-        "z": "ea624a14c02b0348",
-        "name": "spacer",
-        "group": "9fc6f20edecaa025",
-        "order": 3,
-        "width": "6",
-        "height": "2"
-    },
-    {
-        "id": "41b8d78aa9aba8c8",
-        "type": "ui_slider",
-        "z": "ea624a14c02b0348",
-        "name": "",
-        "label": "",
-        "tooltip": "",
-        "group": "9fc6f20edecaa025",
-        "order": 2,
-        "width": "6",
-        "height": "2",
-        "passthru": true,
-        "outs": "all",
-        "topic": "topic",
-        "topicType": "msg",
-        "min": 0,
-        "max": "100",
-        "step": 1,
-        "className": "piu-slider-brightness",
-        "x": 250,
-        "y": 40,
-        "wires": [
-            [
-                "43d38d2a9c592a35"
-            ]
-        ]
-    },
-    {
-        "id": "43d38d2a9c592a35",
+        "id": "645bc366ceafa6a6",
         "type": "debug",
-        "z": "ea624a14c02b0348",
+        "z": "78b294c9dbbf5952",
         "name": "debug 3",
         "active": true,
         "tosidebar": true,
@@ -195,19 +138,19 @@
         "complete": "false",
         "statusVal": "",
         "statusType": "auto",
-        "x": 540,
-        "y": 80,
+        "x": 860,
+        "y": 180,
         "wires": []
     },
     {
-        "id": "5244a1afe035d88f",
+        "id": "03e806b461e5a1fe",
         "type": "ui_switch",
-        "z": "ea624a14c02b0348",
+        "z": "78b294c9dbbf5952",
         "name": "",
-        "label": "switch",
+        "label": "Switch",
         "tooltip": "",
-        "group": "9fc6f20edecaa025",
-        "order": 4,
+        "group": "c12ad26221494ae8",
+        "order": 3,
         "width": "6",
         "height": "2",
         "passthru": true,
@@ -225,11 +168,240 @@
         "offcolor": "",
         "animate": false,
         "className": "piu-switch-power",
-        "x": 250,
+        "x": 450,
+        "y": 180,
+        "wires": [
+            [
+                "fe06eca4c15e5527"
+            ]
+        ]
+    },
+    {
+        "id": "4fcb77214e7515a3",
+        "type": "ui_colour_picker",
+        "z": "78b294c9dbbf5952",
+        "name": "",
+        "label": "Color",
+        "group": "c12ad26221494ae8",
+        "format": "rgb",
+        "outformat": "object",
+        "showSwatch": false,
+        "showPicker": true,
+        "showValue": false,
+        "showHue": false,
+        "showAlpha": false,
+        "showLightness": true,
+        "square": "false",
+        "dynOutput": "true",
+        "order": 2,
+        "width": "6",
+        "height": "4",
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "piu-color-wheel",
+        "x": 450,
+        "y": 260,
+        "wires": [
+            [
+                "a7219058ad5efa76"
+            ]
+        ]
+    },
+    {
+        "id": "69e7ae4074696618",
+        "type": "ui_slider",
+        "z": "78b294c9dbbf5952",
+        "name": "",
+        "label": "Brightness",
+        "tooltip": "",
+        "group": "c12ad26221494ae8",
+        "order": 1,
+        "width": "6",
+        "height": "2",
+        "passthru": true,
+        "outs": "all",
+        "topic": "topic",
+        "topicType": "msg",
+        "min": 0,
+        "max": "255",
+        "step": 1,
+        "className": "piu-slider-brightness",
+        "x": 470,
         "y": 100,
         "wires": [
             [
-                "43d38d2a9c592a35"
+                "bb55938d79ed5599"
+            ]
+        ]
+    },
+    {
+        "id": "bb55938d79ed5599",
+        "type": "function",
+        "z": "78b294c9dbbf5952",
+        "name": "function 1",
+        "func": "msg.payload = { brightness:msg.payload };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 100,
+        "wires": [
+            [
+                "645bc366ceafa6a6"
+            ]
+        ]
+    },
+    {
+        "id": "fe06eca4c15e5527",
+        "type": "function",
+        "z": "78b294c9dbbf5952",
+        "name": "function 2",
+        "func": "msg.payload = { power: msg.payload };\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 180,
+        "wires": [
+            [
+                "645bc366ceafa6a6"
+            ]
+        ]
+    },
+    {
+        "id": "a7219058ad5efa76",
+        "type": "function",
+        "z": "78b294c9dbbf5952",
+        "name": "function 3",
+        "func": "msg.payload = { color:msg.payload }\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 640,
+        "y": 260,
+        "wires": [
+            [
+                "645bc366ceafa6a6"
+            ]
+        ]
+    },
+    {
+        "id": "3e1a58a509f3011d",
+        "type": "inject",
+        "z": "78b294c9dbbf5952",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "{\"power\":true,\"brightness\":128,\"color\":{\"r\":0,\"g\":0,\"b\":255}}",
+        "payloadType": "json",
+        "x": 90,
+        "y": 180,
+        "wires": [
+            [
+                "bc9d5c2a49d7baa3",
+                "5b3cb7c77b84c424",
+                "71c6daa7c821571e"
+            ]
+        ]
+    },
+    {
+        "id": "bc9d5c2a49d7baa3",
+        "type": "change",
+        "z": "78b294c9dbbf5952",
+        "name": "power",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.power",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 250,
+        "y": 180,
+        "wires": [
+            [
+                "03e806b461e5a1fe"
+            ]
+        ]
+    },
+    {
+        "id": "5b3cb7c77b84c424",
+        "type": "change",
+        "z": "78b294c9dbbf5952",
+        "name": "brightness",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.brightness",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 270,
+        "y": 100,
+        "wires": [
+            [
+                "69e7ae4074696618"
+            ]
+        ]
+    },
+    {
+        "id": "71c6daa7c821571e",
+        "type": "change",
+        "z": "78b294c9dbbf5952",
+        "name": "color",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload.color",
+                "tot": "msg",
+                "dc": true
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 250,
+        "y": 260,
+        "wires": [
+            [
+                "4fcb77214e7515a3"
             ]
         ]
     }

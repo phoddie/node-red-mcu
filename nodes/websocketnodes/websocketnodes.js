@@ -87,7 +87,7 @@ class WebSocketClient extends Node {
 			this.#ws = undefined;
 			this.status(disconnected);
 
-			this.#reconnect = Timer.repeat(() => {
+			this.#reconnect ??= Timer.repeat(() => {
 				if (this.#ws)
 					return;
 				
@@ -105,7 +105,9 @@ class WebSocketClient extends Node {
 		this.#nodes?.delete(node);
 	}
 	status(status) {
-		for (let node of this.#nodes)
+		const nodes = this.#nodes;
+		if (!nodes) return;
+		for (let node of nodes)
 			node.status(status);
 	}
 

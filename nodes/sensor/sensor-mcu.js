@@ -23,25 +23,24 @@ import Modules from "modules";
 
 class Sensor extends Node {
 	#io;
-	#module;
 	#sensor;
 	#configuration;
 
 	onStart(config) {
 		this.#io = config.io;
-		this.#module = config.module;
-		this.#configuration = config.configuration ? JSON.parse(config.configuration) : undefined;
+		const configuration = config.configuration ? JSON.parse(config.configuration) : undefined;
 
 		try {
-			const Sensor = Modules.importNow(this.#module);
+			const Sensor = Modules.importNow(config.module);
 			let sensor;
+			const bus = config.bus ?? "default";
 			if ("SMBus" === this.#io) 
-				sensor = {...device.I2C.default, io: device.io.SMBus}
+				sensor = {...device.I2C[bus], io: device.io.SMBus}
 			else
-				sensor = device[this.#io].default;
+				sensor = device[this.#io][bus];
 			this.#sensor = new Sensor({sensor});
-			if (this.#configuration)
-				this.#sensor.configure(this.#configuration);
+			if (configuration)
+				this.#sensor.configure(configuration);
 		}
 		catch {
 		}

@@ -5,6 +5,7 @@
         defaults: {
             name: {value:""},
             io: {value:"I2C"},
+            bus: {value:"default"},
             module: {
 				value:"",
 				validate: function(v) {
@@ -111,6 +112,11 @@
 			<option value="SMBus">SMBus</option>
 		</select>
 	</div>
+
+    <div class="form-row">
+        <label for="node-input-bus"><i class="fa fa-tasks"></i> Bus</label>
+        <input type="text" id="node-input-bus" placeholder="default">
+    </div>
 
     <div class="form-row">
         <label for="node-input-configuration"><i class="fa fa-tasks"></i> Configure</label>

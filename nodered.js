@@ -1070,7 +1070,7 @@ class MQTTBrokerNode extends Node {
 									msg.payload = JSON.parse(String.fromArrayBuffer(payload));
 								}
 								catch {
-									throw new Error("ignoring invalid JSON");
+									trace("invalid JSON\n");		//@@ call error
 								}
 								break;
 							case "base64":

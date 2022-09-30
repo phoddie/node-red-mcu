@@ -115,7 +115,7 @@ class Server {
 										this.input = JSON.parse(this.input);
 									}
 									catch (e) {
-										this.node.error(e);
+										this.node.error(e);		//@@ this.node doesn't exist
 										this.close();
 										return;
 									}
@@ -158,7 +158,7 @@ class Server {
 						const index = this.target.requests.findIndex(item => item.id === this.id);
 						if (index >= 0)
 							this.target.requests.splice(index);
-						this.node.error("http server fail");
+						this.node.error("http server fail");		//@@ this.node doesn't exist
 					}
 				});
 			}

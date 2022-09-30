@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 26, 2022<br>
+Updated September 28, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -304,9 +304,10 @@ Function node implements support for calling `done()` if function's source code 
 - [X] "Inject once after"
 - [X] "Repeat after"
 - [X] Property values msg., flow., global.
+- [X] Property values expression
 - [ ] Interval between times
 - [ ] At a specific time
-- [ ] Property values expression & environment variable
+- [ ] Environment variables
 
 ### Link Call
 - [X] Implemented

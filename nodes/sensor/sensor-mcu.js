@@ -27,6 +27,8 @@ class Sensor extends Node {
 	#configuration;
 
 	onStart(config) {
+		super.onStart(config);
+
 		this.#io = config.io;
 		const configuration = config.configuration ? JSON.parse(config.configuration) : undefined;
 

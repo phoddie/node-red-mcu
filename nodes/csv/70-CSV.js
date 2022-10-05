@@ -110,6 +110,9 @@ function CSVNode(n) {
 								else if (msg.payload[s][t].toString().indexOf(node.sep) !== -1) { // add quotes if any "commas"
 									msg.payload[s][t] = node.quo + msg.payload[s][t].toString() + node.quo;
 								}
+								else if (msg.payload[s][t].toString().indexOf("\n") !== -1) { // add quotes if any "\n"
+                                        msg.payload[s][t] = node.quo + msg.payload[s][t].toString() + node.quo;
+								}
 							}
 							ou += msg.payload[s].join(node.sep) + node.ret;
 						}
@@ -128,12 +131,17 @@ function CSVNode(n) {
 									if (msg.payload[s].hasOwnProperty(p)) {
 										/* istanbul ignore else */
 										if (typeof msg.payload[s][p] !== "object") {
-											let q = "" + msg.payload[s][p];
+										// Fix to honour include null values flag
+										//if (typeof msg.payload[s][p] !== "object" || (node.include_null_values === true && msg.payload[s][p] === null)) {
+											var q = "";
+											if (msg.payload[s][p] !== undefined) {
+												q += msg.payload[s][p];
+											}
 											if (q.indexOf(node.quo) !== -1) { // add double quotes if any quotes
 												q = q.replace(/"/g, '""');
 												ou += node.quo + q + node.quo + node.sep;
 											}
-											else if (q.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+											else if (q.indexOf(node.sep) !== -1 || p.indexOf("\n") !== -1) { // add quotes if any "commas" or "\n"
 												ou += node.quo + q + node.quo + node.sep;
 											}
 											else { ou += q + node.sep; } // otherwise just add
@@ -148,15 +156,18 @@ function CSVNode(n) {
 										ou += node.sep;
 									}
 									else {
-//										let p = RED.util.ensureString(RED.util.getMessageProperty(msg,"payload["+s+"]['"+template[t]+"']"));
-										let p = RED.util.ensureString(msg.payload[s][template[t]]);
+//										var p = RED.util.getMessageProperty(msg,"payload["+s+"]['"+template[t]+"']");
+										let p = msg.payload[s][template[t]];
 										/* istanbul ignore else */
-										if (p === "undefined") { p = ""; }		//@@ BUG - for property value of "undefined"
+										if (p === undefined) { p = ""; }
+										// fix to honour include null values flag
+										//if (p === null && node.include_null_values !== true) { p = "";}
+										p = RED.util.ensureString(p);
 										if (p.indexOf(node.quo) !== -1) { // add double quotes if any quotes
 											p = p.replace(/"/g, '""');
 											ou += node.quo + p + node.quo + node.sep;
 										}
-										else if (p.indexOf(node.sep) !== -1) { // add quotes if any "commas"
+										else if (p.indexOf(node.sep) !== -1 || p.indexOf("\n") !== -1) { // add quotes if any "commas" or "\n"
 											ou += node.quo + p + node.quo + node.sep;
 										}
 										else { ou += p + node.sep; } // otherwise just add

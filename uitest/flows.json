@@ -8,30 +8,10 @@
         "env": []
     },
     {
-        "id": "f99dbb54e09ec7c6",
-        "type": "ui_group",
-        "name": "Integer",
-        "tab": "954946ab8c989af5",
-        "order": 1,
-        "disp": true,
-        "width": "6",
-        "collapse": true,
-        "className": ""
-    },
-    {
-        "id": "954946ab8c989af5",
-        "type": "ui_tab",
-        "name": "Controls",
-        "icon": "dashboard",
-        "order": 3,
-        "disabled": false,
-        "hidden": false
-    },
-    {
-        "id": "48a0040e60e54d16",
+        "id": "ab16f25a757c1af3",
         "type": "ui_base",
         "theme": {
-            "name": "theme-dark",
+            "name": "theme-light",
             "lightTheme": {
                 "default": "#0094CE",
                 "baseColor": "#0094CE",
@@ -55,44 +35,44 @@
             },
             "themeState": {
                 "base-color": {
-                    "default": "#097479",
-                    "value": "#097479",
+                    "default": "#0094CE",
+                    "value": "#0094CE",
                     "edited": true
                 },
                 "page-titlebar-backgroundColor": {
-                    "value": "#097479",
+                    "value": "#0094CE",
                     "edited": true
                 },
                 "page-backgroundColor": {
-                    "value": "#111111",
+                    "value": "#fafafa",
                     "edited": true
                 },
                 "page-sidebar-backgroundColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "group-textColor": {
-                    "value": "#0eb8c0",
+                    "value": "#1bbfff",
                     "edited": true
                 },
                 "group-borderColor": {
-                    "value": "#555555",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "group-backgroundColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "widget-textColor": {
-                    "value": "#eeeeee",
+                    "value": "#111111",
                     "edited": true
                 },
                 "widget-backgroundColor": {
-                    "value": "#097479",
+                    "value": "#0094ce",
                     "edited": true
                 },
                 "widget-borderColor": {
-                    "value": "#333333",
+                    "value": "#ffffff",
                     "edited": true
                 },
                 "base-font": {
@@ -125,6 +105,26 @@
                 "py": 0
             }
         }
+    },
+    {
+        "id": "f99dbb54e09ec7c6",
+        "type": "ui_group",
+        "name": "Integer",
+        "tab": "954946ab8c989af5",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "954946ab8c989af5",
+        "type": "ui_tab",
+        "name": "Controls",
+        "icon": "dashboard",
+        "order": 3,
+        "disabled": false,
+        "hidden": false
     },
     {
         "id": "f42f9cdea4891a2e",
@@ -248,6 +248,26 @@
         "disp": true,
         "width": "6",
         "collapse": true,
+        "className": ""
+    },
+    {
+        "id": "0f91633c3df0fa3b",
+        "type": "ui_tab",
+        "name": "Pickers",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "8f597939be20f38d",
+        "type": "ui_group",
+        "name": "Pickers",
+        "tab": "0f91633c3df0fa3b",
+        "order": 1,
+        "disp": true,
+        "width": "6",
+        "collapse": false,
         "className": ""
     },
     {
@@ -857,5 +877,54 @@
                 "02d7202d39793d28"
             ]
         ]
+    },
+    {
+        "id": "b43c4f00676e9c38",
+        "type": "ui_colour_picker",
+        "z": "43412a74034aa593",
+        "name": "",
+        "label": "color",
+        "group": "8f597939be20f38d",
+        "format": "rgb",
+        "outformat": "string",
+        "showSwatch": true,
+        "showPicker": false,
+        "showValue": false,
+        "showHue": false,
+        "showAlpha": true,
+        "showLightness": true,
+        "square": "false",
+        "dynOutput": "false",
+        "order": 1,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 210,
+        "y": 1040,
+        "wires": [
+            [
+                "e6b3275157ecdabe"
+            ]
+        ]
+    },
+    {
+        "id": "e6b3275157ecdabe",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "8f597939be20f38d",
+        "order": 4,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "value",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 490,
+        "y": 1100,
+        "wires": []
     }
 ]

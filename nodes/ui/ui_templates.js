@@ -41,6 +41,7 @@ function buildTheme(theme) {
 			transparent: TRANSPARENT,
 			white: WHITE,
 			widget,
+			widgetText,
 		},
 		skins: {},
 		styles: {
@@ -50,6 +51,8 @@ function buildTheme(theme) {
 			textValueLeft: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"left", left:10 }),
 			textNameRight: new Style({ font:"18px Roboto", color:widgetText, horizontal:"right", right:10 }),
 			textValueRight: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"right", right:10 }),
+		},
+		textures: {
 		}
 	};
 	

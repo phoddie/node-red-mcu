@@ -14,7 +14,8 @@
 			"../template/mustache",
 			"./ScrollerBehaviors",
 			"./ui_nodes",
-			"./ui_templates"
+			"./ui_templates",
+			"./ui_colorpicker"
 		]
 	},
 	"preload": [
@@ -22,17 +23,22 @@
 		"mustache",
 		"ScrollerBehaviors",
 		"ui_nodes",
-		"ui_templates"
+		"ui_templates",
+		"ui_colorpicker"
 	],
 	"resources":{
+		"*": [
+			"./assets/ui-color-picker"
+		],
 		"*-mask": [
 			"./assets/Roboto-Medium-18",
 			"./assets/Roboto-Regular-18",
-			"./assets/button",
 			"./assets/glyphs",
+			"./assets/button",
 			"./assets/popup",
 			"./assets/slider",
-			"./assets/switch"
+			"./assets/switch",
+			"./assets/ui-color-picker-mask"
 		]
 	},
 	"platforms": {

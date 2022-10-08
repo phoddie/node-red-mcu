@@ -255,7 +255,7 @@
         "type": "ui_tab",
         "name": "Pickers",
         "icon": "dashboard",
-        "order": 1,
+        "order": 2,
         "disabled": false,
         "hidden": false
     },
@@ -266,6 +266,26 @@
         "tab": "0f91633c3df0fa3b",
         "order": 1,
         "disp": true,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "e8c5dbcd8d3085a8",
+        "type": "ui_tab",
+        "name": "Notifications",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "2cf4533444e654ce",
+        "type": "ui_group",
+        "name": "Notifications",
+        "tab": "e8c5dbcd8d3085a8",
+        "order": 1,
+        "disp": false,
         "width": "6",
         "collapse": false,
         "className": ""
@@ -925,6 +945,313 @@
         "className": "",
         "x": 490,
         "y": 1100,
+        "wires": []
+    },
+    {
+        "id": "b18295fdb8bc41c7",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "top left",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "This is a top left notification with some text.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 220,
+        "y": 1340,
+        "wires": [
+            [
+                "34acfd1e1b90877f"
+            ]
+        ]
+    },
+    {
+        "id": "34acfd1e1b90877f",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "top left",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 450,
+        "y": 1340,
+        "wires": []
+    },
+    {
+        "id": "88ad724f72310c6a",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "top right",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "red",
+        "className": "",
+        "icon": "",
+        "payload": "This is a top right notification with some text and a red border.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 220,
+        "y": 1380,
+        "wires": [
+            [
+                "649ec0a03fcd0518"
+            ]
+        ]
+    },
+    {
+        "id": "649ec0a03fcd0518",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "top right",
+        "displayTime": "3",
+        "highlight": "red",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 450,
+        "y": 1380,
+        "wires": []
+    },
+    {
+        "id": "17d61cedd9422e62",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "bottom right",
+        "displayTime": "3",
+        "highlight": "green",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 450,
+        "y": 1420,
+        "wires": []
+    },
+    {
+        "id": "09cdf1d431a58fee",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 4,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "bottom right",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "green",
+        "className": "",
+        "icon": "",
+        "payload": "This is a bottom right notification with some text and a green border.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 230,
+        "y": 1420,
+        "wires": [
+            [
+                "17d61cedd9422e62"
+            ]
+        ]
+    },
+    {
+        "id": "1154c5e44abf8453",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "bottom left",
+        "displayTime": "3",
+        "highlight": "blue",
+        "sendall": true,
+        "outputs": 0,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 450,
+        "y": 1460,
+        "wires": []
+    },
+    {
+        "id": "2f9641c36f669973",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 3,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "bottom left",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "blue",
+        "className": "",
+        "icon": "",
+        "payload": "This is a bottom left notification with some text and a blue border.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 230,
+        "y": 1460,
+        "wires": [
+            [
+                "1154c5e44abf8453"
+            ]
+        ]
+    },
+    {
+        "id": "0110d652639a06b2",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 6,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "one",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "This is a dialog with some text and one button.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 210,
+        "y": 1500,
+        "wires": [
+            [
+                "776e7d3296b1a588"
+            ]
+        ]
+    },
+    {
+        "id": "776e7d3296b1a588",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 430,
+        "y": 1500,
+        "wires": [
+            [
+                "98beeb70c8234f2c"
+            ]
+        ]
+    },
+    {
+        "id": "63e7c315b221df91",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 7,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "two",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "This is a dialog with some text and two buttons.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 210,
+        "y": 1540,
+        "wires": [
+            [
+                "b9dc9d88889bb10e"
+            ]
+        ]
+    },
+    {
+        "id": "b9dc9d88889bb10e",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "dialog",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "YES",
+        "cancel": "NO",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 430,
+        "y": 1540,
+        "wires": [
+            [
+                "98beeb70c8234f2c"
+            ]
+        ]
+    },
+    {
+        "id": "98beeb70c8234f2c",
+        "type": "ui_text",
+        "z": "43412a74034aa593",
+        "group": "2cf4533444e654ce",
+        "order": 5,
+        "width": 0,
+        "height": 0,
+        "name": "",
+        "label": "value",
+        "format": "{{msg.payload}}",
+        "layout": "row-spread",
+        "className": "",
+        "x": 670,
+        "y": 1520,
         "wires": []
     }
 ]

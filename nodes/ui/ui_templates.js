@@ -45,6 +45,7 @@ function buildTheme(theme) {
 		},
 		skins: {},
 		styles: {
+			notification: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10, right:10, top:10, bottom:10 }),
 			textName: new Style({ font:"18px Roboto", color:widgetText, left:5, right:5 }),
 			textValue: new Style({ font:"medium 18px Roboto", color:widgetText, left:5, right:5 }),
 			textNameLeft: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10 }),
@@ -95,6 +96,9 @@ function buildTheme(theme) {
 	result.skins.switchThumb = new Skin({ texture:textures.switch, color: [TRANSPARENT,gray,widget], x:60, y:0, width:40, height:40 });
 	
 	result.skins.compass = new Skin({ fill:widget, stroke:widget });
+	
+	result.skins.toast = new Skin({ fill:group, stroke:widget, left:2, right:2, top:2, bottom:2 }),
+	
 	globalThis.REDTheme = result;
 }
 
@@ -753,6 +757,86 @@ let REDTabMenuItem = Row.template($ => ({
 	],
 }));
 
+class REDToastNotificationBehavior extends REDBehavior {
+	onClose(container, value) {
+		this.onFinished(container);
+		this.data.value = value;
+		this.data.onChanged();
+	}
+	onCreate(container, data) {
+		super.onCreate(container, data);
+		const stroke = data.highlight;
+		if (stroke)
+			container.first.skin = new Skin({ fill:REDTheme.colors.group, stroke, left:2, right:2, top:2, bottom:2 });
+	}
+	onDisplaying(container) {
+		const column = container.first;
+		const { position, displayTime } = this.data;
+		if (position != "dialog") {
+			switch (position) {
+				case "top left": column.coordinates = { top:0, left:0, width:160 }; break;
+				case "top right": column.coordinates = { top:0, right:0, width:160 }; break;
+				case "bottom right": column.coordinates = { bottom:0, right:0, width:160 }; break;
+				case "bottom left": column.coordinates = { bottom:0, left:0, width:160 }; break;
+			}
+			container.duration = displayTime;
+			container.start();
+		}
+	}
+	onFinished(container, id, x, y, ticks) {
+		const application = container.application;
+		if (application)
+			application.remove(container);
+	}
+	onTouchEnded(container, id, x, y, ticks) {
+		if (container.running) {
+			container.stop();
+			this.onFinished(container);
+		}
+	}
+}
+const REDToastNotification = Container.template($ => ({
+	left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.menuBackground, active:true, backgroundTouch:true, Behavior:REDToastNotificationBehavior,
+	contents: [
+		Column($, {
+			width:240, skin:REDTheme.skins.toast,
+			contents: [
+				Text($, { left:0, right:0, style:REDTheme.styles.notification, string:$.text }),
+				($.position == "dialog") ?	[
+					Row($, {
+						right:10, height:UNIT,
+						contents: [
+							($.cancel) ? Container($, {
+								width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
+								Behavior: class extends ButtonBehavior{
+									onTap(container) {
+										container.bubble("onClose", this.data.cancel);
+									}
+								},
+								contents: [
+									Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.cancel }),
+								],
+							}) : null,
+							Container($, {
+								width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
+								Behavior: class extends ButtonBehavior{
+									onTap(container) {
+										container.bubble("onClose", this.data.ok);
+									}
+								},
+								contents: [
+									Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.ok }),
+								],
+							}),
+						],
+					}),
+					Content($, { height: 10 }),
+				] : null,
+			]
+		}),
+	],
+}));
+
 class REDApplicationBehavior extends Behavior {
 	display(application, selection) {
 		const container = application.first;
@@ -774,6 +858,9 @@ class REDApplicationBehavior extends Behavior {
 	onMenuSelected(application, selection) {
 		if ((selection >= 0) && (this.data.selection != selection))
 			application.defer("display", selection);
+	}
+	onNotify(application, data) {
+		application.add(new data.Template(data));
 	}
 	onSelectTab(application) {
 		this.data.button = application;
@@ -808,5 +895,6 @@ export {
 	REDTextRowRight,
 	REDTextRowSpread,
 	REDTextColumnCenter,
+	REDToastNotification,
 	UNIT
 };

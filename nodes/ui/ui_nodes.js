@@ -13,6 +13,7 @@ import {
 	REDTextRowRight,
 	REDTextRowSpread,
 	REDTextColumnCenter,
+	REDToastNotification,
 	UNIT
 }  from "./ui_templates";
 
@@ -68,6 +69,15 @@ class UINode extends Node {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 	}
+	lookupTemplate(config, Template) {
+		const name = config.className;
+		let result;
+		if (name)
+			result = Templates[name];
+		if (!result)
+			result = Template;
+		return result;
+	}
 	onStart(config) {
 		super.onStart(config);
 		this.order = parseInt(config.order);
@@ -97,15 +107,6 @@ class UIControlNode extends UINode {
 		insert(groupNode.controls, this);
 		this.width = parseInt(config.width);
 		this.height = parseInt(config.height);
-	}
-	lookupTemplate(config, Template) {
-		const name = config.className;
-		let result;
-		if (name)
-			result = Templates[name];
-		if (!result)
-			result = Template;
-		return result;
 	}
 	measure(group) {
 		if (this.width == 0)
@@ -408,6 +409,35 @@ class UITabNode extends UINode {
 	}
 }
 registerConstructor("ui_tab", UITabNode);
+
+class UIToastNode extends UINode {
+	constructor(id, flow, name) {
+		super(id, flow, name);
+	}
+	onChanged() {
+		this.msg.payload = this.value;
+		this.send(this.msg);
+	}
+	onMessage(msg) {
+		this.text = msg.payload;
+		application.delegate("onNotify", this);
+	}
+	onStart(config) {
+		super.onStart(config);
+		
+		this.cancel = config.cancel;
+		this.displayTime = Math.round(Number(config.displayTime) * 1000);
+		this.highlight = config.highlight;
+		this.msg = { topic: config.topic }
+		this.ok = config.ok;
+		this.position = config.position;
+		this.text = "";
+		this.value = "";
+		
+		this.Template = this.lookupTemplate(config, REDToastNotification);
+	}
+}
+registerConstructor("ui_toast", UIToastNode);
 
 export default function() {
 	model.enableTitleBar = model.tabs.length > 1;

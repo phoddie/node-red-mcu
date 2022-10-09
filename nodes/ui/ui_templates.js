@@ -684,15 +684,15 @@ let REDGroupContainer = Container.template($ => ({
 }));
 
 let REDTab = Container.template($ => ({
-	left:0, right:0, top:0, bottom:0,
+	left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.tab,
 	contents: [
-		$.showTitleBar ? new REDTabTitle($) : null,
 		Container($, {
-			left:0, right:0, top:$.showTitleBar ? UNIT : 0, bottom:0, skin:REDTheme.skins.tab,
+			left:0, right:0, top:$.showTitleBar ? UNIT : 0, height:$.showTitleBar ? screen.height - UNIT : screen.height,
 			contents: [
 				$.height > screen.height ? new REDTabScroller($) : new REDTabColumn($),
 			],
 		}),
+		$.showTitleBar ? new REDTabTitle($) : null,
 	]
 }));
 let REDTabTitle = Row.template($ => ({

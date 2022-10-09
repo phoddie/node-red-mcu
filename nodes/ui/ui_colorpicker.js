@@ -173,7 +173,6 @@ class UIColorPickerNode extends UIControlNode {
 registerConstructor("ui_colour_picker", UIColorPickerNode);
 
 import {} from "piu/MC";
-import {} from "piu/shape";
 
 import {
 	REDBehavior,
@@ -421,7 +420,7 @@ const REDColorThumb = Container.template($ => ({
 }));
 
 const REDColorDialog = Container.template($ => ({
-	left:0, right:0, top:0, bottom:0, active:true, backgroundTouch:true, skin:REDTheme.skins.menuBackground, Behavior:REDColorPickerDialogBehavior,
+	left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.menuBackground, active:true, backgroundTouch:true, Behavior:REDColorPickerDialogBehavior,
 	contents: [
 		Column($, {
 			skin:REDTheme.skins.colorPicker,

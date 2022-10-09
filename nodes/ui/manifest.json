@@ -2,6 +2,7 @@
 	"include": [
 		"$(MODDABLE)/examples/manifest_base.json",
 		"$(MODDABLE)/examples/manifest_piu.json",
+		"$(MODDABLE)/modules/input/expanding-keyboard/vertical/manifest.json",
 		"$(MODDABLE)/modules/base/deepEqual/manifest.json",
 		"$(MODDABLE)/modules/base/structuredClone/manifest.json",
 		"$(MODDABLE)/modules/base/modules/manifest.json",
@@ -15,7 +16,8 @@
 			"./ScrollerBehaviors",
 			"./ui_nodes",
 			"./ui_templates",
-			"./ui_colorpicker"
+			"./ui_colorpicker",
+			"./ui_text_input"
 		]
 	},
 	"preload": [
@@ -24,7 +26,8 @@
 		"ScrollerBehaviors",
 		"ui_nodes",
 		"ui_templates",
-		"ui_colorpicker"
+		"ui_colorpicker",
+		"ui_text_input"
 	],
 	"resources":{
 		"*": [

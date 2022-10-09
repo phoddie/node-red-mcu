@@ -90,7 +90,7 @@ function DelayNode(n) {
 	}
 
 	this.diff = this.randomLast - this.randomFirst;
-	this.name = n.name;
+	// this.name = n.name;
 	this.idList = [];
 	this.buffer = [];
 	this.intervalID = -1;

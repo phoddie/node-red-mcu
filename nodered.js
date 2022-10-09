@@ -819,7 +819,7 @@ class LinkCallNode extends Node {
 		//@@ timeout
 	}
 	onMessage(msg) {
-		this.#link.send({...msg, _linkSource: this});		//@@ need eventid for timeout feature, to know when this message replies
+		this.#link.send({...msg, _linkSource: this.id});		//@@ need eventid for timeout feature, to know when this message replies
 	}
 	response(msg) {
 		delete msg._linkSource;
@@ -855,7 +855,7 @@ class LinkOutNode extends Node {
 				links[i].send(msg);
 		}
 		else if (msg._linkSource)
-			msg._linkSource.response(msg);
+			RED.nodes.getNode(msg._linkSource).response(msg);
 		else
 			throw new Error("lost link source");
 	}

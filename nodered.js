@@ -243,7 +243,15 @@ export class Node {
 		if (!outputs.length)
 			return;
 
+		function _enqueue(_wires, _msg) {
+			// spread msg to the different wires
+			for (let i = 0, length = _wires.length; i < length; i++)
+				RED.mcu.enqueue(util.cloneMessage(_msg), _wires[i]); 
+		}
+
 		const util = RED.util;
+
+		// split outer array to outputs
 		if (Array.isArray(msg)) {
 			const length = Math.min(msg.length, outputs.length);
 			for (let j = 0; j < length; j++) {
@@ -251,19 +259,22 @@ export class Node {
 				if (null === m)
 					continue;
 
-				m._msgid ??= util.generateId();
-				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++) {
-					const clone = util.cloneMessage(m);
-					RED.mcu.enqueue(clone, wires[i], wires[i].makeDone(clone)); 
+				// split inner array into separate messages
+				if (Array.isArray(m)) {
+					for (let k = 0, kk = m.length; k < kk; k++) {
+						let mk = util.cloneMessage(m[k]);
+						mk._msgid = util.generateId();
+						_enqueue(this.#outputs[j], mk);
+					}
+				} else {
+					m._msgid ??= util.generateId();
+					_enqueue(outputs[j], m)	
 				}
 			}
 		}
 		else {
 			msg._msgid ??= util.generateId();
-			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++) {
-				const clone = util.cloneMessage(msg);
-				RED.mcu.enqueue(clone, wires[i], wires[i].makeDone(clone)); 
-			}
+			_enqueue(outputs[0], m)
 		}
 	}
 	receive(msg, done) {

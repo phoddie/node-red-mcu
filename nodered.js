@@ -561,23 +561,45 @@ class FunctionNode extends Node {
 		try {
 			const context = this.context;
 			const func = this.#func;
+			const _msgid = msg._msgid;
 			const node = Object.create(this, {
 				done: {value: done},
 				error: {value: (error, msg) => {
 					this.debug(error.toString());
 					if (msg)
 						done(msg);
+				}},
+				send: {value: msg => {
+					this.send(msg, _msgid);
 				}}
 			});
 			msg = func(msg, node, context, context.flow, context.global, this.#libs);
 			if (this.#doDone)
 				done();
 			if (msg)
-				this.send(msg);
+				this.send(msg, _msgid);
 		}
 		catch (e) {
 			done(e);
 		}
+	}
+	send(msg, _msgid) {
+		_msgid ??= RED.util.generateId();
+		if (Array.isArray(msg)) {
+			for (let i = 0, length = msg.length; i < length; i++) {
+				const output = msg[i];
+				if (Array.isArray(output)) {
+					for (let j = 0, length = output.length; j < length; j++)
+						output[j]._msgid = _msgid;
+				}
+				else
+					output._msgid = _msgid;
+			}
+		}
+		else
+			msg._msgid = _msgid;
+			
+		return super.send(msg);
 	}
 
 	static type = "function";

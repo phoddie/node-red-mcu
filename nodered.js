@@ -107,9 +107,10 @@ class RED {
 			}
 			return Class;
 		}
-		static enqueue(msg, target, done) {
+		static enqueue(msg, target) {
+			msg = RED.util.cloneMessage(msg);
 			msg._target = target;
-			msg._done = done;
+			msg._done = target.makeDone(msg);
 			if (msgQueue.first) {
 				msgQueue.last._next = msg;
 				msgQueue.last = msg;
@@ -243,40 +244,29 @@ export class Node {
 		if (!outputs.length)
 			return;
 
-		function _enqueue(_wires, _msg) {
-			// spread msg to the different wires
-			for (let i = 0, length = _wires.length; i < length; i++) {
-				const clone = util.cloneMessage(_msg);
-				RED.mcu.enqueue(clone, _wires[i], _wires[i].makeDone(clone));
-			}
-		}
-
-		const util = RED.util;
-
-		// split outer array to outputs
+		const generateId = RED.util.generateId;
 		if (Array.isArray(msg)) {
 			const length = Math.min(msg.length, outputs.length);
 			for (let j = 0; j < length; j++) {
-				const m = msg[j];
-				if (null === m)
-					continue;
-
-				// split inner array into separate messages
-				if (Array.isArray(m)) {
-					for (let k = 0, kk = m.length; k < kk; k++) {
-						let mk = util.cloneMessage(m[k]);
-						mk._msgid = util.generateId();
-						_enqueue(this.#outputs[j], mk);
+				for (let i = 0, wires = outputs[j], length = wires.length; i < length; i++) {
+					const m = msg[j];
+					if (Array.isArray(m)) {
+						for (let k = 0, length = m.length; k < length; k++) {
+							m[k]._msgid ??= generateId();
+							RED.mcu.enqueue(m[k], wires[i]);
+						}
 					}
-				} else {
-					m._msgid ??= util.generateId();
-					_enqueue(outputs[j], m)	
+					else if (m) {
+						m._msgid ??= generateId();
+						RED.mcu.enqueue(m, wires[i]);
+					}
 				}
 			}
 		}
 		else {
-			msg._msgid ??= util.generateId();
-			_enqueue(outputs[0], msg)
+			msg._msgid ??= generateId();
+			for (let i = 0, wires = outputs[0], length = wires.length; i < length; i++)
+				RED.mcu.enqueue(msg, wires[i]); 
 		}
 	}
 	receive(msg, done) {
@@ -346,8 +336,7 @@ export class Node {
 					}
 				}
 				for (let i = 0, dones = error ? source.#outputs.errors : source.#outputs.dones, length = dones ? dones.length : 0; i < length; i++) {
-					const clone = RED.util.cloneMessage(msg);
-					RED.mcu.enqueue(clone, dones[i], dones[i].makeDone(clone));
+					RED.mcu.enqueue(msg, dones[i]);
 				}
 			}
 		}
@@ -1310,8 +1299,7 @@ class CompatibiltyNode extends Node {
 			return false;
 
 		events.forEach(input => {
-			const clone = RED.util.cloneMessage(msg);
-			RED.mcu.enqueue(clone, this, this.makeDone(clone));
+			RED.mcu.enqueue(msg, this);
 		});
 
 		return true;

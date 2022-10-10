@@ -255,7 +255,7 @@
         "type": "ui_tab",
         "name": "Pickers",
         "icon": "dashboard",
-        "order": 1,
+        "order": 2,
         "disabled": false,
         "hidden": false
     },
@@ -275,7 +275,7 @@
         "type": "ui_tab",
         "name": "Notifications",
         "icon": "dashboard",
-        "order": 2,
+        "order": 1,
         "disabled": false,
         "hidden": false
     },
@@ -1303,6 +1303,57 @@
         "wires": [
             [
                 "e6b3275157ecdabe"
+            ]
+        ]
+    },
+    {
+        "id": "7469361a0efd25ee",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2cf4533444e654ce",
+        "order": 7,
+        "width": 0,
+        "height": 0,
+        "passthru": false,
+        "label": "input",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "This a dialog with a text input.",
+        "payloadType": "str",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 210,
+        "y": 1600,
+        "wires": [
+            [
+                "84679b9b4d0fb301"
+            ]
+        ]
+    },
+    {
+        "id": "84679b9b4d0fb301",
+        "type": "ui_toast",
+        "z": "43412a74034aa593",
+        "position": "prompt",
+        "displayTime": "3",
+        "highlight": "",
+        "sendall": true,
+        "outputs": 1,
+        "ok": "OK",
+        "cancel": "Cancel",
+        "raw": false,
+        "className": "",
+        "topic": "",
+        "name": "",
+        "x": 390,
+        "y": 1600,
+        "wires": [
+            [
+                "98beeb70c8234f2c"
             ]
         ]
     }

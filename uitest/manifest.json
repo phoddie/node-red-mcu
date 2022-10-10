@@ -8,6 +8,9 @@
 		},
 		"stack": 1024
 	},
+	"config": {
+		"ui_text_input": true
+	},
 	"modules": {
 		"*": [
 			"./main",

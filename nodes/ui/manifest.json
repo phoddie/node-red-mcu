@@ -16,7 +16,7 @@
 			"./ScrollerBehaviors",
 			"./ui_nodes",
 			"./ui_templates",
-			"./ui_colorpicker",
+			"./ui_colour_picker",
 			"./ui_text_input"
 		]
 	},
@@ -26,12 +26,12 @@
 		"ScrollerBehaviors",
 		"ui_nodes",
 		"ui_templates",
-		"ui_colorpicker",
+		"ui_colour_picker",
 		"ui_text_input"
 	],
 	"resources":{
 		"*": [
-			"./assets/ui-color-picker"
+			"./assets/ui_colour_picker"
 		],
 		"*-mask": [
 			"./assets/Roboto-Medium-18",
@@ -41,7 +41,7 @@
 			"./assets/popup",
 			"./assets/slider",
 			"./assets/switch",
-			"./assets/ui-color-picker-mask"
+			"./assets/ui_colour_picker_mask"
 		]
 	},
 	"platforms": {
@@ -51,11 +51,11 @@
 			],
 			"modules": {
 				"*": [
-					"./ui_outlines"
+					"./ui_gauge"
 				]
 			},
 			"preload": [
-				"ui_outlines"
+				"ui_gauge"
 			]
 		},
 		"mac": {
@@ -64,11 +64,11 @@
 			],
 			"modules": {
 				"*": [
-					"./ui_outlines"
+					"./ui_gauge"
 				]
 			},
 			"preload": [
-				"ui_outlines"
+				"ui_gauge"
 			]
 		}
 	}	

@@ -192,7 +192,7 @@ function buildTheme(theme) {
 	
 	skins.colorPicker = new Skin({ fill:GRAY, stroke:WHITE, left:1, right:1, top:1, bottom:1 });
 	
-	texture = new Texture({ path:"ui-color-picker.png" });
+	texture = new Texture({ path:"ui_colour_picker.png" });
 	
 	skins.colorWheel = new Skin({ texture, x:0, y:0, width:120, height:120 });
 	skins.colorHueSlider = new Skin({ texture, x:0, y:120, width:120, height:20 });
@@ -200,7 +200,7 @@ function buildTheme(theme) {
 	skins.colorTranparencyOverlay = new Skin({ texture, x:0, y:140, width:40, height:40, left:0, right:0, top:0, bottom:0, states:40 });
 	skins.colorThumbTranparency = new Skin({ texture, x:40, y:140, width:20, height:20, states:40 });
 
-	texture = new Texture({ path:"ui-color-picker-mask.png" });
+	texture = new Texture({ path:"ui_colour_picker_mask.png" });
 
 	skins.colorWheelMask = new Skin({ texture, color:GRAY, x:0, y:0, width:120, height:120 });
 	skins.colorSliderMask = new Skin({ texture, color:GRAY, x:0, y:120, width:120, height:20, left:20, right:20 });

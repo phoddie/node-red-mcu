@@ -13,6 +13,7 @@ const UNIT = 40;
 
 function buildTheme(theme) {
 	const gray = "#949494";
+	const BLACK = "black";
 	const TRANSPARENT = "transparent";
 	const WHITE = "white";
 
@@ -46,12 +47,14 @@ function buildTheme(theme) {
 		skins: {},
 		styles: {
 			notification: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10, right:10, top:10, bottom:10 }),
+			keyboard: new Style({ font:"18px Roboto", color:BLACK }),
 			textName: new Style({ font:"18px Roboto", color:widgetText, left:5, right:5 }),
 			textValue: new Style({ font:"medium 18px Roboto", color:widgetText, left:5, right:5 }),
 			textNameLeft: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10 }),
 			textValueLeft: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"left", left:10 }),
 			textNameRight: new Style({ font:"18px Roboto", color:widgetText, horizontal:"right", right:10 }),
 			textValueRight: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"right", right:10 }),
+			textField: new Style({ font:"medium 18px Roboto", color:[TRANSPARENT,widgetText,widgetText,widget], horizontal:"left", left:10 }),
 		},
 		textures: {
 		}
@@ -98,6 +101,7 @@ function buildTheme(theme) {
 	result.skins.compass = new Skin({ fill:widget, stroke:widget });
 	
 	result.skins.toast = new Skin({ fill:group, stroke:widget, left:2, right:2, top:2, bottom:2 }),
+	result.skins.textField = new Skin({ stroke:[TRANSPARENT,widgetText,widgetText,widget], bottom:1 });
 	
 	globalThis.REDTheme = result;
 }
@@ -757,12 +761,56 @@ let REDTabMenuItem = Row.template($ => ({
 	],
 }));
 
-class REDToastNotificationBehavior extends REDBehavior {
+class REDToastDialogBehavior extends REDBehavior {
 	onClose(container, value) {
-		this.onFinished(container);
+		const application = container.application;
+		if (application)
+			application.remove(container);
 		this.data.value = value;
 		this.data.onChanged();
 	}
+}
+const REDToastDialog = Container.template($ => ({
+	left:0, right:0, top:0, bottom:0, skin:REDTheme.skins.menuBackground, Behavior:REDToastDialogBehavior,
+	contents: [
+		Column($, {
+			width:240, skin:REDTheme.skins.toast,
+			contents: [
+				Text($, { left:0, right:0, style:REDTheme.styles.notification, string:$.text }),
+				Row($, {
+					right:10, height:UNIT,
+					contents: [
+						($.cancel) ? Container($, {
+							width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
+							Behavior: class extends ButtonBehavior{
+								onTap(container) {
+									container.bubble("onClose", this.data.cancel);
+								}
+							},
+							contents: [
+								Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.cancel }),
+							],
+						}) : null,
+						Container($, {
+							width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
+							Behavior: class extends ButtonBehavior{
+								onTap(container) {
+									container.bubble("onClose", this.data.ok);
+								}
+							},
+							contents: [
+								Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.ok }),
+							],
+						}),
+					],
+				}),
+				Content($, { height: 10 }),
+			]
+		}),
+	],
+}));
+
+class REDToastNotificationBehavior extends REDBehavior {
 	onCreate(container, data) {
 		super.onCreate(container, data);
 		const stroke = data.highlight;
@@ -802,36 +850,6 @@ const REDToastNotification = Container.template($ => ({
 			width:240, skin:REDTheme.skins.toast,
 			contents: [
 				Text($, { left:0, right:0, style:REDTheme.styles.notification, string:$.text }),
-				($.position == "dialog") ?	[
-					Row($, {
-						right:10, height:UNIT,
-						contents: [
-							($.cancel) ? Container($, {
-								width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
-								Behavior: class extends ButtonBehavior{
-									onTap(container) {
-										container.bubble("onClose", this.data.cancel);
-									}
-								},
-								contents: [
-									Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.cancel }),
-								],
-							}) : null,
-							Container($, {
-								width:110, height:UNIT, skin:REDTheme.skins.button, clip:true, active:true, 
-								Behavior: class extends ButtonBehavior{
-									onTap(container) {
-										container.bubble("onClose", this.data.ok);
-									}
-								},
-								contents: [
-									Label($, { top:0, bottom:0, style:REDTheme.styles.button, string:$.ok }),
-								],
-							}),
-						],
-					}),
-					Content($, { height: 10 }),
-				] : null,
 			]
 		}),
 	],
@@ -876,6 +894,7 @@ let REDApplication = Application.template($ => ({
 
 export {
 	buildTheme,
+	ButtonBehavior,
 	REDApplication,
 	REDBehavior,
 	REDButton,
@@ -895,6 +914,7 @@ export {
 	REDTextRowRight,
 	REDTextRowSpread,
 	REDTextColumnCenter,
+	REDToastDialog,
 	REDToastNotification,
 	UNIT
 };

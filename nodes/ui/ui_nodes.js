@@ -1,3 +1,4 @@
+import Modules from "modules";
 import Mustache from "mustache";
 import { Node } from "nodered";
 import {
@@ -13,6 +14,7 @@ import {
 	REDTextRowRight,
 	REDTextRowSpread,
 	REDTextColumnCenter,
+	REDToastDialog,
 	REDToastNotification,
 	UNIT
 }  from "./ui_templates";
@@ -434,7 +436,18 @@ class UIToastNode extends UINode {
 		this.text = "";
 		this.value = "";
 		
-		this.Template = this.lookupTemplate(config, REDToastNotification);
+		let Template;
+		if (config.position == "dialog")
+			Template = REDToastDialog;
+		else if (config.position == "prompt") {
+			if (Modules.has("ui_text_input"))
+				Template = Modules.importNow("ui_text_input");
+			else
+				Template = REDToastDialog;
+		}
+		else
+			Template = REDToastNotification;
+		this.Template = this.lookupTemplate(config, Template);
 	}
 }
 registerConstructor("ui_toast", UIToastNode);
@@ -476,4 +489,4 @@ export default function() {
 	return model;
 }
 
-export { UIControlNode, registerConstructor, registerTemplate, registerThemeBuilder };
+export { UINode, UIControlNode, registerConstructor, registerTemplate, registerThemeBuilder };

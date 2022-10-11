@@ -34,6 +34,7 @@
 			"./assets/ui_colour_picker"
 		],
 		"*-mask": [
+			"./assets/Roboto-Medium-12",
 			"./assets/Roboto-Medium-18",
 			"./assets/Roboto-Regular-18",
 			"./assets/glyphs",
@@ -51,10 +52,12 @@
 			],
 			"modules": {
 				"*": [
+					"./ui_chart",
 					"./ui_gauge"
 				]
 			},
 			"preload": [
+				"ui_chart",
 				"ui_gauge"
 			]
 		},
@@ -64,10 +67,12 @@
 			],
 			"modules": {
 				"*": [
+					"./ui_chart",
 					"./ui_gauge"
 				]
 			},
 			"preload": [
+				"ui_chart",
 				"ui_gauge"
 			]
 		}

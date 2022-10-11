@@ -122,7 +122,7 @@
         "type": "ui_tab",
         "name": "Controls",
         "icon": "dashboard",
-        "order": 3,
+        "order": 4,
         "disabled": false,
         "hidden": false
     },
@@ -131,7 +131,7 @@
         "type": "ui_tab",
         "name": "Layouts",
         "icon": "dashboard",
-        "order": 5,
+        "order": 6,
         "disabled": false,
         "hidden": false
     },
@@ -172,7 +172,7 @@
         "type": "ui_tab",
         "name": "Gauges",
         "icon": "dashboard",
-        "order": 4,
+        "order": 5,
         "disabled": false,
         "hidden": false
     },
@@ -255,7 +255,7 @@
         "type": "ui_tab",
         "name": "Pickers",
         "icon": "dashboard",
-        "order": 2,
+        "order": 3,
         "disabled": false,
         "hidden": false
     },
@@ -275,7 +275,7 @@
         "type": "ui_tab",
         "name": "Notifications",
         "icon": "dashboard",
-        "order": 1,
+        "order": 2,
         "disabled": false,
         "hidden": false
     },
@@ -287,6 +287,44 @@
         "order": 1,
         "disp": false,
         "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "03c138212de03921",
+        "type": "ui_tab",
+        "name": "Charts",
+        "icon": "dashboard",
+        "order": 1,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "1d70df5442784fd6",
+        "type": "ui_group",
+        "name": "Data",
+        "tab": "03c138212de03921",
+        "order": 1,
+        "disp": false,
+        "width": "6",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "d7901f40.2659d",
+        "type": "ui_tab",
+        "name": "Charts",
+        "icon": "dashboard",
+        "order": 2
+    },
+    {
+        "id": "050d0a0d9c54c50f",
+        "type": "ui_group",
+        "name": "Charts",
+        "tab": "03c138212de03921",
+        "order": 2,
+        "disp": false,
+        "width": "12",
         "collapse": false,
         "className": ""
     },
@@ -1322,7 +1360,7 @@
         "bgcolor": "",
         "className": "",
         "icon": "",
-        "payload": "This a dialog with a text input.",
+        "payload": "This a dialog with a text prompt.",
         "payloadType": "str",
         "topic": "topic",
         "topicType": "msg",
@@ -1354,6 +1392,260 @@
         "wires": [
             [
                 "98beeb70c8234f2c"
+            ]
+        ]
+    },
+    {
+        "id": "611c48ae7302b866",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 1,
+        "width": "6",
+        "height": "4",
+        "label": "Line",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "auto",
+        "interpolate": "linear",
+        "nodata": "No Data",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "250",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 770,
+        "y": 1780,
+        "wires": [
+            [
+                "328092c75a4d74be"
+            ]
+        ]
+    },
+    {
+        "id": "5a505d22cce17109",
+        "type": "inject",
+        "z": "43412a74034aa593",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            },
+            {
+                "p": "topic",
+                "vt": "str"
+            }
+        ],
+        "repeat": "1",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 210,
+        "y": 1720,
+        "wires": [
+            [
+                "d22ff5a8a399f3c7",
+                "f70232b2adcf11d0",
+                "1d117765e7558681"
+            ]
+        ]
+    },
+    {
+        "id": "d22ff5a8a399f3c7",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "random",
+        "func": "msg.payload = Math.round(Math.random() * 100);\nmsg.topic = \"random\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 220,
+        "y": 1820,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f70232b2adcf11d0",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "sine",
+        "func": "let angle = msg.payload % 360;\nmsg.payload = 50+ Math.round(Math.sin(angle*Math.PI/180) * 50);\nmsg.topic = \"sine\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 1880,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "1d117765e7558681",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "cosine",
+        "func": "let angle = msg.payload % 360;\nmsg.payload = 50+ Math.round(Math.cos(angle*Math.PI/180) * 50);\nmsg.topic = \"cosine\";\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 210,
+        "y": 1940,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "328092c75a4d74be",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 2,
+        "width": "6",
+        "height": "4",
+        "label": "Bar",
+        "chartType": "bar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 910,
+        "y": 1780,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "9379dccc562c073f",
+        "type": "ui_dropdown",
+        "z": "43412a74034aa593",
+        "name": "",
+        "label": "Data",
+        "tooltip": "",
+        "place": "Select option",
+        "group": "1d70df5442784fd6",
+        "order": 2,
+        "width": 0,
+        "height": 0,
+        "passthru": true,
+        "multiple": false,
+        "options": [
+            {
+                "label": "None",
+                "value": 0,
+                "type": "num"
+            },
+            {
+                "label": "3 x Time",
+                "value": 1,
+                "type": "num"
+            },
+            {
+                "label": "1 x 3",
+                "value": 2,
+                "type": "num"
+            },
+            {
+                "label": "3 x 1",
+                "value": 3,
+                "type": "num"
+            },
+            {
+                "label": "3 x 3",
+                "value": 4,
+                "type": "num"
+            },
+            {
+                "label": "3 x 6",
+                "value": 5,
+                "type": "num"
+            },
+            {
+                "label": "4 x 7",
+                "value": 6,
+                "type": "num"
+            }
+        ],
+        "payload": "",
+        "topic": "topic",
+        "topicType": "msg",
+        "className": "",
+        "x": 430,
+        "y": 1780,
+        "wires": [
+            [
+                "b7840d9ba2535b43"
+            ]
+        ]
+    },
+    {
+        "id": "b7840d9ba2535b43",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "prepare",
+        "func": "let chart;\nswitch (msg.payload) {\n    case 1:\n        chart = [{\n            \"series\": [\"A\", \"B\", \"C\"],\n            \"labels\": [\"\"],\n            \"data\": [\n                [{ \"x\": 1504029632890, \"y\": 5 }, { \"x\": 1504029636001, \"y\": 4 }, { \"x\": 1504029638656, \"y\": 2 }],\n                [{ \"x\": 1504029633514, \"y\": 6 }, { \"x\": 1504029636622, \"y\": 7 }, { \"x\": 1504029639539, \"y\": 6 }],\n                [{ \"x\": 1504029634400, \"y\": 7 }, { \"x\": 1504029637959, \"y\": 9 }, { \"x\": 1504029640317, \"y\": 7 }]\n            ],\n        }];\n        break;\n    case 2:\n        chart = [{\n            \"series\": [\"X\"],\n            \"labels\": [\"Jan\", \"Feb\", \"Mar\"],\n            \"data\": [\n                [5, 3, 6]\n            ],\n        }];\n        break;\n    case 3:\n        chart = [{\n            \"series\": [\"X\", \"Y\", \"Z\"],\n            \"labels\": [\"Jan\"],\n\t\t\t\"data\": [\n                [5],\n                [3],\n                [6]\n            ],\n        }];\n        break;\n    case 4:\n        chart = [{\n            \"series\": [\"X\", \"Y\", \"Z\"],\n            \"labels\": [\"Jan\", \"Feb\", \"Mar\"],\n            \"data\": [\n                [5, 6, 9],\n                [3, 8, 5],\n                [6, 7, 2]\n            ],\n        }];\n        break;\n    case 5:\n        chart = [{\n            series: ['Series A', 'Series B', 'Series C'],\n            labels: [\"January\", \"February\", \"March\", \"April\", \"May\", \"June\", \"July\"],\n            data: [\n                [65, 59, 80, 81, 56, 55, 40],\n                [28, 48, 40, 19, 86, 27, 90],\n                [38, 28, 20, 49, 45, 60, 20]\n            ],\n        }];\n        break;\n    case 6:\n        chart = [{\n            series: ['Series A', 'Series B', 'Series C', 'Series D'],\n            labels: [10, 20, 30, 40, 50, 60, 70],\n            data: [\n                [65, 59, 80, 81, 56, 55, 40],\n                [28, 48, 40, 19, 86, 27, 90],\n                [38, 28, 20, 49, 45, 60, 20],\n                [58, 18, 40, 29, 15, 30, 60]\n            ],\n        }];\n        break;\n    default:\n        chart = [];\n        break;\n}\nmsg.payload = chart;\nreturn msg;\n",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 620,
+        "y": 1780,
+        "wires": [
+            [
+                "611c48ae7302b866"
             ]
         ]
     }

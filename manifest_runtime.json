@@ -17,6 +17,7 @@
 		"./nodes/delay/manifest.json",
 		"./nodes/join/manifest.json",
 		"./nodes/batch/manifest.json",
+		"./nodes/random/manifest.json",
 		"./nodes/sort/manifest.json",
 		"./nodes/trigger/manifest.json",
 		"./nodes/sensor/manifest.json",

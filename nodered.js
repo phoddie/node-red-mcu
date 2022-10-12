@@ -226,10 +226,12 @@ export class Node {
 				return;
 		}
 		else {
-			if (!config.dones && !config.errors)
+			if (!config.dones && !config.errors && !config.statuses)
 				return;
 			this.#outputs = [];
 		}
+		if (config.statuses)
+			this.#outputs.statuses = config.statuses.map(target => this.#flow.getNode(target));
 		if (config.dones)
 			this.#outputs.dones = config.dones.map(target => this.#flow.getNode(target));
 		if (config.errors)
@@ -287,10 +289,12 @@ export class Node {
 
 		trace.left(JSON.stringify(msg));
 
-		for (const node of this.#flow.nodes()) {
-			if (node instanceof StatusNode)
-				node.onStatus(msg);
-		}
+		const statuses = this.#outputs.statuses;
+		if (!statuses)
+			return;
+		
+		for (let i = 0, length = statuses.length; i < length; i++)
+			RED.mcu.enqueue(msg, statuses[i]);
 	}
 	done(msg) {
 		this.makeDone(msg)();
@@ -459,16 +463,9 @@ class CatchNode extends Node {
 }
 
 class StatusNode extends Node {
-	#scope;
-
-	onStart(config) {
-		super.onStart(config);
-
-		this.#scope = config.scope;
-	}
-	onStatus(msg) {
-		if (!this.#scope || this.#scope.includes(msg.status?.source?.id))
-			this.send(msg);
+	onMessage(msg, done) {
+		done();
+		return msg;
 	}
 
 	static type = "status";

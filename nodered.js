@@ -110,7 +110,6 @@ class RED {
 		static enqueue(msg, target) {
 			msg = RED.util.cloneMessage(msg);
 			msg._target = target;
-			msg._done = target.makeDone(msg);
 			if (msgQueue.first) {
 				msgQueue.last._next = msg;
 				msgQueue.last = msg;
@@ -126,11 +125,10 @@ class RED {
 			let current = msgQueue.first;
 			msgQueue.first = msgQueue.last = undefined;
 			while (current) {
-				const next = current._next, target = current._target, done = current._done;
+				const next = current._next, target = current._target;
 				delete current._next; 
 				delete current._target; 
-				delete current._done; 
-				target.receive(current, done);
+				target.receive(current, target.makeDone(current));
 				current = next;
 			}
 		}

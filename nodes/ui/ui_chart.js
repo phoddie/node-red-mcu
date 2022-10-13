@@ -86,6 +86,7 @@ class UIChartNode extends UIControlNode {
 			let bad = false;
 			let samplesLength, time, xmin, xmax, ymin, ymax;
 			let result = data.map((samples, index) => {
+				let ysum = 0;
 				if ((typeof(samples) != "object") || !Array.isArray(samples))
 					bad = true;
 				else {
@@ -114,6 +115,7 @@ class UIChartNode extends UIControlNode {
 							ymin = y;
 						if ((ymax == undefined) || (ymax < y))
 							ymax = y;
+						ysum += y;
 						return { x, y };
 					});
 					if (!time) {
@@ -125,7 +127,8 @@ class UIChartNode extends UIControlNode {
 				}
 				return {
 					name: series[index],
-					samples
+					samples,
+					ysum
 				}
 			});
 			if (bad)
@@ -246,6 +249,8 @@ class UIChartNode extends UIControlNode {
 		switch (config.chartType) {
 		case "bar": Template = REDChartVerticalBar; this.zero = true; break;
 		case "horizontalBar": Template = REDChartHorizontalBar; this.zero = true; break;
+		case "pie":  Template = REDChartPie; break;
+		case "polar-area":  Template = REDChartPolarArea; this.zero = true; break;
 		case "radar": Template = REDChartRadar; this.zero = true; break;
 		default: Template = REDChartLine; break;
 		}
@@ -661,6 +666,152 @@ let REDChartHorizontalBar = Container.template($ => ({
 	],
 }));
 
+class REDChartPolarAreaBehavior extends REDBehavior {
+	onCreate(container, data) {
+		super.onCreate(container, data);
+	}
+	onUpdate(container) {
+		const data = this.data;
+		let { series, labels, ticks, ymin, ymax, colors } = data;
+		const port = container.last;
+		const shapes = port.previous;
+		let shape = shapes.previous;
+		if (!series || !labels || !ticks) {
+			shapes.empty(0);
+			shape.strokeOutline = null;
+			return;
+		}
+		let style = REDTheme.styles.chartX;
+		let left = 0;
+		const labelsLength = labels.length;
+		const ticksLength = ticks.length;
+		let labelIndex, tickIndex;
+		
+		const labelXs = new Array(labelsLength).fill(0);
+		const labelYs = new Array(labelsLength).fill(0);
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			let width = style.measure(labels[labelIndex]).width;
+			if (left < width)
+				left = width;
+			labelXs[labelIndex] = width + 10;
+			labelYs[labelIndex] = 16;
+			labelIndex++;
+		};
+		left += 10;
+		let right = left;
+		let top = 20;
+		let bottom = 20;
+
+		const width = container.width;
+		let height = container.height;
+		if (data.title)
+			height -= UNIT;
+			
+		const delta = (2 * Math.PI) / labels.length;
+		const half = delta / 2;
+		const r = Math.min(width - left - right, height - top - bottom) / 2;
+		const cx = width >> 1;
+		const cy = height >> 1;
+		
+		const xs = new Array(labelsLength).fill(0);
+		const ys = new Array(labelsLength).fill(0);
+		let angle = (3 * Math.PI) / 2;
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			xs[labelIndex] = r * Math.cos(angle);
+			ys[labelIndex] = r * Math.sin(angle);
+			labelXs[labelIndex] = cx + ((r + (labelXs[labelIndex] >> 1)) * Math.cos(angle + half));
+			labelYs[labelIndex] = cy + ((r + (labelYs[labelIndex] >> 1)) * Math.sin(angle + half));
+			labelIndex++;
+			angle += delta;
+		}
+		data.labelXs = labelXs;
+		data.labelYs = labelYs;
+		
+		const path = new Outline.CanvasPath;
+		tickIndex = 1;
+		while (tickIndex < ticksLength) {
+			path.arc(cx, cy, (r * tickIndex) / (ticksLength - 1), 0, 2 * Math.PI);
+			path.closePath();
+			tickIndex++;
+		}
+		shape.strokeOutline = Outline.stroke(path, 1, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		
+		const seriesLength = series.length;
+		let shapesLength = shapes.length;
+		if (shapesLength > seriesLength)
+			shapes.empty(seriesLength);
+		else {
+			while (shapesLength < seriesLength) {
+				const stroke = colors[shapesLength];
+				shapes.add(new Shape(undefined, { left:0, right:0, top:0, bottom:0, skin:new Skin({ stroke }) }));
+				shapesLength++;
+			}
+		}
+		let serieIndex = 0;
+		shape = shapes.first;
+		while (shape) {
+			const path = new Outline.CanvasPath;
+			const samples = series[serieIndex].samples;
+			angle = (3 * Math.PI) / 2;
+			labelIndex = 0;
+			while (labelIndex < labelsLength) {
+				let ratio = (samples[labelIndex].y - ymin) / (ymax - ymin);
+				path.moveTo(cx, cy);
+				path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
+				path.arc(cx, cy, ratio * r, angle, angle + delta);
+				path.lineTo(cx, cy);
+				path.closePath();
+				angle += delta
+				labelIndex++;
+			}
+			shape.strokeOutline = Outline.stroke(path, 2, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+			serieIndex++;
+			shape = shape.next;
+		}
+
+		port.invalidate();
+	}
+};
+let REDChartPolarArea = Container.template($ => ({
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDChartPolarAreaBehavior,
+	contents: [
+		$.title ? Label($, { left:0, right:0, top:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Shape($, { left:0, right:0, top:$.title ? UNIT : 0, bottom:0, skin:new Skin({ stroke:REDTheme.colors.halfGray }) }),
+		Container($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			contents: [
+			],
+		}),
+		Port($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			Behavior: class extends Behavior {
+				onCreate(port, data) {
+					this.data = data;
+				}
+				onDraw(port) {
+					const { series, labels, ticks, nodata, labelXs, labelYs } = this.data;
+					const styleX = REDTheme.styles.chartX;
+					if (!series || !labels || !ticks) {
+						port.drawStyle(nodata,  styleX, 0, 0, port.width, port.height);
+						return;
+					}
+					const labelsLength = labels.length;
+					let labelIndex = 0;
+					while (labelIndex < labelsLength) {
+						let label = labels[labelIndex];
+						let x = labelXs[labelIndex];
+						let y = labelYs[labelIndex];
+						port.drawStyle(label, styleX, x - 30, y - 10, 60, 16);
+						labelIndex++;
+					}
+				}
+			},
+		}),
+	],
+}));
+
 class REDChartRadarBehavior extends REDBehavior {
 	onCreate(container, data) {
 		super.onCreate(container, data);
@@ -697,7 +848,6 @@ class REDChartRadarBehavior extends REDBehavior {
 		let right = left;
 		let top = 20;
 		let bottom = 20;
-		data.margins = { left, right, top, bottom };
 
 		const width = container.width;
 		let height = container.height;
@@ -822,3 +972,119 @@ let REDChartRadar = Container.template($ => ({
 		}),
 	],
 }));
+
+class REDChartPieBehavior extends REDBehavior {
+	onCreate(container, data) {
+		super.onCreate(container, data);
+	}
+	onUpdate(container) {
+		const data = this.data;
+		let { series, labels, ticks, ymin, ymax, colors } = data;
+		const port = container.last;
+		const separator = port.previous;
+		const shapes = separator.previous;
+		if (!series || !labels || !ticks) {
+			shapes.empty(0);
+			return;
+		}
+		let style = REDTheme.styles.chartX;
+
+		const seriesLength = series.length;
+		const labelsLength = labels.length;
+		let serieIndex, labelIndex;
+
+		let shapesLength = shapes.length;
+		if (shapesLength > labelsLength)
+			shapes.empty(labelsLength);
+		else {
+			while (shapesLength < labelsLength) {
+				const stroke = colors[shapesLength];
+				shapes.add(new Shape(undefined, { left:0, right:0, top:0, bottom:0, skin:new Skin({ stroke }) }));
+				shapesLength++;
+			}
+		}
+		
+		const width = container.width;
+		let height = container.height;
+		if (data.title)
+			height -= UNIT;
+		let r = Math.min(width - padding - padding, height - padding) / 2;
+		const cx = width >> 1;
+		const cy = height >> 1;
+		const dr = r / seriesLength;
+		
+		const path = new Outline.CanvasPath;
+		let radius = r;
+		serieIndex = 0;
+		while (serieIndex < seriesLength) {
+			path.arc(cx, cy, radius, 0, 2 * Math.PI);
+// 			path.closePath();
+			radius -= dr;
+			serieIndex++;
+		}
+		separator.strokeOutline = Outline.stroke(path, 1, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		
+		const paths = new Array(labelsLength).fill(null);
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			paths[labelIndex] = new Outline.CanvasPath;
+			labelIndex++;
+		}
+		r -= dr / 2;
+		serieIndex = 0;
+		while (serieIndex < seriesLength) {
+			const serie = series[serieIndex];
+			const samples = serie.samples;
+			const ysum = serie.ysum;
+			let angle = (3 * Math.PI) / 2;
+			labelIndex = 0;
+			while (labelIndex < labelsLength) {
+				const path = paths[labelIndex];
+				const delta = (2 * Math.PI * samples[labelIndex].y) / ysum;
+// 				path.moveTo(cx + (r * Math.cos(angle)), cy + (r * Math.sin(angle)));
+				path.arc(cx, cy, r, angle, angle + delta);
+// 				path.closePath();
+				angle += delta;
+				labelIndex++;
+			}
+			r -= dr;
+			serieIndex++;
+		}
+		let shape = shapes.first;
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			shape.strokeOutline = Outline.stroke(paths[labelIndex], dr, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+			shape = shape.next;
+			labelIndex++;
+		}
+	}
+};
+let REDChartPie = Container.template($ => ({
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDChartPieBehavior,
+	contents: [
+		$.title ? Label($, { left:0, right:0, top:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Container($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			contents: [
+			],
+		}),
+		Shape($, { left:0, right:0, top:$.title ? UNIT : 0, bottom:0, skin:new Skin({ stroke:REDTheme.colors.halfGray }) }),
+		Port($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			Behavior: class extends Behavior {
+				onCreate(port, data) {
+					this.data = data;
+				}
+				onDraw(port) {
+					const { series, labels, ticks, nodata, labelXs, labelYs } = this.data;
+					const styleX = REDTheme.styles.chartX;
+					if (!series || !labels || !ticks) {
+						port.drawStyle(nodata,  styleX, 0, 0, port.width, port.height);
+						return;
+					}
+				}
+			},
+		}),
+	],
+}));
+

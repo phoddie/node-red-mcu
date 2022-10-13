@@ -311,20 +311,13 @@
         "className": ""
     },
     {
-        "id": "d7901f40.2659d",
-        "type": "ui_tab",
-        "name": "Charts",
-        "icon": "dashboard",
-        "order": 2
-    },
-    {
         "id": "050d0a0d9c54c50f",
         "type": "ui_group",
         "name": "Charts",
         "tab": "03c138212de03921",
         "order": 2,
         "disp": false,
-        "width": "12",
+        "width": "36",
         "collapse": false,
         "className": ""
     },
@@ -1403,13 +1396,13 @@
         "group": "050d0a0d9c54c50f",
         "order": 1,
         "width": "6",
-        "height": "4",
+        "height": "5",
         "label": "Line",
         "chartType": "line",
         "legend": "false",
         "xformat": "auto",
         "interpolate": "linear",
-        "nodata": "No Data",
+        "nodata": "NO DATA",
         "dot": false,
         "ymin": "",
         "ymax": "",
@@ -1433,7 +1426,7 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 770,
+        "x": 730,
         "y": 1780,
         "wires": [
             [
@@ -1531,13 +1524,13 @@
         "group": "050d0a0d9c54c50f",
         "order": 2,
         "width": "6",
-        "height": "4",
-        "label": "Bar",
+        "height": "5",
+        "label": "Vertical Bar",
         "chartType": "bar",
         "legend": "false",
         "xformat": "HH:mm:ss",
         "interpolate": "linear",
-        "nodata": "",
+        "nodata": "NO DATA",
         "dot": false,
         "ymin": "",
         "ymax": "",
@@ -1561,10 +1554,12 @@
         "outputs": 1,
         "useDifferentColor": false,
         "className": "",
-        "x": 910,
-        "y": 1780,
+        "x": 750,
+        "y": 1840,
         "wires": [
-            []
+            [
+                "d406b7c72b8c6fed"
+            ]
         ]
     },
     {
@@ -1641,12 +1636,194 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 620,
+        "x": 580,
         "y": 1780,
         "wires": [
             [
                 "611c48ae7302b866"
             ]
+        ]
+    },
+    {
+        "id": "d406b7c72b8c6fed",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 3,
+        "width": "6",
+        "height": "5",
+        "label": "Horizontal Bar",
+        "chartType": "horizontalBar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "NO DATA",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 760,
+        "y": 1900,
+        "wires": [
+            [
+                "1a3a12ef80f2f423"
+            ]
+        ]
+    },
+    {
+        "id": "1a3a12ef80f2f423",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 3,
+        "width": "6",
+        "height": "5",
+        "label": "Pie",
+        "chartType": "pie",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "NO DATA",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 730,
+        "y": 1960,
+        "wires": [
+            [
+                "47f2c2d4b97aaad0"
+            ]
+        ]
+    },
+    {
+        "id": "47f2c2d4b97aaad0",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 3,
+        "width": "6",
+        "height": "5",
+        "label": "Polar Area",
+        "chartType": "polar-area",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "NO DATA",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 750,
+        "y": 2020,
+        "wires": [
+            [
+                "03843702e357bf6b"
+            ]
+        ]
+    },
+    {
+        "id": "03843702e357bf6b",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "050d0a0d9c54c50f",
+        "order": 3,
+        "width": "6",
+        "height": "5",
+        "label": "Radar",
+        "chartType": "radar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "NO DATA",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "3600",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 730,
+        "y": 2080,
+        "wires": [
+            []
         ]
     }
 ]

@@ -46,6 +46,7 @@ function buildTheme(theme) {
 		},
 		skins: {},
 		styles: {
+			chartNoData: new Style({ font:"18px Roboto", color:halfGray, horizontal:"center" }),
 			chartX: new Style({ font:"medium 12px Roboto", color:widgetText, horizontal:"center" }),
 			chartY: new Style({ font:"medium 12px Roboto", color:widgetText, horizontal:"right" }),
 			notification: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10, right:10, top:10, bottom:10 }),

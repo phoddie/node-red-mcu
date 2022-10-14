@@ -61,107 +61,117 @@ class UIChartNode extends UIControlNode {
 		return result;
 	}
 	parsePayload(payload) {
-		if ((typeof(payload) == "object") && Array.isArray(payload)) {
-			this.labels = null;
-			this.series = null;
-			if (payload.length == 0)
-				return;
-			payload = payload[0];
-			if (typeof(payload) != "object")
-				return;
-			let data = payload.data;
-			if ((typeof(data) != "object") || !Array.isArray(data))
-				return;
-			let labels = payload.labels;
-			if ((typeof(labels) != "object") || !Array.isArray(labels))
-				return;
-			let series = payload.series;
-			if ((typeof(series) != "object") || !Array.isArray(series))
-				return;
-			let dataLength = data.length;
-			let labelsLength = labels.length;
-			let seriesLength = series.length;
-			if (dataLength != seriesLength)
-				return;
-			let bad = false;
-			let samplesLength, time, xmin, xmax, ymin, ymax;
-			let result = data.map((samples, index) => {
-				let ysum = 0;
-				if ((typeof(samples) != "object") || !Array.isArray(samples))
-					bad = true;
-				else {
-					samples = samples.map((sample, x) => {
-						let y;
-						if ((typeof(sample) == "object") && sample.hasOwnProperty("x") && sample.hasOwnProperty("y")) {
-							if (time == undefined)
-								time = true;
-							else if (!time)
-								bad = true;
-							x = Number(sample.x);
-							y = Number(sample.y);
-						}
-						else {
-							if (time == undefined)
-								time = false;
-							else if (time)
-								bad = true; 
-							y = Number(sample);
-						}
-						if ((xmin == undefined) || (xmin > x))
-							xmin = x;
-						if ((xmax == undefined) || (xmax < x))
-							xmax = x;
-						if ((ymin == undefined) || (ymin > y))
-							ymin = y;
-						if ((ymax == undefined) || (ymax < y))
-							ymax = y;
-						ysum += y;
-						return { x, y };
-					});
-					if (!time) {
-						if (samplesLength == undefined)
-							samplesLength = samples.length;
-						else if (samplesLength != samples.length)
+		this.labels = null;
+		this.series = null;
+		if (payload.length == 0)
+			return;
+		payload = payload[0];
+		if (typeof(payload) != "object")
+			return;
+		let data = payload.data;
+		if ((typeof(data) != "object") || !Array.isArray(data))
+			return;
+		let labels = payload.labels;
+		if ((typeof(labels) != "object") || !Array.isArray(labels))
+			return;
+		let series = payload.series;
+		if ((typeof(series) != "object") || !Array.isArray(series))
+			return;
+		let dataLength = data.length;
+		let labelsLength = labels.length;
+		let seriesLength = series.length;
+		if (dataLength != seriesLength)
+			return;
+		let { adjustMin, adjustMax, sum, timed, zero } = this;
+		let bad = false;
+		let samplesLength, timing, xmin, xmax, ymin, ymax;
+		let result = data.map((samples, index) => {
+			let ysum = 0;
+			if ((typeof(samples) != "object") || !Array.isArray(samples))
+				bad = true;
+			else {
+				samples = samples.map((sample, x) => {
+					let y;
+					if ((typeof(sample) == "object") && sample.hasOwnProperty("x") && sample.hasOwnProperty("y")) {
+						if (timing == undefined)
+							timing = true;
+						else if (!timing)
+							bad = true;
+						x = Number(sample.x);
+						if (isNaN(x))
+							bad = true;
+						y = Number(sample.y);
+						if (isNaN(y))
 							bad = true;
 					}
+					else {
+						if (timing == undefined)
+							timing = false;
+						else if (timing)
+							bad = true; 
+						y = Number(sample);
+						if (isNaN(y))
+							bad = true;
+					}
+					if (sum)
+						ysum += y;
+					else {
+						if (timed && ((xmin == undefined) || (xmin > x)))
+							xmin = x;
+						if (timed && ((xmax == undefined) || (xmax < x)))
+							xmax = x;
+						if (adjustMin && ((ymin == undefined) || (ymin > y)))
+							ymin = y;
+						if (adjustMax && ((ymax == undefined) || (ymax < y)))
+							ymax = y;
+					}
+					return timed ? { x, y } : y;
+				});
+				if (!timing) {
+					if (samples.length != labelsLength)
+						bad = true;
 				}
-				return {
-					name: series[index],
-					samples,
-					ysum
-				}
-			});
-			if (bad)
-				return;
-			if (time) {
-				this.labels = [ this.formatTime(xmin), this.formatTime(xmax) ];
 			}
-			else {
-				if (labelsLength != samplesLength)
-					return;
-				this.labels = labels;
-			}	
-			this.series = result;
+			return {
+				name: series[index],
+				samples,
+				ysum
+			}
+		});
+		if (bad)
+			return;
+		if (timing) {
+			if (!timed)
+				return;
+			this.labels = [ this.formatTime(xmin), this.formatTime(xmax) ];
+		}
+		else {
+			this.labels = labels;
+		}	
+		this.series = result;
+		if (sum)
+			return;
+		if (timed) {
 			this.xmin = xmin;
 			this.xmax = xmax;
-			if (this.adjustMin) {
-				if (this.zero) {
-					if (ymin > 0)
-						ymin = 0;
-				}
-				this.ymin = ymin;
+		}
+		if (adjustMin) {
+			if (zero) {
+				if (ymin > 0)
+					ymin = 0;
 			}
-			if (this.adjustMax) {
-				if (this.zero) {
-					if (ymax < 0)
-						ymax = 0;
-				}
-				this.ymax = ymax;
+			this.ymin = ymin;
+		}
+		if (adjustMax) {
+			if (zero) {
+				if (ymax < 0)
+					ymax = 0;
 			}
-			if (this.adjustMin || this.adjustMax) {
-				if (this.ymin < this.ymax)
-					this.computeTicks();
-			}
+			this.ymax = ymax;
+		}
+		if (adjustMin || adjustMax) {
+			if (this.ymin < this.ymax)
+				this.computeTicks();
 		}
 	}
 	onMessage(msg) {
@@ -172,7 +182,6 @@ class UIChartNode extends UIControlNode {
 			payload = Number(msg.payload);
 			if (isNaN(payload)) {
 				this.labels = null;
-				this.ticks = null;
 				this.series = null;
 			}
 			else {
@@ -228,6 +237,7 @@ class UIChartNode extends UIControlNode {
 		
 		this.xmin = undefined;
 		this.xmax = undefined;
+		
 		if (config.ymin == "") {
 			this.adjustMin = true;
 			this.ymin = undefined;
@@ -244,15 +254,35 @@ class UIChartNode extends UIControlNode {
 			this.adjustMax = false;
 			this.ymax = Number(config.ymax);
 		}
-		this.zero = false;
 		
+		this.sum = false;
+		this.timed = false;
+		this.zero = false;
 		switch (config.chartType) {
-		case "bar": Template = REDChartVerticalBar; this.zero = true; break;
-		case "horizontalBar": Template = REDChartHorizontalBar; this.zero = true; break;
-		case "pie":  Template = REDChartPie; break;
-		case "polar-area":  Template = REDChartPolarArea; this.zero = true; break;
-		case "radar": Template = REDChartRadar; this.zero = true; break;
-		default: Template = REDChartLine; break;
+		case "bar":
+			this.zero = true;
+			Template = REDChartVerticalBar;
+			break;
+		case "horizontalBar":
+			this.zero = true;
+			Template = REDChartHorizontalBar;
+			break;
+		case "pie":
+			this.sum = true;
+			Template = REDChartPie;
+			break;
+		case "polar-area":
+			this.zero = true;
+			Template = REDChartPolarArea;
+			break;
+		case "radar":
+			this.zero = true;
+			Template = REDChartRadar;
+			break;
+		default:
+			this.timed = true;
+			Template = REDChartLine;
+			break;
 		}
 		this.Template = this.lookupTemplate(config, Template);
 	}
@@ -268,7 +298,7 @@ class UIChartNode extends UIControlNode {
 		if (this.title)
 			nticks--;
 		this.nticks = (2 * nticks) - 1;
-		if (this.adjustMin || this.adjustMax)
+		if (this.adjustMin || this.adjustMax || this.sum)
 			return;
 		this.computeTicks();
 	}
@@ -390,53 +420,54 @@ let REDChartLine = Container.template($ => ({
 					this.data = data;
 				}
 				onDraw(port) {
-					let { series, labels, ticks, nodata, xmin, xmax, ymin, ymax, colors, margins } = this.data;
+					let { series, labels, ticks, nodata, margins } = this.data;
 					let width = port.width;
 					let height = port.height;
-					if (!series) {
-						port.drawStyle(nodata,  REDTheme.styles.textName, 0, 0, width, height);
+					if (!series || !labels || !ticks) {
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
 						return;
 					}
 					let { left, right, top, bottom } = margins;
+					let gray = REDTheme.colors.halfGray;
+					const styleX = REDTheme.styles.chartX;
+					const styleY = REDTheme.styles.chartY;
 					
-					let color = REDTheme.colors.halfGray;
+					const labelsLength = labels.length;
+					const ticksLength = ticks.length;
 					
-					if (ticks) {
-						let style = REDTheme.styles.chartY;
-						let index = 0;
-						let length = ticks.length;
-						let y = height - 30;
-						let tickWidth = port.width - left - right;
-						let tickHeight = (height - 40) / (length - 1);
-						while (index < length) {
-							const iy = Math.round(y);
-							port.fillColor(color, left, iy - 1, tickWidth, 1);
-							port.drawStyle(ticks[index], style, 0, iy - 10, left - 5, 15);
-							index++;
-							y -= tickHeight;
-						}
+					let graphWidth = width - left - padding - padding - right;
+					let graphHeight = height - top - padding - padding - bottom;
+					
+					let labelWidth = graphWidth / (labelsLength - 1);
+					const tickWidth = padding + graphWidth + padding;
+					const labelHeight = padding + graphHeight + padding;
+					const tickHeight = graphHeight / (ticksLength - 1);
+				
+					let tickIndex = 0;
+					let tickY = top + padding + graphHeight;
+					while (tickIndex < ticksLength) {
+						const iy = Math.round(tickY);
+						port.fillColor(gray, left, iy - 1, tickWidth, 1);
+						port.drawStyle(ticks[tickIndex], styleY, 0, iy - 10, left - 5, 15);
+						tickIndex++;
+						tickY -= tickHeight;
 					}
-					if (labels) {
-						let style = REDTheme.styles.chartX;
-						let index = 0;
-						let length = labels.length;
-						let x = left + 10;
-						let h = height - 20;
-						let delta = (width - right - left - 20) / (length - 1);
-						let offset = 0;
-						while (index < length) {
-							const ix = Math.round(x);
-							port.fillColor(color, ix - 1,  0, 1, h);
-							
-							const label = labels[index];
-							const size = (style.measure(label).width + 10) >> 1;
-							if (offset < ix - size) {
-								port.drawStyle(label, style, ix - 30, h, 60, 15);
-								offset = ix + size;
-							}
-							index++;
-							x += delta;
+					
+					let labelX = left + padding;
+					let labelIndex = 0;
+					let offset = 0;
+					port.fillColor(gray, labelX, top, 1, labelHeight);
+					while (labelIndex < labelsLength) {
+						const ix = Math.round(labelX);
+						const label = labels[labelIndex];
+						const size = (styleX.measure(label).width + 10) >> 1;
+						if (offset < ix - size) {
+							port.drawStyle(label, styleX, ix - 30, labelHeight, 60, 15);
+							offset = ix + size;
 						}
+						labelX += labelWidth;
+						labelIndex++;
+						port.fillColor(gray, labelX, top, 1, labelHeight);
 					}
 				}
 			},
@@ -488,11 +519,11 @@ let REDChartVerticalBar = Container.template($ => ({
 					this.data = data;
 				}
 				onDraw(port) {
-					const { series, labels, ticks, nodata, xmin, xmax, ymin, ymax, colors, margins } = this.data;
+					const { series, labels, ticks, nodata, ymin, ymax, colors, margins } = this.data;
 					const width = port.width;
 					const height = port.height;
 					if (!series) {
-						port.drawStyle(nodata,  REDTheme.styles.textName, 0, 0, width, height);
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
 						return;
 					}
 					const { left, right, top, bottom } = margins;
@@ -544,7 +575,7 @@ let REDChartVerticalBar = Container.template($ => ({
 						while (serieIndex < seriesLength) {
 							const color = colors[serieIndex];
 							const sample = series[serieIndex].samples[labelIndex];
-							const barHeight = Math.round((sample.y - ymin) * barRatio);
+							const barHeight = Math.round((sample - ymin) * barRatio);
 							port.fillColor(color, barX, barY - barHeight, barWidth, barHeight);
 							barX += barWidth;
 							serieIndex++;
@@ -558,7 +589,6 @@ let REDChartVerticalBar = Container.template($ => ({
 		}),
 	],
 }));
-
 
 class REDChartHorizontalBarBehavior extends REDBehavior {
 	onCreate(container, data) {
@@ -598,11 +628,11 @@ let REDChartHorizontalBar = Container.template($ => ({
 					this.data = data;
 				}
 				onDraw(port) {
-					const { series, labels, ticks, nodata, xmin, xmax, ymin, ymax, colors, margins } = this.data;
+					const { series, labels, ticks, nodata, ymin, ymax, colors, margins } = this.data;
 					const width = port.width;
 					const height = port.height;
 					if (!series) {
-						port.drawStyle(nodata,  REDTheme.styles.textName, 0, 0, width, height);
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
 						return;
 					}
 					const { left, right, top, bottom } = margins;
@@ -651,7 +681,7 @@ let REDChartHorizontalBar = Container.template($ => ({
 						while (serieIndex < seriesLength) {
 							const color = colors[serieIndex];
 							const sample = series[serieIndex].samples[labelIndex];
-							const barWidth = Math.round((sample.y - ymin) * barRatio);
+							const barWidth = Math.round((sample - ymin) * barRatio);
 							port.fillColor(color, barX, barY, barWidth, barHeight);
 							barY += barHeight;
 							serieIndex++;
@@ -659,6 +689,117 @@ let REDChartHorizontalBar = Container.template($ => ({
 						labelY += labelHeight;
 						labelIndex++;
 						port.fillColor(gray, left, labelY, labelWidth, 1);
+					}
+				}
+			},
+		}),
+	],
+}));
+
+class REDChartPieBehavior extends REDBehavior {
+	onCreate(container, data) {
+		super.onCreate(container, data);
+	}
+	onUpdate(container) {
+		const data = this.data;
+		let { series, labels, colors } = data;
+		const port = container.last;
+		const separator = port.previous;
+		const shapes = separator.previous;
+		if (!series || !labels) {
+			shapes.empty(0);
+			return;
+		}
+		let style = REDTheme.styles.chartX;
+
+		const seriesLength = series.length;
+		const labelsLength = labels.length;
+		let serieIndex, labelIndex;
+
+		let shapesLength = shapes.length;
+		if (shapesLength > labelsLength)
+			shapes.empty(labelsLength);
+		else {
+			while (shapesLength < labelsLength) {
+				const stroke = colors[shapesLength];
+				shapes.add(new Shape(undefined, { left:0, right:0, top:0, bottom:0, skin:new Skin({ stroke }) }));
+				shapesLength++;
+			}
+		}
+		
+		const width = container.width;
+		let height = container.height;
+		if (data.title)
+			height -= UNIT;
+		let r = Math.min(width - padding - padding, height - padding) / 2;
+		const cx = width >> 1;
+		const cy = height >> 1;
+		const dr = r / seriesLength;
+		
+		const path = new Outline.CanvasPath;
+		let radius = r;
+		serieIndex = 0;
+		while (serieIndex < seriesLength) {
+			path.arc(cx, cy, radius, 0, 2 * Math.PI);
+			radius -= dr;
+			serieIndex++;
+		}
+		separator.strokeOutline = Outline.stroke(path, 1, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+		
+		const paths = new Array(labelsLength).fill(null);
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			paths[labelIndex] = new Outline.CanvasPath;
+			labelIndex++;
+		}
+		r -= dr / 2;
+		serieIndex = 0;
+		while (serieIndex < seriesLength) {
+			const serie = series[serieIndex];
+			const samples = serie.samples;
+			const ysum = serie.ysum;
+			let angle = (3 * Math.PI) / 2;
+			labelIndex = 0;
+			while (labelIndex < labelsLength) {
+				const path = paths[labelIndex];
+				const delta = (2 * Math.PI * samples[labelIndex]) / ysum;
+				path.arc(cx, cy, r, angle, angle + delta);
+				angle += delta;
+				labelIndex++;
+			}
+			r -= dr;
+			serieIndex++;
+		}
+		let shape = shapes.first;
+		labelIndex = 0;
+		while (labelIndex < labelsLength) {
+			shape.strokeOutline = Outline.stroke(paths[labelIndex], dr, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
+			shape = shape.next;
+			labelIndex++;
+		}
+	}
+};
+let REDChartPie = Container.template($ => ({
+	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDChartPieBehavior,
+	contents: [
+		$.title ? Label($, { left:0, right:0, top:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
+		Container($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			contents: [
+			],
+		}),
+		Shape($, { left:0, right:0, top:$.title ? UNIT : 0, bottom:0, skin:new Skin({ stroke:REDTheme.colors.halfGray }) }),
+		Port($, {
+			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
+			Behavior: class extends Behavior {
+				onCreate(port, data) {
+					this.data = data;
+				}
+				onDraw(port) {
+					const { series, labels, nodata } = this.data;
+					if (!series || !labels) {
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
+						return;
 					}
 				}
 			},
@@ -757,7 +898,7 @@ class REDChartPolarAreaBehavior extends REDBehavior {
 			angle = (3 * Math.PI) / 2;
 			labelIndex = 0;
 			while (labelIndex < labelsLength) {
-				let ratio = (samples[labelIndex].y - ymin) / (ymax - ymin);
+				let ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
 				path.moveTo(cx, cy);
 				path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
 				path.arc(cx, cy, ratio * r, angle, angle + delta);
@@ -792,11 +933,11 @@ let REDChartPolarArea = Container.template($ => ({
 				}
 				onDraw(port) {
 					const { series, labels, ticks, nodata, labelXs, labelYs } = this.data;
-					const styleX = REDTheme.styles.chartX;
 					if (!series || !labels || !ticks) {
-						port.drawStyle(nodata,  styleX, 0, 0, port.width, port.height);
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
 						return;
 					}
+					const styleX = REDTheme.styles.chartX;
 					const labelsLength = labels.length;
 					let labelIndex = 0;
 					while (labelIndex < labelsLength) {
@@ -918,11 +1059,11 @@ class REDChartRadarBehavior extends REDBehavior {
 			const path = new Outline.FreeTypePath;
 			const samples = series[serieIndex].samples;
 			labelIndex = 0;
-			let ratio = (samples[labelIndex].y - ymin) / (ymax - ymin);
+			let ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
 			path.beginSubpath(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
 			labelIndex++;
 			while (labelIndex < labelsLength) {
-				ratio = (samples[labelIndex].y - ymin) / (ymax - ymin);
+				ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
 				path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
 				labelIndex++;
 			}
@@ -953,11 +1094,11 @@ let REDChartRadar = Container.template($ => ({
 				}
 				onDraw(port) {
 					const { series, labels, ticks, nodata, labelXs, labelYs } = this.data;
-					const styleX = REDTheme.styles.chartX;
 					if (!series || !labels || !ticks) {
-						port.drawStyle(nodata,  styleX, 0, 0, port.width, port.height);
+						port.drawStyle(nodata,  REDTheme.styles.chartNoData, 0, 0, port.width, port.height);
 						return;
 					}
+					const styleX = REDTheme.styles.chartX;
 					const labelsLength = labels.length;
 					let labelIndex = 0;
 					while (labelIndex < labelsLength) {
@@ -966,121 +1107,6 @@ let REDChartRadar = Container.template($ => ({
 						let y = labelYs[labelIndex];
 						port.drawStyle(label, styleX, x - 30, y - 10, 60, 16);
 						labelIndex++;
-					}
-				}
-			},
-		}),
-	],
-}));
-
-class REDChartPieBehavior extends REDBehavior {
-	onCreate(container, data) {
-		super.onCreate(container, data);
-	}
-	onUpdate(container) {
-		const data = this.data;
-		let { series, labels, ticks, ymin, ymax, colors } = data;
-		const port = container.last;
-		const separator = port.previous;
-		const shapes = separator.previous;
-		if (!series || !labels || !ticks) {
-			shapes.empty(0);
-			return;
-		}
-		let style = REDTheme.styles.chartX;
-
-		const seriesLength = series.length;
-		const labelsLength = labels.length;
-		let serieIndex, labelIndex;
-
-		let shapesLength = shapes.length;
-		if (shapesLength > labelsLength)
-			shapes.empty(labelsLength);
-		else {
-			while (shapesLength < labelsLength) {
-				const stroke = colors[shapesLength];
-				shapes.add(new Shape(undefined, { left:0, right:0, top:0, bottom:0, skin:new Skin({ stroke }) }));
-				shapesLength++;
-			}
-		}
-		
-		const width = container.width;
-		let height = container.height;
-		if (data.title)
-			height -= UNIT;
-		let r = Math.min(width - padding - padding, height - padding) / 2;
-		const cx = width >> 1;
-		const cy = height >> 1;
-		const dr = r / seriesLength;
-		
-		const path = new Outline.CanvasPath;
-		let radius = r;
-		serieIndex = 0;
-		while (serieIndex < seriesLength) {
-			path.arc(cx, cy, radius, 0, 2 * Math.PI);
-// 			path.closePath();
-			radius -= dr;
-			serieIndex++;
-		}
-		separator.strokeOutline = Outline.stroke(path, 1, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-		
-		const paths = new Array(labelsLength).fill(null);
-		labelIndex = 0;
-		while (labelIndex < labelsLength) {
-			paths[labelIndex] = new Outline.CanvasPath;
-			labelIndex++;
-		}
-		r -= dr / 2;
-		serieIndex = 0;
-		while (serieIndex < seriesLength) {
-			const serie = series[serieIndex];
-			const samples = serie.samples;
-			const ysum = serie.ysum;
-			let angle = (3 * Math.PI) / 2;
-			labelIndex = 0;
-			while (labelIndex < labelsLength) {
-				const path = paths[labelIndex];
-				const delta = (2 * Math.PI * samples[labelIndex].y) / ysum;
-// 				path.moveTo(cx + (r * Math.cos(angle)), cy + (r * Math.sin(angle)));
-				path.arc(cx, cy, r, angle, angle + delta);
-// 				path.closePath();
-				angle += delta;
-				labelIndex++;
-			}
-			r -= dr;
-			serieIndex++;
-		}
-		let shape = shapes.first;
-		labelIndex = 0;
-		while (labelIndex < labelsLength) {
-			shape.strokeOutline = Outline.stroke(paths[labelIndex], dr, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
-			shape = shape.next;
-			labelIndex++;
-		}
-	}
-};
-let REDChartPie = Container.template($ => ({
-	left:$.left, width:$.width, top:$.top, height:$.height, clip:true, Behavior:REDChartPieBehavior,
-	contents: [
-		$.title ? Label($, { left:0, right:0, top:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
-		Container($, {
-			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
-			contents: [
-			],
-		}),
-		Shape($, { left:0, right:0, top:$.title ? UNIT : 0, bottom:0, skin:new Skin({ stroke:REDTheme.colors.halfGray }) }),
-		Port($, {
-			left:0, right:0, top:$.title ? UNIT : 0, bottom:0,
-			Behavior: class extends Behavior {
-				onCreate(port, data) {
-					this.data = data;
-				}
-				onDraw(port) {
-					const { series, labels, ticks, nodata, labelXs, labelYs } = this.data;
-					const styleX = REDTheme.styles.chartX;
-					if (!series || !labels || !ticks) {
-						port.drawStyle(nodata,  styleX, 0, 0, port.width, port.height);
-						return;
 					}
 				}
 			},

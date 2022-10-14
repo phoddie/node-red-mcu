@@ -174,53 +174,80 @@ class UIChartNode extends UIControlNode {
 				this.computeTicks();
 		}
 	}
+	pushPayload(msg) {
+		const payload = Number(msg.payload);
+		if (isNaN(payload)) {
+			this.labels = null;
+			this.series = null;
+			return;
+		}
+		let { ymin, ymax, series, labels } = this;
+		if (this.timed) {
+			if (!series)
+				this.series = series = [];
+			let name = msg.topic;
+			let serie = series.find(serie => serie.name == name);
+			if (!serie) {
+				serie = { name, samples:[] };
+				series.push(serie);
+			}
+			let when = Date.now();
+			serie.samples.push({ x:when, y:payload });
+			if (this.xmin == undefined)
+				this.xmin = when;
+			const xmin = this.xmax - this.duration;
+			const xmax = this.xmax = when;
+			if (this.xmin < xmin) {
+				this.xmin = xmin;
+				series.forEach(serie => {
+					let index = serie.samples.findIndex(sample => sample.x >= xmin);
+					if (index > 0) {
+						index--;
+						if (index > 0) {
+							serie.samples.splice(0, index);
+						}
+					}
+				});
+			}
+			this.labels = [ this.formatTime(xmin), this.formatTime(xmax) ];
+			if (this.adjustMin) {
+				if ((ymin == undefined) || (ymin > payload))
+					this.ymin = payload;
+			}
+		}
+		else {
+			if (!series)
+				this.series = series = [ { name:"", samples:[], ysum:0 } ];
+			if (!labels)
+				this.labels = labels = [ ];
+			let name = msg.topic;
+			let index = labels.findIndex(label => label == name);
+			if (index < 0) {
+				index = labels.length;
+				labels.push(name);
+			}
+			const serie = series[0];
+			const samples = serie.samples;
+			samples[index] = payload;
+			if (this.sum)
+				serie.ysum = samples.reduce((previousValue, currentValue) => previousValue + currentValue, 0);
+		}
+		if (this.adjustMax) {
+			if ((ymax == undefined) || (ymax < payload))
+				this.ymax = payload;
+		}
+		if (this.adjustMin || this.adjustMax) {
+			if (this.ymin < this.ymax)
+				this.computeTicks();
+		}
+	}
+	
 	onMessage(msg) {
 		let payload = msg.payload;
 		if ((typeof(payload) == "object") && Array.isArray(payload))
-			this.parsePayload(msg.payload);
-		else {
-			payload = Number(msg.payload);
-			if (isNaN(payload)) {
-				this.labels = null;
-				this.series = null;
-			}
-			else {
-				const { ymin, ymax, series } = this;
-				let name = msg.topic;
-				let serie = series.find(serie => serie.name == name);
-				if (!serie) {
-					serie = { name, samples:[] };
-					series.push(serie);
-				}
-				let when = Date.now();
-				serie.samples.push({ x:when, y:payload });
-				if (this.xmin == undefined)
-					this.xmin = when;
-				this.xmax = when;
-				const xmin = this.xmax - this.duration;
-				if (this.xmin < xmin) {
-					this.xmin = xmin;
-					series.forEach(serie => {
-						const index = serie.samples.findIndex(sample => sample.x >= xmin);
-						if (index > 0)
-							serie.samples.splice(0, index);
-					});
-				}
-				this.labels = [ this.formatTime(xmin), this,formatTime(xmax) ];
-				if (this.adjustMin) {
-					if ((ymin == undefined) || (ymin > payload))
-						this.ymin = payload;
-				}
-				if (this.adjustMax) {
-					if ((ymax == undefined) || (ymax < payload))
-						this.ymax = payload;
-				}
-				if (this.adjustMin || this.adjustMax) {
-					if (this.ymin < this.ymax)
-						this.computeTicks();
-				}
-			}
-		}	
+			this.parsePayload(payload);
+		else
+			this.pushPayload(msg);
 		this.container?.delegate("onUpdate");
 		this.send(msg);
 	}
@@ -758,14 +785,17 @@ class REDChartPieBehavior extends REDBehavior {
 			const serie = series[serieIndex];
 			const samples = serie.samples;
 			const ysum = serie.ysum;
-			let angle = (3 * Math.PI) / 2;
-			labelIndex = 0;
-			while (labelIndex < labelsLength) {
-				const path = paths[labelIndex];
-				const delta = (2 * Math.PI * samples[labelIndex]) / ysum;
-				path.arc(cx, cy, r, angle, angle + delta);
-				angle += delta;
-				labelIndex++;
+			if (ysum) {
+				let angle = (3 * Math.PI) / 2;
+				labelIndex = 0;
+				while (labelIndex < labelsLength) {
+					const path = paths[labelIndex];
+					const delta = (2 * Math.PI * samples[labelIndex]) / ysum;
+					if (delta)
+						path.arc(cx, cy, r, angle, angle + delta);
+					angle += delta;
+					labelIndex++;
+				}
 			}
 			r -= dr;
 			serieIndex++;
@@ -899,11 +929,13 @@ class REDChartPolarAreaBehavior extends REDBehavior {
 			labelIndex = 0;
 			while (labelIndex < labelsLength) {
 				let ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
-				path.moveTo(cx, cy);
-				path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
-				path.arc(cx, cy, ratio * r, angle, angle + delta);
-				path.lineTo(cx, cy);
-				path.closePath();
+				if (ratio) {
+					path.moveTo(cx, cy);
+					path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
+					path.arc(cx, cy, ratio * r, angle, angle + delta);
+					path.lineTo(cx, cy);
+					path.closePath();
+				}
 				angle += delta
 				labelIndex++;
 			}
@@ -1060,14 +1092,16 @@ class REDChartRadarBehavior extends REDBehavior {
 			const samples = series[serieIndex].samples;
 			labelIndex = 0;
 			let ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
-			path.beginSubpath(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
-			labelIndex++;
-			while (labelIndex < labelsLength) {
-				ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
-				path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
+			if (ratio) {
+				path.beginSubpath(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
 				labelIndex++;
+				while (labelIndex < labelsLength) {
+					ratio = (samples[labelIndex] - ymin) / (ymax - ymin);
+					path.lineTo(cx + (ratio * xs[labelIndex]), cy + (ratio * ys[labelIndex]));
+					labelIndex++;
+				}
+				path.endSubpath();
 			}
-			path.endSubpath();
 			shape.strokeOutline = Outline.stroke(path, 2, Outline.LINECAP_BUTT, Outline.LINEJOIN_MITER);
 			serieIndex++;
 			shape = shape.next;

@@ -1,12 +1,14 @@
 {
 	"include": [
-		"../nodes/ui/manifest.json"
+		"../nodes/ui/manifest.json",
+		"../nodes/random/manifest.json",
+		"../nodes/trigger/manifest.json"
 	],
 	"creation": {
 		"keys": {
 			"available": 128
 		},
-		"stack": 1024
+		"stack": 2048
 	},
 	"config": {
 		"ui_text_input": true

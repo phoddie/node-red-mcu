@@ -122,7 +122,7 @@
         "type": "ui_tab",
         "name": "Controls",
         "icon": "dashboard",
-        "order": 4,
+        "order": 3,
         "disabled": false,
         "hidden": false
     },
@@ -131,7 +131,7 @@
         "type": "ui_tab",
         "name": "Layouts",
         "icon": "dashboard",
-        "order": 6,
+        "order": 5,
         "disabled": false,
         "hidden": false
     },
@@ -172,7 +172,7 @@
         "type": "ui_tab",
         "name": "Gauges",
         "icon": "dashboard",
-        "order": 5,
+        "order": 4,
         "disabled": false,
         "hidden": false
     },
@@ -255,7 +255,7 @@
         "type": "ui_tab",
         "name": "Pickers",
         "icon": "dashboard",
-        "order": 3,
+        "order": 7,
         "disabled": false,
         "hidden": false
     },
@@ -275,7 +275,7 @@
         "type": "ui_tab",
         "name": "Notifications",
         "icon": "dashboard",
-        "order": 2,
+        "order": 6,
         "disabled": false,
         "hidden": false
     },
@@ -318,6 +318,37 @@
         "order": 2,
         "disp": false,
         "width": "36",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2f2c93a0e963bf61",
+        "type": "ui_tab",
+        "name": "Charts (Real Time)",
+        "icon": "dashboard",
+        "order": 2,
+        "disabled": false,
+        "hidden": false
+    },
+    {
+        "id": "9ab790c6cf8856b4",
+        "type": "ui_group",
+        "name": "Charts Time",
+        "tab": "2f2c93a0e963bf61",
+        "order": 2,
+        "disp": false,
+        "width": "36",
+        "collapse": false,
+        "className": ""
+    },
+    {
+        "id": "2ce20b44340d76dd",
+        "type": "ui_group",
+        "name": "Trigger",
+        "tab": "2f2c93a0e963bf61",
+        "order": 1,
+        "disp": false,
+        "width": "6",
         "collapse": false,
         "className": ""
     },
@@ -1435,68 +1466,22 @@
         ]
     },
     {
-        "id": "5a505d22cce17109",
-        "type": "inject",
-        "z": "43412a74034aa593",
-        "name": "",
-        "props": [
-            {
-                "p": "payload"
-            },
-            {
-                "p": "topic",
-                "vt": "str"
-            }
-        ],
-        "repeat": "1",
-        "crontab": "",
-        "once": true,
-        "onceDelay": 0.1,
-        "topic": "",
-        "payload": "",
-        "payloadType": "date",
-        "x": 210,
-        "y": 1720,
-        "wires": [
-            [
-                "d22ff5a8a399f3c7",
-                "f70232b2adcf11d0",
-                "1d117765e7558681"
-            ]
-        ]
-    },
-    {
-        "id": "d22ff5a8a399f3c7",
-        "type": "function",
-        "z": "43412a74034aa593",
-        "name": "random",
-        "func": "msg.payload = Math.round(Math.random() * 100);\nmsg.topic = \"random\";\nreturn msg;\n",
-        "outputs": 1,
-        "noerr": 0,
-        "initialize": "",
-        "finalize": "",
-        "libs": [],
-        "x": 220,
-        "y": 1820,
-        "wires": [
-            []
-        ]
-    },
-    {
         "id": "f70232b2adcf11d0",
         "type": "function",
         "z": "43412a74034aa593",
         "name": "sine",
-        "func": "let angle = msg.payload % 360;\nmsg.payload = 50+ Math.round(Math.sin(angle*Math.PI/180) * 50);\nmsg.topic = \"sine\";\nreturn msg;\n",
+        "func": "let angle = Date.now() % 360;\nmsg.payload = 50+ Math.round(Math.sin(angle*Math.PI/180) * 50);\nmsg.topic = \"sine\";\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 210,
-        "y": 1880,
+        "x": 510,
+        "y": 2240,
         "wires": [
-            []
+            [
+                "2a89de9f0db6f4e2"
+            ]
         ]
     },
     {
@@ -1504,16 +1489,18 @@
         "type": "function",
         "z": "43412a74034aa593",
         "name": "cosine",
-        "func": "let angle = msg.payload % 360;\nmsg.payload = 50+ Math.round(Math.cos(angle*Math.PI/180) * 50);\nmsg.topic = \"cosine\";\nreturn msg;\n",
+        "func": "let angle = Date.now() % 360;\nmsg.payload = 50+ Math.round(Math.cos(angle*Math.PI/180) * 50);\nmsg.topic = \"cosine\";\nreturn msg;\n",
         "outputs": 1,
         "noerr": 0,
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 210,
-        "y": 1940,
+        "x": 510,
+        "y": 2300,
         "wires": [
-            []
+            [
+                "2a89de9f0db6f4e2"
+            ]
         ]
     },
     {
@@ -1617,8 +1604,8 @@
         "topic": "topic",
         "topicType": "msg",
         "className": "",
-        "x": 430,
-        "y": 1780,
+        "x": 310,
+        "y": 1860,
         "wires": [
             [
                 "b7840d9ba2535b43"
@@ -1636,8 +1623,8 @@
         "initialize": "",
         "finalize": "",
         "libs": [],
-        "x": 580,
-        "y": 1780,
+        "x": 500,
+        "y": 1860,
         "wires": [
             [
                 "611c48ae7302b866"
@@ -1655,7 +1642,7 @@
         "height": "5",
         "label": "Horizontal Bar",
         "chartType": "horizontalBar",
-        "legend": "false",
+        "legend": "true",
         "xformat": "HH:mm:ss",
         "interpolate": "linear",
         "nodata": "NO DATA",
@@ -1747,7 +1734,7 @@
         "height": "5",
         "label": "Polar Area",
         "chartType": "polar-area",
-        "legend": "false",
+        "legend": "true",
         "xformat": "HH:mm:ss",
         "interpolate": "linear",
         "nodata": "NO DATA",
@@ -1793,7 +1780,7 @@
         "height": "5",
         "label": "Radar",
         "chartType": "radar",
-        "legend": "false",
+        "legend": "true",
         "xformat": "HH:mm:ss",
         "interpolate": "linear",
         "nodata": "NO DATA",
@@ -1824,6 +1811,404 @@
         "y": 2080,
         "wires": [
             []
+        ]
+    },
+    {
+        "id": "7c195fd482e0f358",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Line",
+        "chartType": "line",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "",
+        "ymax": "",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 930,
+        "y": 2080,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "2a89de9f0db6f4e2",
+        "type": "change",
+        "z": "43412a74034aa593",
+        "name": "",
+        "rules": [
+            {
+                "t": "set",
+                "p": "payload",
+                "pt": "msg",
+                "to": "payload",
+                "tot": "msg"
+            }
+        ],
+        "action": "",
+        "property": "",
+        "from": "",
+        "to": "",
+        "reg": false,
+        "x": 720,
+        "y": 2240,
+        "wires": [
+            [
+                "7c195fd482e0f358",
+                "106520907dcd6c2e",
+                "bcbec39a48066901",
+                "6af7e2fc33110b1d",
+                "8604ccc642205647",
+                "3fbd5236090a894f"
+            ]
+        ]
+    },
+    {
+        "id": "43af57a3ef290509",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2ce20b44340d76dd",
+        "order": 1,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Start",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "1",
+        "payloadType": "num",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 2220,
+        "wires": [
+            [
+                "8127f36ab04058da"
+            ]
+        ]
+    },
+    {
+        "id": "8127f36ab04058da",
+        "type": "trigger",
+        "z": "43412a74034aa593",
+        "name": "",
+        "op1": "1",
+        "op2": "0",
+        "op1type": "str",
+        "op2type": "str",
+        "duration": "-250",
+        "extend": false,
+        "overrideDelay": false,
+        "units": "ms",
+        "reset": "0",
+        "bytopic": "all",
+        "topic": "topic",
+        "outputs": 1,
+        "x": 320,
+        "y": 2240,
+        "wires": [
+            [
+                "f70232b2adcf11d0",
+                "1d117765e7558681",
+                "f076544b1f098a5a"
+            ]
+        ]
+    },
+    {
+        "id": "074931595ceb1fee",
+        "type": "ui_button",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "2ce20b44340d76dd",
+        "order": 2,
+        "width": "3",
+        "height": "1",
+        "passthru": false,
+        "label": "Stop",
+        "tooltip": "",
+        "color": "",
+        "bgcolor": "",
+        "className": "",
+        "icon": "",
+        "payload": "0",
+        "payloadType": "num",
+        "topic": "topic",
+        "topicType": "msg",
+        "x": 130,
+        "y": 2260,
+        "wires": [
+            [
+                "8127f36ab04058da"
+            ]
+        ]
+    },
+    {
+        "id": "3fbd5236090a894f",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Vertical Bar",
+        "chartType": "bar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 950,
+        "y": 2140,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "106520907dcd6c2e",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Horizontal Bar",
+        "chartType": "horizontalBar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 960,
+        "y": 2200,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "bcbec39a48066901",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Pie",
+        "chartType": "pie",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 930,
+        "y": 2260,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "6af7e2fc33110b1d",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Polar Area",
+        "chartType": "polar-area",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 950,
+        "y": 2320,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "8604ccc642205647",
+        "type": "ui_chart",
+        "z": "43412a74034aa593",
+        "name": "",
+        "group": "9ab790c6cf8856b4",
+        "order": 1,
+        "width": "6",
+        "height": "5",
+        "label": "Radar",
+        "chartType": "radar",
+        "legend": "false",
+        "xformat": "HH:mm:ss",
+        "interpolate": "linear",
+        "nodata": "",
+        "dot": false,
+        "ymin": "0",
+        "ymax": "100",
+        "removeOlder": 1,
+        "removeOlderPoints": "",
+        "removeOlderUnit": "1",
+        "cutout": 0,
+        "useOneColor": false,
+        "useUTC": false,
+        "colors": [
+            "#1f77b4",
+            "#aec7e8",
+            "#ff7f0e",
+            "#2ca02c",
+            "#98df8a",
+            "#d62728",
+            "#ff9896",
+            "#9467bd",
+            "#c5b0d5"
+        ],
+        "outputs": 1,
+        "useDifferentColor": false,
+        "className": "",
+        "x": 930,
+        "y": 2380,
+        "wires": [
+            []
+        ]
+    },
+    {
+        "id": "f076544b1f098a5a",
+        "type": "function",
+        "z": "43412a74034aa593",
+        "name": "random",
+        "func": "msg.payload = Math.round(100 * Math.random());\nmsg.topic = \"random\";\nreturn msg;",
+        "outputs": 1,
+        "noerr": 0,
+        "initialize": "",
+        "finalize": "",
+        "libs": [],
+        "x": 520,
+        "y": 2180,
+        "wires": [
+            [
+                "2a89de9f0db6f4e2"
+            ]
         ]
     }
 ]

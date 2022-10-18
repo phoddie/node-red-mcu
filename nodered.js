@@ -1251,7 +1251,9 @@ class CompatibiltyNode extends Node {
 	#send;
 
 	constructor(id, flow, name, module) {
-		super(id, flow, name);
+		super(id, flow, undefined);
+		if (name)
+			this.name = name;
 		this.#module = module;
 	}
 	onStart(config) {

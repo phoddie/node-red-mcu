@@ -1246,20 +1246,20 @@ class MQTTOutNode extends Node {
 
 const CompatibilityEvents = Object.freeze(["input" /*, "close" */]);
 class CompatibiltyNode extends Node {
-	#module;
-	#events = {};
+	#events;		// overloaded during constructor & onStart to hold module reference; module reference not needed after that
 	#send;
 
 	constructor(id, flow, name, module) {
-		super(id, flow, undefined);
-		if (name)
-			this.name = name;
-		this.#module = module;
+		super(id, flow);
+		this.name = name;
+		this.#events = module;
 	}
 	onStart(config) {
 		super.onStart(config);
 
-		this.#module(config);
+		const module = this.#events;
+		this.#events = {};
+		module.call(this, config);
 	}
 	onMessage(msg, done) {
 		this.#events.input?.forEach(input => input.call(this, msg, this.#send, done));

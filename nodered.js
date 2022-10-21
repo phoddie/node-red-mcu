@@ -156,9 +156,8 @@ class RED {
 			(type, id, name, flow) => {
 				let Class = nodeClasses.get(type) ?? compatibilityClasses?.get(type);
 				if (!Class) {	
-					const msg = `Unsupported Node "${type}"`; 
-					trace(msg, "\n");
-					throw new Error(msg);
+					trace(`Disabling unsupported node type "${type}"!\n`);
+					Class = UnknownNode;
 				}
 
 				if (Node.isPrototypeOf(Class))

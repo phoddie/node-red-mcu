@@ -393,8 +393,7 @@ class DebugNode extends Node {
 		this.#statusType = config.statusType;
 		this.#statusVal = config.statusVal;
 	}
-	onMessage(msg) {
-
+	onMessage(msg, done) {
 		// to prevent endless loops -> 21-debug.js:123
 		if (msg.status?.source?.id === this.id) {
 			done();
@@ -442,6 +441,8 @@ class DebugNode extends Node {
 				this.#oldStatus = statusVal;
 			}
 		}
+
+		done();
 	}
 
 	static type = "debug";

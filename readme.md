@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated September 28, 2022<br>
+Updated October 19, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -621,7 +621,7 @@ This prototype is a breadth-first effort to implement all the steps required to 
 
 The compatibility goal should be to provide the same behaviors as much as possible so that existing Node-RED developers can apply their knowledge and experience to embedded MCUs without encountered confusing and unnecessary differences. The goal is not to provide all the features of Node-RED, as some are impractical or impossible on the target class of devices.
 
-- [ ] Integrate embedded conversion into Deploy feature of Node-RED (excellent work is being done here by @@ralphwetzel with the [node-red-mcu-plugin](https://github.com/ralphwetzel/node-red-mcu-plugin))
+- [ ] Integrate embedded conversion into Deploy feature of Node-RED (excellent work is being done here by @ralphwetzel with the [node-red-mcu-plugin](https://github.com/ralphwetzel/node-red-mcu-plugin))
 
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.
@@ -652,7 +652,7 @@ The full Node-RED runtime optimizes this by building a map at start-up for the C
 
 The transformation and optimization of the Complete and Catch node structure by `nodered2mcu` is a bit obscure but the benefits are not: the runtime memory use and load are reduced so flows run more efficiently on constrained hardware.
 
-Status nodes may benefit from a similar optimization. This is an area for future exploration.
+Status nodes are implemented using the same optimization.
 
 ## Thank You
 This exploration was motivated by an extended conversation with [Nick O'Leary](https://github.com/knolleary) who patiently explained Node-RED to me at OpenJS World 2022. That clear and patient discussion gave me grounding to begin this effort.

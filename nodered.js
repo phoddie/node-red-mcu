@@ -364,13 +364,6 @@ class UnknownNode extends Node {
 	}
 }
 
-class CommentNode extends UnknownNode {
-	static type = "comment";
-	static {
-		RED.nodes.registerType(this.type, this);
-	}
-}
-
 class DebugNode extends Node {
 	#property;
 	#getter;

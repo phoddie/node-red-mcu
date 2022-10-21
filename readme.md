@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated October 19, 2022<br>
+Updated October 21, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -250,11 +250,11 @@ The Node-RED runtime executes the nodes and flows. This runtime architecture det
 This is a summary of what is implemented in the Node-RED for MCUs runtime:
 
 - [X] Nodes (details below)
-	- [X] Disabled nodes are ignored
+	- [X] Disabled nodes eliminated at build-time
 - [X] Flows
 	- [X] Multiple
 	- [X] Configuration
-	- [X] Ignore disabled flows
+	- [X] Disabled flows eliminated at build-time
 	- [ ] Environment variables defined in editor
 	- [ ] Sub-flows
 - [X] Links
@@ -281,6 +281,8 @@ This section lists the supported nodes. The implemented features are checked.
 
 ### Comment
 - [X] Supported
+
+Comment nodes are removed at build time.
 
 ### Debug
 - [X] Console output is displayed in the xsbug log pane
@@ -331,6 +333,11 @@ Function node implements support for calling `done()` if function's source code 
 
 ### Complete
 - [X] Implemented
+
+### Junction
+- [X] Supported
+
+Junction nodes are optimized out by `nodered2mcu` by replacing each junction with direct wiring between its inputs and outputs.
 
 ### GPIO In
 Implemented using "rpi-gpio in" node

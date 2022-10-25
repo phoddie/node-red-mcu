@@ -569,7 +569,7 @@ class FunctionNode extends Node {
 					for (let j = 0, length = output.length; j < length; j++)
 						output[j]._msgid = _msgid;
 				}
-				else
+				else if (output)
 					output._msgid = _msgid;
 			}
 		}

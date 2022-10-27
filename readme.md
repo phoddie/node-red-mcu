@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated October 21, 2022<br>
+Updated October 26, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -255,7 +255,7 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 	- [X] Multiple
 	- [X] Configuration
 	- [X] Disabled flows eliminated at build-time
-	- [ ] Environment variables defined in editor
+	- [X] Environment variables defined in editor
 	- [ ] Sub-flows
 - [X] Links
 - [X] Context
@@ -275,6 +275,17 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 - [X] Instantiation
 	- [X] Node-RED JSON transformed to JavaScript during build
 	- [X] 1:1 map from JSON type to class (maybe not always optimal)
+- [X] Environment variables
+	- [X] In TypedInput widget
+	- [X] In Function node via `env.get()`
+	- [X] In nested Groups
+	- [X] Built-ins (`NR_NODE_ID`, `NR_NODE_NAME`, `NR_NODE_PATH`, `NR_GROUP_ID`, `NR_GROUP_NAME`, `NR_FLOW_ID`, `NR_FLOW_NAME`)
+	- [ ] `$parent.`
+	- [ ] On Template node
+	- [ ] On "[any node property](https://nodered.org/docs/user-guide/environment-variables)"
+- [X] Groups
+	- [X] Groups with no environment variables eliminated at build-time
+	- [X] Environment variables
 
 ## Nodes
 This section lists the supported nodes. The implemented features are checked.
@@ -282,7 +293,7 @@ This section lists the supported nodes. The implemented features are checked.
 ### Comment
 - [X] Supported
 
-Comment nodes are removed at build time.
+Comment nodes are removed at build-time.
 
 ### Debug
 - [X] Console output is displayed in the xsbug log pane
@@ -295,8 +306,8 @@ Comment nodes are removed at build time.
 - [X] Access to Node context, flow context, and global context
 - [X] Report uncaught exceptions to Catch nodes
 - [X] Import modules (Setup)
+- [X] `env(()` to access flow's environment variables
 - [ ] When "On Start" returns Promise, queue received messages until ready
-- [ ] `env(()` to access flow's environment variables
 
 Function node implements support for calling `done()` if function's source code does not appear to do so. The check for the presence of `node.done()` is simpler than full Node-RED. Perhaps in the future Node-RED can export this setting in the flow so `nodered2mcu` doesn't need to try to duplicate it.
 
@@ -307,9 +318,9 @@ Function node implements support for calling `done()` if function's source code 
 - [X] "Repeat after"
 - [X] Property values msg., flow., global.
 - [X] Property values expression
+- [X] Environment variables
 - [ ] Interval between times
 - [ ] At a specific time
-- [ ] Environment variables
 
 ### Link Call
 - [X] Implemented
@@ -383,8 +394,8 @@ Implemented using ECMA-419 MQTT Client draft.
 - [X] Subscribe to topic with QoS 0
 - [X] Payload formats: UTF-8, buffer, JSON, and Base64
 - [X] Wildcards in topic
+- [X] Payload format: auto-detect 
 - [ ] Dynamic subscription
-- [ ] Payload format: auto-detect 
 
 ### MQTT Out
 - [X] Data formats: number, string, object, buffer
@@ -483,7 +494,8 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] Property values Boolean, timestamp, JSON, number, string, and buffer
 - [X] Replace within property value 
 - [X] msg., flow. and global. targets
-- [ ] Property values expression & environment variable
+- [X] Environment variable
+- [ ] Property value expression
 
 ### Switch
 - [X] Multiple rules

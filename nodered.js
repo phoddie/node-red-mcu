@@ -1073,25 +1073,30 @@ class MQTTBrokerNode extends Node {
 					if (ti === topic.length) {
 						switch (subscription.format) {
 							case "utf8":
-								msg.payload = String.fromArrayBuffer(payload);
+								payload = String.fromArrayBuffer(payload);		//@@ TextDecoder with fatal: false seems to be the intent here
 								break;
 							case "buffer":
-								msg.payload = payload;
 								break;
 							case "json":
 								try {
-									msg.payload = JSON.parse(String.fromArrayBuffer(payload));
+									payload = JSON.parse(String.fromArrayBuffer(payload));
 								}
 								catch {
-									trace("invalid JSON\n");		//@@ call error
+									this.error("invalid JSON");
 								}
 								break;
 							case "base64":
-								msg.payload = Base64.encode(payload);
+								payload = Base64.encode(payload);
 								break;
-							default:
-								throw new Error("unimplemented format");
+							default:		// "auto-detect"
+								try {
+									payload = String.fromArrayBuffer(payload);
+								}
+								catch {
+								}
+								break;
 						}
+						msg.payload = payload
 						subscription.node.send(msg);
 					}
 				}

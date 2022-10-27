@@ -79,6 +79,9 @@ class RED {
 			}
 			return "" + s;
 		}
+		static getSetting(node, name) {
+			return node.getSetting(name);
+		}
 		static prepareJSONataExpression() {
 			throw new Error("unimplemented");
 		}
@@ -148,8 +151,8 @@ class RED {
 
 		builder.build(
 			flows,
-			(id, name) => {
-				const flow = new Flow(id, name);
+			(id, name, env) => {
+				const flow = new Flow(id, name, env);
 				flows.set(id, flow);
 				return flow;
 			},
@@ -185,7 +188,7 @@ function nop() {
 }
 
 class Flow extends Map {
-	constructor(id, name) {
+	constructor(id, name, env) {
 		super();
 		const properties = {
 			id: {value: id},
@@ -193,10 +196,24 @@ class Flow extends Map {
 		};
 		if (name)
 			properties.name = {value: name};
+		if (env)
+			properties.env = {value: env};
 		Object.defineProperties(this, properties);
 	}
 	addNode(node) {
 		super.set(node.id, node);
+	}
+	getSetting(name) {
+        if ("NR_FLOW_NAME" === name)
+            return this.name;
+        if (("NR_FLOW_ID" === name) || ("NR_NODE_PATH" === name))
+            return this.id;
+
+		if (name.startsWith("$parent.")) {
+			throw new Error("$parent unimplemented!");
+		}
+
+		return this.env?.[name];
 	}
 	static {
 		this.prototype.getNode = this.prototype.get;
@@ -218,6 +235,8 @@ export class Node {
 		Object.defineProperties(this, properties);
 	}
 	onStart(config) {
+		if (config.g)
+			Object.defineProperty(this, "group", {value: this.#flow.getNode(config.g)});
 		const wires = config.wires;
 		if (wires) {
 			this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target)));
@@ -298,6 +317,18 @@ export class Node {
 	done(msg) {
 		this.makeDone(msg)();
 	}
+	getSetting(name) {
+        if ("NR_NODE_NAME" === name)
+			return this.name;
+        if ("NR_NODE_ID" === name)
+			return this.id;
+
+		const parent = this.group ?? this.#flow;
+		if ("NR_NODE_PATH" === name)
+			return parent.getSetting(name) + "/" + this.id; 
+
+		return parent.getSetting(name);
+	}
 	log(msg) {
 		this.trace(msg);
 	}
@@ -359,6 +390,28 @@ class UnknownNode extends Node {
 	send() {}
 
 	static type = "unknown";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
+class Group extends Node {
+	#env;
+
+	onStart(config) {
+		super.onStart(config);
+		this.#env = config.env;
+	}
+	getSetting(name) {
+		if ("NR_GROUP_NAME" == name)
+			return this.name;
+		if ("NR_GROUP_ID" == name)
+			return this.id;
+
+		return this.#env?.[name] ?? super.getSetting(name); 
+	}
+
+	static type = "group";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}
@@ -528,7 +581,7 @@ class FunctionNode extends Node {
 		try {
 			const context = this.context;
 			const initialize = config.initialize;
-			initialize?.(this, context, context.flow, context.global, this.#libs);
+			initialize?.(this, context, context.flow, context.global, this.#libs, {get: name => this.getSetting(name)});
 		}
 		catch (e) {
 			this.error(e);		//@@ what's the right way to handle this?
@@ -551,7 +604,7 @@ class FunctionNode extends Node {
 				}},
 				status: {value: status => this.status(status)}
 			});
-			msg = func(msg, node, context, context.flow, context.global, this.#libs);
+			msg = func(msg, node, context, context.flow, context.global, this.#libs, {get: name => this.getSetting(name)});
 			if (this.#doDone)
 				done();
 			if (msg)
@@ -576,7 +629,7 @@ class FunctionNode extends Node {
 		}
 		else
 			msg._msgid = _msgid;
-			
+
 		return super.send(msg);
 	}
 
@@ -1043,9 +1096,8 @@ class MQTTBrokerNode extends Node {
 				if (options.more)
 					throw new Error("fragmented receive unimplemented!");
 
-				const payload = this.#mqtt.read(count);
-				const msg = {topic: options.topic, QoS: Number(options.QoS)};
-				if (options.retain) msg.retain = true;
+				let payload = this.#mqtt.read(count);
+				const msg = {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
 
 				const topic = options.topic.split("/");
 				topic.shift();

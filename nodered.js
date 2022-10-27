@@ -548,7 +548,8 @@ class FunctionNode extends Node {
 				}},
 				send: {value: msg => {
 					this.send(msg, _msgid);
-				}}
+				}},
+				status: {value: status => this.status(status)}
 			});
 			msg = func(msg, node, context, context.flow, context.global, this.#libs);
 			if (this.#doDone)

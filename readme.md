@@ -504,7 +504,7 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] ==, !=, <, <=, >, >=, is between, is true, is false, is null, is not null, is of type, otherwise, has key
 - [X] flow., global., expression
 - [X] "recreate message sequences"
-- [ ] env variable
+- [X] env variable
 - [ ] is of type: buffer
 - [ ] contains, matches regexp, is empty, is not empty, sequence rules, JSONata exp
 

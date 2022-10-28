@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated October 26, 2022<br>
+Updated October 27, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -281,7 +281,7 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 	- [X] In nested Groups
 	- [X] Built-ins (`NR_NODE_ID`, `NR_NODE_NAME`, `NR_NODE_PATH`, `NR_GROUP_ID`, `NR_GROUP_NAME`, `NR_FLOW_ID`, `NR_FLOW_NAME`)
 	- [ ] `$parent.`
-	- [ ] On Template node
+	- [X] On Template node
 	- [ ] On "[any node property](https://nodered.org/docs/user-guide/environment-variables)"
 - [X] Groups
 	- [X] Groups with no environment variables eliminated at build-time
@@ -538,8 +538,9 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] Output as Plain text
 - [X] Output as parsed JSON
 - [X] msg.template
+- [X] `env.*`, `flow.*`, `global.*` substitutions
 - [ ] Output as parsed YAML
-- [ ] msg.* property (always msg.payload)
+- [ ] msg.* property (output always to msg.payload)
 
 The Template node uses the [mustache.js](https://github.com/janl/mustache.js) module.
 

@@ -21,6 +21,26 @@
 import {Node} from "nodered";
 import Mustache from "mustache";
 
+class Context extends Mustache.Context {
+	#node;
+	constructor(msg, node) {
+		super(msg);
+		this.#node = node;
+	}
+	lookup(name) {
+		const result = super.lookup(name);
+		if (result)
+			return result;
+
+		if (name.startsWith("env."))
+			return this.#node.getSetting(name.slice(4));
+		if (name.startsWith("flow."))
+			return this.#node.flow.get(name.slice(5));
+		if (name.startsWith("global."))
+			return globalContext.get(name.slice(7));
+	}
+}
+
 class Template extends Node {
 	#template;
 	#syntax;
@@ -38,7 +58,7 @@ class Template extends Node {
 		const template = this.#template ?? msg.template;
 		let result = template;
 		if ("mustache" === this.#syntax)
-			result = Mustache.render(template, msg);
+			result = Mustache.render(template, new Context(msg, this));
 		if ("json" === this.#output) {
 			try {
 				result = JSON.parse(result);

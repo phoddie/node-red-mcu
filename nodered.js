@@ -323,10 +323,10 @@ export class Node {
         if ("NR_NODE_ID" === name)
 			return this.id;
 
-		const parent = this.group ?? this.#flow;
 		if ("NR_NODE_PATH" === name)
-			return parent.getSetting(name) + "/" + this.id; 
+			return this.#flow.getSetting(name) + "/" + this.id; 
 
+		const parent = this.group ?? this.#flow;
 		return parent.getSetting(name);
 	}
 	log(msg) {

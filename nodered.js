@@ -293,15 +293,15 @@ export class Node {
 			return this.send(result);
 	}
 	status(status) {
+		const source = {
+			id: this.id
+		};
+
 		const msg = {
 			status: {
 				...status,
-				source: {
-					id: this.id,
-					type: this.constructor.type,
-					name: this.name
-				}
-			}
+			},
+			source
 		};
 
 		trace.left(JSON.stringify(msg));
@@ -310,6 +310,8 @@ export class Node {
 		if (!statuses)
 			return;
 		
+		source.type = this.constructor.type;
+		source.name = this.name;
 		for (let i = 0, length = statuses.length; i < length; i++)
 			RED.mcu.enqueue(msg, statuses[i]);
 	}

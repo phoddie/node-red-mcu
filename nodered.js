@@ -1384,6 +1384,10 @@ globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 	node.onCommand(options);
 }
 
+// placeholder for compatibility
+class Buffer extends Uint8Array {
+}
+
 class Console {
 	static log(...parts) {
 		trace(...parts, "\n");

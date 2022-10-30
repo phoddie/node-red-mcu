@@ -209,11 +209,10 @@ class Flow extends Map {
         if (("NR_FLOW_ID" === name) || ("NR_NODE_PATH" === name))
             return this.id;
 
-		if (name.startsWith("$parent.")) {
-			throw new Error("$parent unimplemented!");
-		}
+		if (name.startsWith("$parent."))
+			return "";
 
-		return this.env?.[name];
+		return this.env?.[name] ?? "";
 	}
 	static {
 		this.prototype.getNode = this.prototype.get;
@@ -322,7 +321,6 @@ export class Node {
 			return this.name;
         if ("NR_NODE_ID" === name)
 			return this.id;
-
 		if ("NR_NODE_PATH" === name)
 			return this.#flow.getSetting(name) + "/" + this.id; 
 
@@ -407,6 +405,9 @@ class Group extends Node {
 			return this.name;
 		if ("NR_GROUP_ID" == name)
 			return this.id;
+
+		if (name.startsWith("$parent."))
+			return super.getSetting(name.slice(8));
 
 		return this.#env?.[name] ?? super.getSetting(name); 
 	}

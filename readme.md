@@ -1,14 +1,14 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated October 29, 2022<br>
+Updated October 31, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
 
 Node-RED is built on Node.js and, consequently, runs where Node.js does: desktop computers and single-board computers like the Raspberry Pi. Because of the dependency on Node.js, Node-RED cannot run where Node cannot, notably the low-cost MCUs found in many IoT products and popular in the maker community.
 
-These MCUs are able to run the same JavaScript language used by Node-RED thanks to the XS JavaScript engine in the [Moddable SDK](https://github.com/Moddable-OpenSource/moddable). However, these MCUs have much less RAM, much less CPU power, and an RTOS instead of a Linux-based OS. As a result, they require a very different implementation. A typical target microcontroller is the ESP32, running FreeRTOS with about 280&nbsp;KB of free RAM and a 160&nbsp;MHz CPU clock. 
+These MCUs are able to run the same JavaScript language used by Node-RED thanks to the XS JavaScript engine in the [Moddable SDK](https://github.com/Moddable-OpenSource/moddable). However, these MCUs have much less RAM, much less CPU power, and an RTOS instead of a Unix-derived OS. As a result, they require a very different implementation. A typical target microcontroller is the ESP32, running FreeRTOS with about 280&nbsp;KB of free RAM and a 160&nbsp;MHz CPU clock. 
 
 The implementation converts the JSON descriptions output by Node-RED to JavaScript objects that are compatible with MCUs. The implementation uses standard JavaScript running in the Moddable SDK runtime. The [ECMA-419](https://419.ecma-international.org) standard, the ECMAScript® Embedded Systems API Specification, is used for I/O such as access to pin hardware and networking.
 
@@ -222,7 +222,7 @@ Based on this investigation, bringing Node-RED to MCUs seems both possible and d
 Please open an issue or submit a pull request on this repository on GitHub. You can also reach out to [@phoddie](https://twitter.com/phoddie) and [@moddabletech](https://twitter.com/moddabletech) on Twitter or chat in real time on our [Gitter page](https://gitter.im/embedded-javascript/moddable).
 
 ## Running Flows on an MCU
-Node-RED MCU Edition is a Moddable SDK project. It is built and run just like any Moddable SDK project. Flows run on ESP8266 and ESP32 MCUs, and in the Moddable SDK simulator on macOS computers. Node-RED MCU Edition requires Moddable SDK from August 8, 2022 (or later).
+Node-RED MCU Edition is a Moddable SDK project. It is built and run just like any Moddable SDK project. Flows run on ESP8266, ESP32, and Raspberry Pi Pico MCUs, and in the Moddable SDK simulator on macOS and Linux computers. Node-RED MCU Edition requires the Moddable SDK from August 8, 2022 (or later).
 
 Of course, the Node-RED flows must be added to the project. The JSON version of the flows is stored in the `nodes.json` source file. There are two part to moving a Node-RED project to the Node-RED MCU Edition project.
 

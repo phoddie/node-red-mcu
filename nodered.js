@@ -304,7 +304,7 @@ export class Node {
 			source
 		};
 
-		trace.left(JSON.stringify(msg));
+		trace.left(JSON.stringify(msg), this.id);
 
 		const statuses = this.#outputs.statuses;
 		if (!statuses)
@@ -458,7 +458,7 @@ class DebugNode extends Node {
 					name: this.name
 				}	
 			}
-		}));
+		}), this.id);
 
 		// Process msg for xsbug
 		let value = this.#getter(msg);

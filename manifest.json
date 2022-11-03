@@ -36,6 +36,11 @@
 					"available": 512
 				}
 			}
+		},
+		"pico": {
+			"creation": {
+				"static": 131072
+			}
 		}
 	}	
 }

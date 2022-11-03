@@ -239,7 +239,7 @@ export class Node {
 		const wires = config.wires;
 		if (wires) {
 			this.#outputs = wires.map(wire => wire.map(target => this.#flow.getNode(target)));
-			if (!config.dones && !config.errors)
+			if (!config.dones && !config.errors && !config.statuses)
 				return;
 		}
 		else {
@@ -293,25 +293,23 @@ export class Node {
 			return this.send(result);
 	}
 	status(status) {
-		const source = {
-			id: this.id
-		};
+		trace.left(JSON.stringify({status}), this.id);
+
+		const statuses = this.#outputs.statuses;
+		if (!statuses)
+			return;
 
 		const msg = {
 			status: {
 				...status,
 			},
-			source
+			source: {
+				id: this.id,
+				type: this.constructor.type,
+				name: this.name
+			}
 		};
 
-		trace.left(JSON.stringify(msg), this.id);
-
-		const statuses = this.#outputs.statuses;
-		if (!statuses)
-			return;
-		
-		source.type = this.constructor.type;
-		source.name = this.name;
 		for (let i = 0, length = statuses.length; i < length; i++)
 			RED.mcu.enqueue(msg, statuses[i]);
 	}
@@ -429,6 +427,7 @@ class DebugNode extends Node {
 	#statusType;
 	#statusVal;
 	#oldStatus;
+	#active;
 
 	onStart(config) {
 		super.onStart(config);
@@ -440,6 +439,7 @@ class DebugNode extends Node {
 		this.#toStatus = config.tostatus;
 		this.#statusType = config.statusType;
 		this.#statusVal = config.statusVal;
+		this.#active = config.active
 	}
 	onMessage(msg, done) {
 		// to prevent endless loops -> 21-debug.js:123
@@ -448,17 +448,9 @@ class DebugNode extends Node {
 			return;
 		}
 
-		// Feed msg back to the editor.
-		trace.left(JSON.stringify({
-			input: {
-				...msg,
-				source: {
-					id: this.id,
-					type: this.constructor.type,
-					name: this.name
-				}	
-			}
-		}), this.id);
+		// Feed msg back to the editor
+		if (this.#active)
+			trace.left(JSON.stringify({input: msg}), this.id);
 
 		// Process msg for xsbug
 		let value = this.#getter(msg);
@@ -466,7 +458,7 @@ class DebugNode extends Node {
 		if (this.#console) {
 			if (value instanceof Uint8Array)
 				value = Hex.toString(value);
-			trace(("object" === typeof value) ? JSON.stringify(value) : value, "\n");
+			trace("<warn>", ("object" === typeof value) ? JSON.stringify(value) : value, "\n");
 		}
 
 		if (this.#sidebar) {
@@ -478,19 +470,25 @@ class DebugNode extends Node {
 					type: this.constructor.type,
 					name: this.name
 				} 
-			}
-			trace.right(JSON.stringify(value));
+			};
+			trace("<info>", JSON.stringify(value), "\n");
 		}
 
 		if (this.#toStatus) {
 			const statusVal = this.#statusVal(msg);		// NR says: #statusVal shall return typeof string!
 			if (statusVal !== this.#oldStatus) {
+				if (statusVal.length > 32)
+					statusVal = statusVal.slice(0, 32) + "…";
 				this.status({fill: "grey", shape: "dot", text: statusVal});
 				this.#oldStatus = statusVal;
 			}
 		}
 
 		done();
+	}
+	onCommand(options) {
+		if ("debug" === options.command)
+			this.#active = !!options.active;
 	}
 
 	static type = "debug";
@@ -1402,6 +1400,7 @@ globalThis.clearInterval = Timer.clear;
 globalThis.setTimeout = Timer.set;
 globalThis.clearTimeout = Timer.clear;
 globalThis.console = Console;
+globalThis.Buffer = Buffer;
 
 globalThis.RED = RED;
 globalThis.module = Object.freeze({

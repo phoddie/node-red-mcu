@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated October 31, 2022<br>
+Updated November 2, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -297,9 +297,12 @@ Comment nodes are removed at build-time.
 
 ### Debug
 - [X] Console output is displayed in the xsbug log pane
-- [X] Sidebar output is displayed in the xsbug message pane
+- [X] Sidebar output is displayed in the xsbug log pane
 - [X] Display of selected property or complete message
 - [X] Output to node status
+- [X] Active
+- [X] Relay to Node-RED Editor
+- [ ] JSONata expression
 
 ### Function
 - [X] "On Start" and "On Message" handlers
@@ -341,6 +344,7 @@ Function node implements support for calling `done()` if function's source code 
 ### Status
 - [X] "Report status from all nodes"
 - [X] "Report status from selected nodes"
+- [X] Status relayed to Node-RED Editor
 
 ### Complete
 - [X] Implemented

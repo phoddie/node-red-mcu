@@ -442,6 +442,11 @@ class DebugNode extends Node {
 		this.#active = config.active
 	}
 	onMessage(msg, done) {
+		if (!this.#active) {
+			done();
+			return;
+		}
+
 		// to prevent endless loops -> 21-debug.js:123
 		if (msg.status?.source?.id === this.id) {
 			done();
@@ -449,8 +454,7 @@ class DebugNode extends Node {
 		}
 
 		// Feed msg back to the editor
-		if (this.#active)
-			trace.left(JSON.stringify({input: msg}), this.id);
+		trace.left(JSON.stringify({input: msg}), this.id);
 
 		// Process msg for xsbug
 		let value = this.#getter(msg);
@@ -555,6 +559,7 @@ class FunctionNode extends Node {
 	#func;
 	#libs;
 	#doDone;
+	//@@ might cache env here
 
 	constructor(id, flow, name) {
 		super(id, flow, name);
@@ -830,7 +835,7 @@ class SplitNode extends Node {
 	}
 	onMessage(msg) {
 		let payload = msg.payload; 
-		if (payload instanceof ArrayBuffer)
+		if (payload instanceof Buffer)		//@@ verify before committing!
 			throw new Error("buffer unimplemented")
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;

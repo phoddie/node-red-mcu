@@ -488,7 +488,7 @@ class DebugNode extends Node {
 	}
 	onCommand(options) {
 		if ("debug" === options.command)
-			this.#active = !!options.active;
+			this.#active = !!options.data;
 	}
 
 	static type = "debug";

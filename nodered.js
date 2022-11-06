@@ -170,6 +170,8 @@ class RED {
 			}
 		);
 
+		trace.left('{"ready": true}', "NR_EDITOR");
+
 		return flows;
 	}
 
@@ -1383,7 +1385,7 @@ globalThis.process = class {
 
 globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 	const options = JSON.parse(script);
-	const node = flows.get(options.flow)?.getNode(options.id);
+	const node = globalThis.flows?.get(options.flow)?.getNode(options.id);
 	if (!node)
 		return;
 

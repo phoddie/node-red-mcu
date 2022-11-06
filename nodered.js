@@ -142,6 +142,8 @@ class RED {
 		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
 		msgQueue = {first: undefined, last: undefined, timer: Timer.repeat(() => RED.mcu.deliver(), 5000, 5000)};
 
+		trace.left('{"state": "building"}', "NR_EDITOR");
+
 		globalThis.globalContext = new Context;
 
 		if (this.#compatibility.length) {
@@ -170,7 +172,7 @@ class RED {
 			}
 		);
 
-		trace.left('{"ready": true}', "NR_EDITOR");
+		trace.left('{"state": "ready"}', "NR_EDITOR");
 
 		return flows;
 	}

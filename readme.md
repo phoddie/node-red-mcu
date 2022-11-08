@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated November 7, 2022<br>
+Updated November 8, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -362,7 +362,10 @@ Implemented as "rpi-gpio in" node.
 - [X] Multiple nodes can share a single GPIO
 - [X] Sets `topic` on message
 - [X] Read initial state of pin on deploy/restart
-- [ ] Debounce
+- [X] Debounce
+- [X] Status
+
+Implemented with ECMA-419 Digital class.
 
 ### GPIO Out
 Implemented as "rpi-gpio out" node.
@@ -371,8 +374,9 @@ Implemented as "rpi-gpio out" node.
 - [X] Digital and PWM output modes
 - [X] Initialize initial pin state option
 - [X] Multiple nodes can share a single GPIO
+- [X] Status & Done
 
-Implemented using "rpi-gpio out" node with ECMA-419 Digital and PWM classes.
+Implemented with ECMA-419 Digital and PWM classes.
 
 ### DS18B20
 - [X] Multiple temperature sensors

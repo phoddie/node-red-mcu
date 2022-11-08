@@ -19,10 +19,14 @@
  */
 
 import {Node} from "nodered";
+import Timer from "timer";
 
 let cache;		// support multiple nodes sharing the same pin, like the RPi implementation
 
 class DigitalInNode extends Node {
+	#debounce;
+	#timer;
+
 	onStart(config) {
 		super.onStart(config);
 
@@ -30,6 +34,7 @@ class DigitalInNode extends Node {
 		if (!Digital)
 			return;
 
+		this.#debounce = config.debounce;
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 		const intype = config.intype ?? "input"
@@ -49,11 +54,18 @@ class DigitalInNode extends Node {
 				mode,
 				edge: Digital.Rising + Digital.Falling,
 				onReadable() {
-					const msg = {
-						payload: this.read(),
-						topic: "gpio/" + this.pin
-					}
-					this.readers.forEach(reader => reader.send(msg));
+					this.readers.forEach(reader => {
+						reader.#timer ??= Timer.set(() => {
+							reader.#timer = undefined;
+
+							const msg = {
+								payload: this.read(),
+								topic: "gpio/" + this.pin
+							}
+							reader.send(msg)
+							reader.status({fill: "green", shape: "dot", text: msg.payload});
+						}, reader.#debounce);
+					});
 				}
 			});
 			io.type = intype;
@@ -63,10 +75,12 @@ class DigitalInNode extends Node {
 		}
 
 		if (config.read) {
+			const payload = io.read();
 			this.send({
-				payload: io.read(),
+				payload,
 				topic: "gpio/" + config.pin
 			});
+			this.status({fill: "green", shape: "dot", text: payload});
 		}
 	}
 
@@ -127,7 +141,7 @@ class DigitalOutNode extends Node {
 			}
 		}
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		if (undefined === this.#hz) {
 			this.#io?.write(msg.payload);
 			trace(`digital out ${this.#pin}: ${msg.payload}\n`);
@@ -137,6 +151,8 @@ class DigitalOutNode extends Node {
 			this.#io?.write(value);
 			trace(`PWM ${this.#pin}: ${value}\n`);
 		}
+		this.status({fill:"green", shape:"dot", text: msg.payload.toString()});
+		done();
 	}
 
 	static type = "rpi-gpio out";

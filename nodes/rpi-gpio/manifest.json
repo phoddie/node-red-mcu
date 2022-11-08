@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			"./rpi-gpio"
+		]
+	},
+	"preload": [
+		"rpi-gpio"
+	]
+}

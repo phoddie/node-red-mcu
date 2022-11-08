@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated November 2, 2022<br>
+Updated November 7, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -352,20 +352,25 @@ Function node implements support for calling `done()` if function's source code 
 ### Junction
 - [X] Supported
 
-Junction nodes are optimized out by `nodered2mcu` by replacing each junction with direct wiring between its inputs and outputs.
+Junction nodes are optimized out by `nodered2mcu` by replacing each junction with direct wires between its inputs and outputs.
 
 ### GPIO In
-Implemented using "rpi-gpio in" node
+Implemented as "rpi-gpio in" node.
 
 - [X] Select GPIO pin
 - [X] Pull-up and pull-down resistor options
+- [X] Multiple nodes can share a single GPIO
+- [X] Sets `topic` on message
+- [X] Read initial state of pin on deploy/restart
 - [ ] Debounce
-- [ ] Read initial state of pin on deploy/restart
 
 ### GPIO Out
+Implemented as "rpi-gpio out" node.
+
 - [X] Select GPIO pin
 - [X] Digital and PWM output modes
 - [X] Initialize initial pin state option
+- [X] Multiple nodes can share a single GPIO
 
 Implemented using "rpi-gpio out" node with ECMA-419 Digital and PWM classes.
 

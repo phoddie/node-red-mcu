@@ -265,7 +265,6 @@ export class Node {
 		if (!outputs.length)
 			return;
 
-		const generateId = RED.util.generateId;
 		if (Array.isArray(msg)) {
 			const length = Math.min(msg.length, outputs.length);
 			for (let j = 0; j < length; j++) {
@@ -625,7 +624,7 @@ class FunctionNode extends Node {
 		}
 	}
 	send(msg, _msgid) {
-		_msgid ??= RED.util.generateId();
+		_msgid ??= generateId();
 		if (Array.isArray(msg)) {
 			for (let i = 0, length = msg.length; i < length; i++) {
 				const output = msg[i];
@@ -705,7 +704,7 @@ class SwitchNode extends Node {
 		const onwards = []
 		const indices = []
 		for (let i = 0; i < outputCount; i++) {
-			ids[i] = RED.util.generateId();
+			ids[i] = generateId();
 			counts[i] = 0;
 			indices[i] = 0;
 		}
@@ -730,7 +729,7 @@ class SwitchNode extends Node {
 
 				if (!first)
 					msg = result[j] = RED.util.cloneMessage(msg);
-				msg._msgid = RED.util.generateId();
+				msg._msgid = generateId();
 				msg.parts.id = ids[j];
 				msg.parts.index = indices[j]++;
 				msg.parts.count = counts[j];
@@ -843,7 +842,7 @@ class SplitNode extends Node {
 			throw new Error("buffer unimplemented")
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;
-			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt, id: RED.util.generateId()};
+			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt, id: generateId()};
 			msg.parts = parts;
 			for (let i = 0; i < length; i += arraySplt) {
 				msg.payload = (1 === arraySplt) ? payload[i] : payload.slice(i, i + arraySplt);
@@ -854,7 +853,7 @@ class SplitNode extends Node {
 		else if ("object" === typeof payload) {
 			const names = Object.getOwnPropertyNames(payload);
 			const length = names.length;
-			const parts = {type: "object", count: length, id: RED.util.generateId()};
+			const parts = {type: "object", count: length, id: generateId()};
 			msg.parts = parts;
 			for (let i = 0, addname = this.#addname; i < length; i += 1) {
 				const key = names[i];
@@ -869,7 +868,7 @@ class SplitNode extends Node {
 		else {	// string
 			payload = payload.toString().split(this.#splt);
 			const length = payload.length;
-			const parts = {type: "string", count: length, ch: this.#splt, id: RED.util.generateId()};
+			const parts = {type: "string", count: length, ch: this.#splt, id: generateId()};
 			msg.parts = parts;
 			for (let i = 0; i < length; i += 1) {
 				msg.payload = payload[i];
@@ -985,89 +984,6 @@ class JSONNode extends Node {
 	}
 
 	static type = "json";
-	static {
-		RED.nodes.registerType(this.type, this);
-	}
-}
-
-class DigitalInNode extends Node {
-	#pin;
-	#io;
-
-	onStart(config) {
-		super.onStart(config);
-
-		this.#pin = config.pin;
-		const Digital = globalThis.device?.io?.Digital;
-		if (!Digital)
-			return;
-
-		let mode = Digital.Input;
-		if ("up" === config.intype)
-			mode = Digital.InputPullUp;
-		else if ("down" === config.intype)
-			mode = Digital.InputPullDown;
-		this.#io = new Digital({
-			target: this,
-			pin: this.#pin,
-			mode,
-			edge: Digital.Rising + Digital.Falling,
-			onReadable() {
-				this.target.send({payload: this.read()});
-			}
-		});
-	}
-
-	static type = "rpi-gpio in";
-	static {
-		RED.nodes.registerType(this.type, this);
-	}
-}
-
-class DigitalOutNode extends Node {
-	#pin;
-	#io;
-	#hz;
-
-	onStart(config) {
-		super.onStart(config);
-
-		this.#pin = config.pin;
-		this.#hz = config.freq; 
-
-		const options = {pin: this.#pin};
-
-		if (undefined === this.#hz) {
-			if (!globalThis.device?.io?.Digital)
-				return;
-
-			options.mode = device.io.Digital.Output;
-			this.#io = new device.io.Digital(options);
-			if (undefined !== config.level)
-				this.#io.write(config.level);
-		}
-		else {
-			if (!globalThis.device?.io?.PWM)
-				return;
-
-			if (this.#hz)
-				options.hz = this.#hz; 
-			this.#io = new device.io.PWM(options);
-		}
-	}
-	onMessage(msg) {
-		if (undefined === this.#hz) {
-			this.#io?.write(msg.payload);
-			trace(`digital out ${this.#pin}: ${msg.payload}\n`);
-		}
-		else {
-			const value = (parseFloat(msg.payload) / 100) * ((1 << (this.#io?.resolution ?? 8)) - 1);
-			this.#io?.write(value);
-			trace(`PWM ${this.#pin}: ${value}\n`);
-		}
-	}
-
-	static type = "rpi-gpio out";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

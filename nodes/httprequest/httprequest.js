@@ -20,7 +20,8 @@
 
 import {Node} from "nodered";
 import fetch from "fetch";
-import {Headers, URLSearchParams} from "fetch";
+import {Headers} from "fetch";
+import {URLSearchParams} from "url";
 import Mustache from "mustache";
 
 class HTTPRequestNode extends Node {

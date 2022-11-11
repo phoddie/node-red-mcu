@@ -886,18 +886,52 @@ class SplitNode extends Node {
 
 class LinkCallNode extends Node {
 	#link;
+	#timers;
 
 	onStart(config) {
 		super.onStart(config);
 		
 		this.#link = RED.nodes.getNode(config.links[0]);
-		//@@ timeout
+		if (config.timeout) {
+			this.#timers = [];
+			this.#timers.timeout = config.timeout;
+		}
 	}
 	onMessage(msg) {
-		this.#link.send({...msg, _linkSource: this.id});		//@@ need eventid for timeout feature, to know when this message replies
+		msg = {
+			...msg,
+			_event: "node:" + this.id
+		};
+		msg._linkSource ??= [];
+		msg._linkSource.push({
+			id: generateId(),		//@@
+			node: this.id
+		})
+		
+		this.#link.send(msg);
+		if (this.#timers) {
+			const timer = Timer.set(() => {
+				this.#timers.splice(this.#timers.indexOf(timer), 1);
+				msg = {...msg};
+				msg._linkSource.length = 0;
+				delete msg._event;
+				this.error("timeout", msg)
+			}, this.#timers.timeout);
+			timer.msg = msg;
+			this.#timers.push(timer);
+		}
 	}
 	response(msg) {
-		delete msg._linkSource;
+		if (msg._linkSource) {
+			const linkSource = msg._linkSource.pop();
+			if (!msg._linkSource.length)
+				delete msg._linkSource;
+			const timer = this.#timers?.find(timer => timer.msg._linkSource.at(-1).id === linkSource.id);
+			if (timer) {
+				Timer.clear(timer);
+				this.#timers.splice(this.#timers.indexOf(timer), 1);
+			}
+		}
 		this.send(msg);
 	}
 
@@ -930,7 +964,7 @@ class LinkOutNode extends Node {
 				links[i].send(msg);
 		}
 		else if (msg._linkSource)
-			RED.nodes.getNode(msg._linkSource).response(msg);
+			RED.nodes.getNode(msg._linkSource.at(-1).node).response(msg);
 		else
 			throw new Error("lost link source");
 	}

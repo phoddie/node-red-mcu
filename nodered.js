@@ -334,7 +334,7 @@ export class Node {
 		this.trace(msg);
 	}
 	warn(msg) {
-		this.trace(msg);
+		this.trace(`(warning: ${msg})`);
 	}
 	error(error, msg = {}) {
 		this.makeDone(msg)(error);
@@ -884,55 +884,41 @@ class SplitNode extends Node {
 	}
 }
 
+let inflight;		// shared across LinkCallNode instances
 class LinkCallNode extends Node {
 	#link;
-	#timers;
+	#timeout;
 
 	onStart(config) {
 		super.onStart(config);
-		
+
+		inflight ??= new Map;
 		this.#link = RED.nodes.getNode(config.links[0]);
-		if (config.timeout) {
-			this.#timers = [];
-			this.#timers.timeout = config.timeout;
-		}
+		this.#timeout = config.timeout;
 	}
-	onMessage(msg) {
-		msg = {
-			...msg,
-			_event: "node:" + this.id
-		};
+	onMessage(msg, done) {
+		const id = generateId(); 	// Node-RED uses 14 byte ID here
 		msg._linkSource ??= [];
 		msg._linkSource.push({
-			id: generateId(),		//@@
+			id,
 			node: this.id
-		})
-		
+		});
+
 		this.#link.send(msg);
-		if (this.#timers) {
-			const timer = Timer.set(() => {
-				this.#timers.splice(this.#timers.indexOf(timer), 1);
-				msg = {...msg};
+
+		const state = {
+			done
+		};
+		inflight.set(id, state);
+
+		if (this.#timeout) {
+			state.timer = Timer.set(() => {
+				const state = inflight.get(id);
+				inflight.delete(id);
 				msg._linkSource.length = 0;
-				delete msg._event;
-				this.error("timeout", msg)
-			}, this.#timers.timeout);
-			timer.msg = msg;
-			this.#timers.push(timer);
+				state.done("timeout");
+			}, this.#timeout);
 		}
-	}
-	response(msg) {
-		if (msg._linkSource) {
-			const linkSource = msg._linkSource.pop();
-			if (!msg._linkSource.length)
-				delete msg._linkSource;
-			const timer = this.#timers?.find(timer => timer.msg._linkSource.at(-1).id === linkSource.id);
-			if (timer) {
-				Timer.clear(timer);
-				this.#timers.splice(this.#timers.indexOf(timer), 1);
-			}
-		}
-		this.send(msg);
 	}
 
 	static type = "link call";
@@ -942,6 +928,11 @@ class LinkCallNode extends Node {
 }
 
 class LinkInNode extends Node {
+	onMessage(msg, done) {
+		done();
+		return msg;
+	}
+
 	static type = "link in";
 	static {
 		RED.nodes.registerType(this.type, this);
@@ -954,19 +945,29 @@ class LinkOutNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 		
-		if ("return" !== config.mode)
-			this.#links = config.links.map(link => RED.nodes.getNode(link));
+		this.#links = config.links?.map(link => RED.nodes.getNode(link));
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		const links = this.#links;
 		if (links) {
 			for (let i = 0, length = links.length; i < length; i++)
 				links[i].send(msg);
 		}
-		else if (msg._linkSource)
-			RED.nodes.getNode(msg._linkSource.at(-1).node).response(msg);
+		else if (Array.isArray(msg._linkSource) && (msg._linkSource.length > 0)) {
+			const _linkSource = msg._linkSource.pop();
+			const state = inflight.get(_linkSource.id);
+			inflight.delete(_linkSource.id);
+			RED.nodes.getNode(_linkSource.node)?.send(msg);
+			if (state) {
+				state.done();
+				Timer.clear(state.timer);
+			}
+			else
+				this.warn("link error missingReturn");
+		}
 		else
-			throw new Error("lost link source");
+			this.warn("link error missingReturn");
+		done();
 	}
 
 	static type = "link out";

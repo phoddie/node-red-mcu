@@ -24,6 +24,7 @@ import structuredClone from "structuredClone";
 import Base64 from "base64";
 import Hex from "hex";
 import Modules from "modules";
+import config from "mc/config";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
@@ -142,7 +143,8 @@ class RED {
 		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
 		msgQueue = {first: undefined, last: undefined, timer: Timer.repeat(() => RED.mcu.deliver(), 5000, 5000)};
 
-		trace.left('{"state": "building"}', "NR_EDITOR");
+		if (config.noderedmcu.editor)
+			trace.left('{"state": "building"}', "NR_EDITOR");
 
 		globalThis.globalContext = new Context;
 
@@ -172,7 +174,8 @@ class RED {
 			}
 		);
 
-		trace.left('{"state": "ready"}', "NR_EDITOR");
+		if (config.noderedmcu.editor)
+			trace.left('{"state": "ready"}', "NR_EDITOR");
 
 		return flows;
 	}
@@ -296,7 +299,8 @@ export class Node {
 			return this.send(result);
 	}
 	status(status) {
-		trace.left(JSON.stringify({status}), this.id);
+		if (config.noderedmcu.editor)
+			trace.left(JSON.stringify({status}), this.id);
 
 		const statuses = this.#outputs.statuses;
 		if (!statuses)
@@ -333,10 +337,14 @@ export class Node {
 	log(msg) {
 		this.trace(msg);
 	}
-	warn(msg) {
-		this.trace(`(warning: ${msg})`);
+	warn(warn) {
+		if (config.noderedmcu.editor)
+			trace.left(JSON.stringify({warn: {warn}}), this.id);
+		this.trace(`(warning: ${warn})`);
 	}
 	error(error, msg = {}) {
+		if (config.noderedmcu.editor)
+			trace.left(JSON.stringify({error: {error}}), this.id);
 		this.makeDone(msg)(error);
 	}
 	debug(msg) {
@@ -457,7 +465,8 @@ class DebugNode extends Node {
 		}
 
 		// Feed msg back to the editor
-		trace.left(JSON.stringify({input: msg}), this.id);
+		if (config.noderedmcu.editor)
+			trace.left(JSON.stringify({input: msg}), this.id);
 
 		// Process msg for xsbug
 		let value = this.#getter(msg);

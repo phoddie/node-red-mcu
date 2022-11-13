@@ -41,6 +41,11 @@
 			"xsbug_hooks": 1
 		}
 	},
+	"config": {
+		"noderedmcu": {
+			"editor": true
+		}
+	},
 	"platforms": {
 		"win": {
 			"error": "Node-RED MCU does not currently run on Windows "

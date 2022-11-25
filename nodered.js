@@ -1231,9 +1231,9 @@ class MQTTOutNode extends Node {
 		super.onStart(config);
 
 		this.#broker = flows.get(configFlowID).getNode(config.broker);
-		if (undefined !== config.topic) this.#topic = config.topic;
+		if (config.topic) this.#topic = config.topic;
 		if (undefined !== config.qos) this.#QoS = parseInt(config.qos);
-		if ((undefined !== config.retain) && ("" !== config.retain)) this.#retain = Boolean(config.retain);
+		if ((true === this.#retain) || ("true" === this.#retain)) this.#retain = true;
 	}
 	onMessage(msg, done) {
 		let payload = msg.payload;

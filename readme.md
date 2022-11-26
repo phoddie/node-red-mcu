@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated November 10, 2022<br>
+Updated November 25, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -387,6 +387,23 @@ Implemented with ECMA-419 Digital and PWM classes.
 - [ ] `id` property in output matches Node-RED
 
 Implemented using "rpi-ds18b20" node with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
+
+### Neopixels
+Implemented as "[rpi-neopixels](https://github.com/node-red/node-red-nodes/tree/master/hardware/neopixel)" node.
+
+- [X] Set number of LEDs in string
+- [X] All modes
+- [X] Wipe time
+- [X] Pixel order
+- [X] Brightness
+- [ ] Select any pin for output (see note below)
+- [ ] Apply gamma correction
+
+**Note**: The Node-RED editor only allows certain pins to be selected as the Neopixel output. This is not a problem when the host (e.g. M5Atom-Matrix) provides a configured driver. For other devices, the pin number must be manually edited in the exported JSON.
+
+Implemented using [Neopixel driver](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/neopixel) from Moddable SDK which supports ESP32 family and Raspberry Pi Pico.
+
+**Note**: Requires Moddable SDK update from November 28, 2022 or later.
 
 ### MQTT Broker
 - [X] Broker URL and port number

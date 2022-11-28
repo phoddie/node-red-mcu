@@ -26,153 +26,224 @@ import TextEncoder from "text/encoder";
 
 let server;
 
-class Server {
-	routes = [];
-	id = 1; 
-	requests = [];
+const httpRoute = Object.freeze({
+	onRequest(request) {
+		let path = request.path, query = {}, params = {}, j = path.indexOf("?"), node;
+		if (j > 0) {
+			query = parseQuery(path.slice(j + 1));
+			path = path.slice(0, j);
+		}
 
-	constructor() {
-		this.server = new HTTPServer({ 
-			io: Listener,
-			port: 80,
-			target: this,
-			onConnect(connection) {
-				connection.target = this.target;		//@@ httpsever ignores this
-				connection.accept({
-					onRequest(request) {
-						trace(`${request.method} ${request.path}\n`);
-						
-						let path = request.path, query = {}, params = {}, j = path.indexOf("?"), node;
-						if (j > 0) {
-							query = parseQuery(path.slice(j + 1));
-							path = path.slice(0, j);
-						}
+		path = path.split("/");
+		path[0] = request.method;
+	routes:	
+		for (let i = 0, routes = server.routes; i < routes.length; i++) {
+			const route = routes[i];
+			if (route.length !== path.length)
+				continue;
 
-						path = path.split("/");
-						path[0] = request.method;
-					routes:	
-						for (let i = 0, routes = this.target.routes; i < routes.length; i++) {
-							const route = routes[i];
-							if (route.length !== path.length)
-								continue;
-
-							for (let j = 0, length = route.length; j < length; j++) {
-								if (path[j] === route[j])
-									continue;
-								
-								if (!route[j].startsWith(":"))
-									continue routes;
-							}
-							
-							for (let j = 0, length = route.length; j < length; j++) {
-								if (route[j].startsWith(":"))
-									params[route[j].slice(1)] = path[j]
-							}
-							node = route.node;
-							break routes;
-						}
-
-						this.id = ++this.target.id;
-						this.node = node;
-						this.target.requests.push(this);
-						this.query = query;
-						this.params = params;
-						this.headers = {};
-						for (const [name, value] of request.headers)
-							this.headers[name] = value;
-
-						const byteLength = this.headers["content-length"];
-						if (undefined !== byteLength) {
-							this.input = new Uint8Array(parseInt(byteLength));
-							this.input.position = 0;
-						}
-					},
-					onReadable(count) {
-						this.input ??= new Uint8Array(new ArrayBuffer(0, {maxByteLength: 0x10000000}));
-						if (this.input.buffer.resizable) {
-							const byteLength = this.input.buffer.byteLength;
-							this.input.buffer.resize(byteLength + count);
-							this.input.set(new Uint8Array(this.read(count)), byteLength);
-						}
-						else {
-							this.input.set(new Uint8Array(this.read(count)), this.input.position);
-							this.input.position += count;
-						}
-					},
-					onResponse(response) {
-						if (!this.node) {
-							response.status = 404;
-							this.respond(response);
-							return;
-						}
-
-						if (this.input) {
-							const mime = this.headers["content-type"];
-							if (("text/plain" === mime) || ("application/json" === mime) || ("application/x-www-form-urlencoded" == mime)) {
-								this.input = (new TextDecoder).decode(this.input);
-								if ("application/json" === mime) {
-									try {
-										this.input = JSON.parse(this.input);
-									}
-									catch (e) {
-										this.node.error(e);		//@@ this.node doesn't exist
-										this.close();
-										return;
-									}
-								}
-								else if ("application/x-www-form-urlencoded" === mime)
-									this.input = parseQuery(this.input);
-							}
-							//@@ other conversions?
-						}
-						const msg = {
-							payload: this.input,
-							req: {
-								headers: this.headers,
-								query: this.query,
-								params: this.params
-							},
-							res: {
-								id: this.id,
-							}
-						};
-						delete this.input;
-						delete this.headers;
-						delete this.query;
-						this.response = response;
-						this.node.send(msg);
-			
-					},
-					onWritable(count) {
-						const payload = this.payload;
-						const end = Math.min(payload.position + count, payload.byteLength);
-						this.write(new Uint8Array(payload, payload.position, end - payload.position));
-						payload.position = end;
-					},
-					onDone() {
-						const index = this.target.requests.findIndex(item => item.id === this.id);
-						if (index >= 0)
-							this.target.requests.splice(index);
-					},
-					onError() {
-						const index = this.target.requests.findIndex(item => item.id === this.id);
-						if (index >= 0)
-							this.target.requests.splice(index);
-						this.node.error("http server fail");		//@@ this.node doesn't exist
-					}
-				});
+			for (let j = 0, length = route.length; j < length; j++) {
+				if (path[j] === route[j])
+					continue;
+				
+				if (!route[j].startsWith(":"))
+					continue routes;
 			}
-		});
-		this.server.target = this;		//@@ httpserver should do this
+			
+			for (let j = 0, length = route.length; j < length; j++) {
+				if (route[j].startsWith(":"))
+					params[route[j].slice(1)] = path[j]
+			}
+			node = route.node;
+			break routes;
+		}
+
+		this.id = ++server.id;
+		this.node = node;
+		server.requests.push(this);
+		this.query = query;
+		this.params = params;
+		this.headers = {};
+		for (const [name, value] of request.headers)
+			this.headers[name] = value;
+
+		const byteLength = this.headers["content-length"];
+		if (undefined !== byteLength) {
+			this.input = new Uint8Array(parseInt(byteLength));
+			this.input.position = 0;
+		}
+	},
+	onReadable(count) {
+		this.input ??= new Uint8Array(new ArrayBuffer(0, {maxByteLength: 0x10000000}));
+		if (this.input.buffer.resizable) {
+			const byteLength = this.input.buffer.byteLength;
+			this.input.buffer.resize(byteLength + count);
+			this.input.set(new Uint8Array(this.read(count)), byteLength);
+		}
+		else {
+			this.input.set(new Uint8Array(this.read(count)), this.input.position);
+			this.input.position += count;
+		}
+	},
+	onResponse(response) {
+		if (!this.node) {
+			response.status = 404;
+			this.respond(response);
+			return;
+		}
+
+		if (this.input) {
+			const mime = this.headers["content-type"];
+			if (("text/plain" === mime) || ("application/json" === mime) || ("application/x-www-form-urlencoded" == mime)) {
+				this.input = (new TextDecoder).decode(this.input);
+				if ("application/json" === mime) {
+					try {
+						this.input = JSON.parse(this.input);
+					}
+					catch (e) {
+						this.node.error(e);
+						this.close();
+						return;
+					}
+				}
+				else if ("application/x-www-form-urlencoded" === mime)
+					this.input = parseQuery(this.input);
+			}
+			//@@ other conversions?
+		}
+		const msg = {
+			payload: this.input,
+			req: {
+				headers: this.headers,
+				query: this.query,
+				params: this.params
+			},
+			res: {
+				id: this.id
+			}
+		};
+		delete this.input;
+		delete this.headers;
+		delete this.query;
+		this.response = response;
+		this.node.send(msg);
+
+	},
+	onWritable(count) {
+		const payload = this.payload;
+		const end = Math.min(payload.position + count, payload.byteLength);
+		this.write(new Uint8Array(payload, payload.position, end - payload.position));
+		payload.position = end;
+	},
+	onDone() {
+		const index = server.requests.findIndex(item => item.id === this.id);
+		if (index >= 0)
+			server.requests.splice(index);
+	},
+	onError() {
+		const index = server.requests.findIndex(item => item.id === this.id);
+		if (index >= 0)
+			server.requests.splice(index);
+		this.node.error("http server fail");		//@@ this.node doesn't exist
 	}
-	add(method, path, node) {
+});
+
+class Server {
+	static add(method, path, node, route) {
+		if (!server) {
+			server = new HTTPServer({ 
+				io: Listener,
+				port: 80,
+				onConnect(connection) {
+					connection.server = this;
+					connection.accept({
+						onRequest(request) {
+							let path = request.path, j = path.indexOf("?");
+							if (j > 0)
+								path = path.slice(0, j);
+
+							path = path.split("/");
+							path[0] = request.method;
+						routes:
+							for (let i = 0, routes = this.server.routes; i < routes.length; i++) {
+								const route = routes[i];
+								if (route.length !== path.length)
+									continue;
+
+								for (let j = 0, length = route.length; j < length; j++) {
+									if (path[j] === route[j])
+										continue;
+									
+									if (!route[j].startsWith(":"))
+										continue routes;
+								}
+								
+								this.route = route.route;
+								return;
+							}
+
+							this.route = httpRoute;
+						}
+					});
+				}
+			});
+			server.routes = [];
+			server.id = 1; 
+			server.requests = [];
+		}
+
 		path = path.split("/");
 		path[0] = method;
 		path.node = node;
-		this.routes.push(path);  
+		path.route = route;
+		server.routes.push(path);  
+	}
+}
+
+function parseQuery(str) {
+	const parts = str.split("&"), query = {};
+	for (let i = 0; i < parts.length; i++) {
+		const part = parts[i].split("=");
+		query[decodeURIComponent(part[0])] = decodeURIComponent(part[1]);
+	}
+	return query;
+}
+
+class HTTPIn extends Node {
+	onStart(config) {
+		super.onStart(config);
+
+		Server.add(config.method, config.url, this, httpRoute);
+	}
+
+	static type = "http in";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
+class HTTPResponse extends Node {
+	#statusCode;
+	#headers;
+
+	onStart(config) {
+		super.onStart(config);
+
+		this.#statusCode = config.statusCode;
+		this.#headers = config.headers;
+	}
+	onMessage(msg) {
+		if (!msg.res?.id) {
+			this.error("response id missing")
+			return;
+		}
+		const statusCode = this.#statusCode ?? msg.statusCode ?? 200;
+		const headers = this.#headers ?? msg.headers ?? [];
+		this.respond(msg, statusCode, headers);
+		return msg;
 	}
 	respond(msg, statusCode, headers) {
-		const request = this.requests.find(item => item.id === msg.res.id);
+		const request = server.requests.find(item => item.id === msg.res.id);
 		if (!request) return;
 
 		const response = request.response;
@@ -211,54 +282,11 @@ class Server {
 
 		request.respond(response);
 	}
-}
-
-function parseQuery(str) {
-	const parts = str.split("&"), query = {};
-	for (let i = 0; i < parts.length; i++) {
-		const part = parts[i].split("=");
-		query[decodeURIComponent(part[0])] = decodeURIComponent(part[1]);
-	}
-	return query;
-}
-
-class HTTPIn extends Node {
-	onStart(config) {
-		super.onStart(config);
-
-		server ??= new Server;
-		server.add(config.method, config.url, this);
-	}
-
-	static type = "http in";
-	static {
-		RED.nodes.registerType(this.type, this);
-	}
-}
-
-class HTTPResponse extends Node {
-	#statusCode;
-	#headers;
-
-	onStart(config) {
-		super.onStart(config);
-		
-		this.#statusCode = config.statusCode;
-		this.#headers = config.headers;
-	}
-	onMessage(msg) {
-		if (!msg.res?.id) {
-			this.error("response id missing")
-			return;
-		}
-		const statusCode = this.#statusCode ?? msg.statusCode ?? 200;
-		const headers = this.#headers ?? msg.headers ?? [];
-		server.respond(msg, statusCode, headers);
-		return msg;
-	}
 
 	static type = "http response";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}
 }
+
+export default Server;

@@ -21,6 +21,7 @@
 import {Node, configFlowID} from "nodered";
 import Timer from "timer";
 import WebSocket from "WebSocket";
+import Modules from "modules";
 
 const connected = Object.freeze({
 	fill: "green",
@@ -101,9 +102,6 @@ class WebSocketClient extends Node {
 		this.#nodes ??= new Set;
 		this.#nodes.add(node);
 	}
-	remove(node) {
-		this.#nodes?.delete(node);
-	}
 	status(status) {
 		const nodes = this.#nodes;
 		if (!nodes) return;
@@ -117,12 +115,78 @@ class WebSocketClient extends Node {
 	}
 }
 
-class WebSocketIn extends Node {
-	#client;
+class WebSocketListener extends Node {
+	#wholemsg;
+	#connections = new Map;		// remote connections to this listener
+	#nodes;		// "websocket in" nodes using this listener
 
 	onStart(config) {
-		this.#client = flows.get(configFlowID).getNode(config.client);
-		this.#client?.add(this);
+		this.#wholemsg = "true" === config.wholemsg;
+
+		const Server = Modules.importNow("httpserver");		// dynamic import so dependency on http server only if websocket listener is used 
+		const WebSocketHandshake = Modules.importNow("embedded:network/http/server/options/websocket");
+
+		Server.add("GET", config.path, this, {
+			...WebSocketHandshake,
+			listener: this,
+			onDone() {
+				const listener = this.route.listener;
+				const ws = new WebSocket(this.detach());
+				ws._session = RED.util.generateId();
+				listener.#connections.set(ws._session, ws);
+				ws.addEventListener("message", function(event) {
+					let msg = event.data;
+					if (listener.#wholemsg)
+						msg = JSON.parse(msg);
+					else
+						msg = {payload: msg};
+					msg._session = {type: "websocket", id: ws._session};
+
+					for (let node of listener.#nodes)
+						node.send(msg);
+				});
+				const remove = function() {
+					listener.#connections.delete(ws._session);
+				}
+				ws.addEventListener("close", remove);
+				ws.addEventListener("error", remove);
+			}
+		});
+	}
+	onMessage(msg, done) {
+		const _session = msg._session;
+		delete msg._session;
+		const payload = this.#wholemsg ? JSON.stringify(msg) : (Buffer.isBuffer(msg.payload) ? msg.payload : RED.util.ensureString(msg.payload));  
+		if ("websocket" === _session?.type) {
+			const connection = this.#connections.get(_session.id);
+			if (connection)
+				connection.send(payload);
+			else
+				this.warn("websocket session not found")
+		}
+		else {
+			for (const [id, connection] of this.#connections)
+				connection.send(payload);
+		}
+		done();
+	}
+	add(node) {
+		this.#nodes ??= new Set;
+		this.#nodes.add(node);
+	}
+
+	static type = "websocket-listener";
+	static {
+		RED.nodes.registerType(this.type, this);
+	}
+}
+
+class WebSocketIn extends Node {
+	onStart(config) {
+		super.onStart(config);
+
+		const ws = flows.get(configFlowID).getNode(config.client || config.server);
+		ws?.add(this);
 	}
 
 	static type = "websocket in";
@@ -132,14 +196,15 @@ class WebSocketIn extends Node {
 }
 
 class WebSocketOut extends Node {
-	#client;
+	#ws;
 
 	onStart(config) {
-		this.#client = flows.get(configFlowID).getNode(config.client);
-		this.#client?.add(this);
+		super.onStart(config);
+
+		this.#ws = flows.get(configFlowID).getNode(config.client || config.server);
 	}
-	onMessage(msg) {
-		return this.#client.onMessage(msg);		// maybe unnecessary to use RED.mcu.enqueue here
+	onMessage(msg, done) {
+		return this.#ws.onMessage(msg, done);		// maybe unnecessary to use RED.mcu.enqueue here
 	}
 
 	static type = "websocket out";

@@ -63,7 +63,7 @@ class NeopixelsNode extends Node {
 		if (globalThis.lights)		// for compatibility with hosts that create the NeoPixel driver (M5Atom-Matrix) 
 			this.#np = globalThis.lights;
 		else
-			this.#np = new NeoPixel({length: config.pixels, pin: 1 /* @@@@@ */, order: config.rgb.toUpperCase()});
+			this.#np = new NeoPixel({length: config.pixels, pin: parseInt(config.gpio), order: config.rgb.toUpperCase()});
 
 		this.#bgnd = this.#np.makeRGB(...this.#bgnd.split(","));
 		this.#fgnd = this.#np.makeRGB(...this.#fgnd.split(","));
@@ -74,13 +74,22 @@ class NeopixelsNode extends Node {
 			this.#np.update();
 		}
 	}
-	onMessage(msg) {
-		if (undefined !== msg.brightness)
-			np.brightness = parseFloat(msg.brightness) / 100 * 255;
-			
+	onMessage(msg, done) {
+		if (undefined !== msg.brightness) {
+			if (this.#wipe) {
+				brightness = parseFloat(msg.brightness) / 100 * 255;
+				this.push(() => {
+					this.#np.brightness = brightness;
+					return true;				
+				})
+			}
+			else
+				this.#np.brightness = brightness;
+		}
+
 		if (undefined === msg.payload)
-			return;
-		
+			return void done();
+
 		let payload = msg.payload.toString();
 		const parts = payload.split(",");
 		switch (parts.length) {
@@ -89,7 +98,7 @@ class NeopixelsNode extends Node {
 					const color = colors.getRGB(payload);
 					if (!color) {
 						this.warn("Invalid payload: " + payload);
-						return;
+						return void done();
 					}
 
 					this.#bgnd = this.#np.makeRGB(...color.split(","));
@@ -125,7 +134,7 @@ class NeopixelsNode extends Node {
 				let color = colors.getRGB(parts[0]); 				
 				if (!color) {
 					this.warn("Invalid color: " + payload);
-					return;
+					return void done();
 				}
 				color = this.#np.makeRGB(...color.split(","));
 
@@ -157,7 +166,7 @@ class NeopixelsNode extends Node {
 						const pixels = new Uint8Array(this.#np);
 						pixels.copyWithin(3, 0, 3 * (pixels.length - 1));
 						this.setPixel(0, color);
-						return;
+						return void done();
 					}
 
 					let i = 0, c = color;
@@ -177,7 +186,7 @@ class NeopixelsNode extends Node {
 						const pixels = new Uint8Array(this.#np);
 						pixels.copyWithin(0, 3, 3 * (pixels.length - 1));
 						this.setPixel(this.#np.length - 1, color);
-						return;
+						return void done();
 					}
 
 					let i = this.#np.length - 1, c = color;
@@ -198,22 +207,31 @@ class NeopixelsNode extends Node {
 
 			case 4:	// set nth pixel: n, r, g, b
 				if (!this.#mode.startsWith("p"))
-					return;
+					return void done();
 				this.setPixel(parts[0], this.#np.makeRGB(parts[1], parts[2], parts[3]));
 				break;
 
 			case 5: {		// set pixels x through y: x, y, r, g, b
 				if (!this.#mode.startsWith("p"))
-					return;
+					return void done();
 				const x = parseInt(parts[0]), y = parseInt(parts[1]);
 				this.fill(this.#np.makeRGB(parts[2], parts[3], parts[4]), x, y - x);
 				} break;
 			
 			default:
-				return;
+				return void done();
 		}
 
-		this.#np.update();
+		if (this.#wipe) {
+			this.push(() => {
+				done();
+				return true;
+			});
+		}
+		else {
+			this.#np.update();
+			done();
+		}
 	}
 	setPixel(start, color) {
 		if (this.#wipe) 
@@ -221,22 +239,24 @@ class NeopixelsNode extends Node {
 		this.#np.setPixel(start, color);
 	}
 	fill(color, start = 0, end = this.#np.length) {
-		if (!this.#wipe) 
-			return this.#np.fill(color, start, end - start);
-
 		if (end > this.#np.length)
 			end = this.#np.length;
 
+		if (!this.#wipe) 
+			return void this.#np.fill(color, start, end - start);
+
 		let i = start;
-		this.#wipe.wipers.push(() => {
+		this.push(() => {
 			this.#np.setPixel(i++, color);
 			this.#np.update();
 			return i >= end;
 		});
+	}
+	push(wiper) {
+		this.#wipe.wipers.push(wiper);
 		if (1 === this.#wipe.wipers.length)
 			Timer.schedule(this.#wipe, 0, this.#wipe.interval);
 	}
-	
 
 	static type = "rpi-neopixels";
 	static {

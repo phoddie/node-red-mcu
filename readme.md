@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated November 27, 2022<br>
+Updated December 1, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -396,12 +396,14 @@ Implemented as "[rpi-neopixels](https://github.com/node-red/node-red-nodes/tree/
 - [X] Wipe time
 - [X] Pixel order
 - [X] Brightness
-- [ ] Select any pin for output (see note below)
+- [~] Select any pin for output (see note below)
 - [ ] Apply gamma correction
 
 **Note**: The Node-RED editor only allows certain pins to be selected as the Neopixel output. This is not a problem when the host (e.g. M5Atom-Matrix) provides a configured driver. For other devices, the pin number must be manually edited in the exported JSON.
 
 Implemented using [Neopixel driver](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/neopixel) from Moddable SDK which supports ESP32 family and Raspberry Pi Pico.
+
+The MCU implementation the Neopixel node calls `done()`  after processing each message so that `Complete` Nodes may be used. This is useful for chaining animations. The full Node-RED Neopixel Node does not call `done()`.
 
 **Note**: Requires Moddable SDK update from November 28, 2022 or later.
 

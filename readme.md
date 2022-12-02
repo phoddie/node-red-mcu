@@ -478,8 +478,8 @@ Implemented using `HTTPServer` based on ECMA-419 HTTP Server draft.
 - [X] Send/receive payload
 - [X] Send/receive entire message
 - [X] Updates status on connect & disconnect 
+- [X] Send heartbeat (ping)
 - [ ] TLS (always insecure)
-- [ ] Send heartbeat (ping)
 
 Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 
@@ -488,7 +488,6 @@ Implemented using HTML5 `WebSocket` based on ECMA-419 WebSocket Client draft.
 - [X] Send/receive payload
 - [X] Send/receive entire message
 - [X] Reply to sender using `_session` or broadcast
-- [ ] Send heartbeat (ping)
 
 Implemented using HTML5 `WebSocket` extensions in Moddable SDK and `HTTPServer` based on ECMA-419 HTTP Server draft.
 

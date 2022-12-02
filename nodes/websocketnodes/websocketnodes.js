@@ -44,13 +44,14 @@ class WebSocketClient extends Node {
 	#nodes;
 
 	onStart(config) {
-		if (config.tls || ("0" !== config.hb))
+		if (config.tls)
 			throw new Error("unimplemented");		
 
 		this.#options = {
 			path: config.path,
 			wholemsg: "true" === config.wholemsg,
-			subprotocol: config.subprotocol
+			subprotocol: config.subprotocol,
+			keepalive: config.hb ? (1000 * parseInt(config.hb)) : 0,
 		};
 
 		this.status(disconnected);
@@ -66,8 +67,9 @@ class WebSocketClient extends Node {
 			this.#ws.send(msg.payload);
 	}
 	#connect() {
-		const options = this.#options;
-		this.#ws = options.subprotocol ? new WebSocket(options.path, options.subprotocol) : new WebSocket(options.path);
+		const options = this.#options, o = {};
+		({path: o.url, subprotocol: o.subprotocol, keepalive: o.keepalive} = options); 
+		this.#ws = new WebSocket(o);
 		this.#ws.binaryType = "arraybuffer"; 
 		this.#ws.addEventListener("open", event => {
 			Timer.clear(this.#reconnect);
@@ -131,7 +133,7 @@ class WebSocketListener extends Node {
 			listener: this,
 			onDone() {
 				const listener = this.route.listener;
-				const ws = new WebSocket(this.detach());
+				const ws = new WebSocket({socket: this.detach()});
 				ws._session = RED.util.generateId();
 				listener.#connections.set(ws._session, ws);
 				ws.addEventListener("message", function(event) {

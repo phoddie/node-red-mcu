@@ -1198,21 +1198,11 @@ class MQTTBrokerNode extends Node {
 }
 
 class MQTTInNode extends Node {
-	#broker;
-	#topic;
-	#format;
-	#QoS;
-
 	onStart(config) {
 		super.onStart(config);
 
-		this.#broker = flows.get(configFlowID).getNode(config.broker);
-
-		this.#topic = config.topic;
-		this.#format = config.datatype;
-		this.#QoS = Number(config.qos);		//@@ nodered2mcu
-
-		this.#broker.subscribe(this, this.#topic, this.#format, this.#QoS); 
+		const broker = flows.get(configFlowID).getNode(config.broker);
+		broker.subscribe(this, config.topic, config.datatype, config.qos); 
 	}
 
 	static type = "mqtt in";
@@ -1231,9 +1221,9 @@ class MQTTOutNode extends Node {
 		super.onStart(config);
 
 		this.#broker = flows.get(configFlowID).getNode(config.broker);
-		if (config.topic) this.#topic = config.topic;
-		if (undefined !== config.qos) this.#QoS = parseInt(config.qos);
-		if ((true === this.#retain) || ("true" === this.#retain)) this.#retain = true;
+		this.#topic = config.topic;
+		this.#QoS = config.qos;
+		this.#retain = config.retain;
 	}
 	onMessage(msg, done) {
 		let payload = msg.payload;

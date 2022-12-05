@@ -8,7 +8,7 @@
 		"keys": {
 			"available": 128
 		},
-		"stack": 2048
+		"stack": 1024
 	},
 	"config": {
 		"ui_text_input": true
@@ -24,5 +24,24 @@
 	},
 	"preload": [
 		"flows"
-	]
+	],
+	"platforms": {
+		"esp32": {
+			"creation": {
+				"static": 0,
+				"chunk": {
+					"initial": 65536,
+					"incremental": 0
+				},
+				"heap": {
+					"initial": 4096,
+					"incremental": 0
+				},
+				"keys": {
+					"available": 128
+				},
+				"stack": 600
+			}
+		}
+	}
 }

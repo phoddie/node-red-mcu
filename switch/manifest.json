@@ -6,7 +6,7 @@
 		"keys": {
 			"available": 128
 		},
-		"stack": 1024
+		"stack": 768
 	},
 	"modules": {
 		"*": [
@@ -33,5 +33,20 @@
 			"./assets/power-bar",
 			"./assets/power-thumb"
 		]
-	}
+	},
+	"platforms": {
+		"esp32": {
+			"creation": {
+				"static": 0,
+				"chunk": {
+					"initial": 81920,
+					"incremental": 0
+				},
+				"heap": {
+					"initial": 5120,
+					"incremental": 0
+				}
+			}
+		}
+	}	
 }

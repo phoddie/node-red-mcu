@@ -143,7 +143,7 @@ class RED {
 		globalThis.flows = flows;		// not ideal (gives FunctionNode access to all flows)
 		msgQueue = {first: undefined, last: undefined, timer: Timer.repeat(() => RED.mcu.deliver(), 5000, 5000)};
 
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left('{"state": "building"}', "NR_EDITOR");
 
 		globalThis.globalContext = new Context;
@@ -174,7 +174,7 @@ class RED {
 			}
 		);
 
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left('{"state": "ready"}', "NR_EDITOR");
 
 		return flows;
@@ -299,7 +299,7 @@ export class Node {
 			return this.send(result);
 	}
 	status(status) {
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left(JSON.stringify({status}), this.id);
 
 		const statuses = this.#outputs.statuses;
@@ -338,12 +338,12 @@ export class Node {
 		this.trace(msg);
 	}
 	warn(warn) {
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left(JSON.stringify({warn: {warn}}), this.id);
 		this.trace(`(warning: ${warn})`);
 	}
 	error(error, msg = {}) {
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left(JSON.stringify({error: {error}}), this.id);
 		this.makeDone(msg)(error);
 	}
@@ -465,7 +465,7 @@ class DebugNode extends Node {
 		}
 
 		// Feed msg back to the editor
-		if (config.noderedmcu.editor)
+		if (config.noderedmcu?.editor)
 			trace.left(JSON.stringify({input: msg}), this.id);
 
 		// Process msg for xsbug

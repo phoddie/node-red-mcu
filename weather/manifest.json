@@ -5,10 +5,19 @@
 		"../nodes/openweathermap/manifest.json"
 	],
 	"creation": {
+		"static": 0,
+		"chunk": {
+			"initial": 81920,
+			"incremental": 0
+		},
+		"heap": {
+			"initial": 5120,
+			"incremental": 0
+		},
+		"stack": 1024,
 		"keys": {
 			"available": 128
-		},
-		"stack": 1024
+		}
 	},
 	"modules": {
 		"*": [

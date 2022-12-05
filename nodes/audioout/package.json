@@ -1,0 +1,12 @@
+{
+	"name": "@moddable-node-red/audioout",
+	"version": "1.0.0",
+	"description": "example",
+	"license": "LGPLv3",
+	"node-red" : {
+		"nodes": {
+			"audioout": "audioout.js"
+		}
+	}
+}
+ 

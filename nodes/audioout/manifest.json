@@ -1,0 +1,36 @@
+{
+	"include": [
+		"$(MODDABLE)/examples/io/tcp/httpclient/manifest_httpclient.json",
+		"$(MODDABLE)/modules/data/wavreader//manifest.json"
+	],
+	"modules": {
+		"audioout-mcu": "./audioout-mcu",
+		"pins/*": [
+			"$(MODULES)/pins/i2s/*"
+		],
+		"*": [
+			"$(MODDABLE)/examples/pins/audioout/http-stream/wavstreamer",
+			"$(MODDABLE)/examples/pins/audioout/http-stream/sbcstreamer"
+		]
+	},
+	"preload": [
+		"audioout-mcu",
+		"pins/audioout",
+		"wavstreamer",
+		"sbcstreamer"
+	],
+	"defines": {
+		"audioOut": {
+			"bitsPerSample": 16,
+			"numChannels": 1,
+			"sampleRate": 16000,
+			"queueLength": 24
+		}
+	},
+	"config": {
+		"startupSound": false
+	},
+	"x-resources": {
+		"*": "$(MODDABLE)/examples/assets/sounds/bflatmajor"
+	}
+}

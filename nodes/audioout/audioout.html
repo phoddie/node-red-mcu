@@ -1,0 +1,122 @@
+
+<script type="text/javascript">
+    RED.nodes.registerType('audioout',{
+        category: 'MCU',
+        color: '#a6bbcf',
+        defaults: {
+            name: {value:""},
+            volume: {
+				value: 1.0,
+				validate(v) {
+					v = parseFloat(v);
+					if (isNaN(v))
+						return false;
+					return (0 <= v) && (v <= 2);
+				}
+			}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "font-awesome/fa-volume-up",
+        label() {
+            return this.name||"audioout";
+        }
+    });
+</script>
+
+<!-- stolen from MQTT -->
+<style>
+
+    .audioout-form-row-cols2 > input.audioout-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+    .audioout-form-row-cols2 > select.audioout-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+
+    .audioout-form-row-cols2 > label.audioout-form-row-col2 {
+        width: 100px;
+        margin-left: 42px;
+        display: inline-block;
+    }
+    .audioout-form-row-cols2 > input.audioout-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .audioout-form-row-cols2 > select.audioout-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .form-row.audioout5-out > label {
+        width: 130px;
+    }
+    .form-row.audioout-flags-row > label {
+        vertical-align: top;
+    }
+    .form-row.audioout-flags-row > .audioout-flags {
+        display: inline-block;
+        width: 70%
+    }
+
+    .form-row.audioout-flags-row > .audioout-flags > .audioout-flag > label {
+        display: block;
+        width: 100%;
+    }
+    .form-row.audioout-flags-row > .audioout-flags > .audioout-flag > label > input {
+        position: relative;
+        vertical-align: bottom;
+        top: -2px;
+        width: 15px;
+        height: 15px;
+    }
+    .form-row-audioout5 {
+        display: none;
+    }
+    .form-row-audioout5.form-row-audioout5-active:not(.form-row-audioout-static-disabled) {
+        display: block
+    }
+    .form-row-audioout-static-disabled {
+        display: none;
+        /* opacity: 0.3;
+        pointer-events: none; */
+    }
+
+</style>
+
+<script type="text/html" data-template-name="audioout">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-volume"><i class="fa fa-tasks"></i> Volume</label>
+        <input type="number" id="node-input-volume" placeholder="1.0">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="audioout">
+    <p>Play audio from local resources, play a sequence of tones, and stream audio from WAVE, audio/L16, and SBC streams.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>wave <span class="property-type">string</span></dt>
+        <dd>HTTP URL to an uncompressed 16-bit WAVE file or audio stream with an audio/L16 MIME type</dd>
+        <dt>sbc <span class="property-type">string</span></dt>
+        <dd>HTTP URL to SBC compressed audio stream (single channel only)</dd>
+        <dt>resource <span class="property-type">string</span></dt>
+        <dd>Name of Resource containing audio)</dd>
+        <dt>tones <span class="property-type">string</span></dt>
+        <dd>Array of tones to play. Each array entry is a two element array of frequency and duration in milliseconds</dd>
+        <dt>samples <span class="property-type">Uint8Array / Buffer</span></dt>
+        <dd>Binary data buffer of audio samples</dd>
+        <dt>flush <span class="property-type">any</span></dt>
+        <dd>When present, the flush property causes any pending audio to be cancelled</dd>
+        <dt>volume <span class="property-type">number</span></dt>
+        <dd>Sets the volume of the audio output. 1.0 is full volume, 0 is silent, and values between 1.0 and 2.0 overdrive the audio.</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The "volume" property is initial volume of the stream. Value between 1,0 and 2.0 overdrive the audio and may result in distortion.</p>
+    <p>Only one of "wave", "sbc", "resource", "samples", and "tones" may be used a each message.</p>
+    <p>Starting playback of audio flushes the currently playing audio on that stream.</p>
+    <p>When running in full Node-RED the node is just a placeholder and does not play audio.</p>
+</script>

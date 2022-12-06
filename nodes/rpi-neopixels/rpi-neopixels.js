@@ -114,13 +114,13 @@ class NeopixelsNode extends Node {
 					}
 					else
 						ll = Math.min(ll, this.#np.length - 1);
-					ll = ll - 1;
 					if (this.#mode.indexOf("need") >= 0) {
 						this.fill(this.#bgnd, 0, ll);
 						this.setPixel(ll, this.#needle);
 						this.fill(this.#bgnd, ll + 1, this.#np.length);
 					}
 					else {
+						ll = ll - 1;
 						this.fill(this.#fgnd, 0, ll);
 						this.fill(this.#bgnd, ll + 1, this.#np.length);
 					}
@@ -141,7 +141,6 @@ class NeopixelsNode extends Node {
 				let l = Number(parts[1]);
 				if (this.#mode.indexOf("pcent") >= 0)
 					l = Math.round(l / 100 * this.#np.length + 0.5);
-				l = l - 1;
 				if (this.#mode.indexOf("need") >= 0) {
 					this.#needle = color;
 
@@ -150,6 +149,7 @@ class NeopixelsNode extends Node {
 					this.fill(this.#bgnd, l + 1, this.#np.length);
 				}
 				else {
+					l = l - 1;
 					this.#fgnd = color;
 
 					this.fill(this.#fgnd, 0, l);
@@ -166,6 +166,7 @@ class NeopixelsNode extends Node {
 						const pixels = new Uint8Array(this.#np);
 						pixels.copyWithin(3, 0, 3 * (pixels.length - 1));
 						this.setPixel(0, color);
+						this.#np.update();
 						return void done();
 					}
 
@@ -186,6 +187,7 @@ class NeopixelsNode extends Node {
 						const pixels = new Uint8Array(this.#np);
 						pixels.copyWithin(0, 3, 3 * (pixels.length - 1));
 						this.setPixel(this.#np.length - 1, color);
+						this.#np.update();
 						return void done();
 					}
 

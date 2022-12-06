@@ -71,7 +71,7 @@ class WebSocketClient extends Node {
 		({path: o.url, subprotocol: o.subprotocol, keepalive: o.keepalive} = options); 
 		this.#ws = new WebSocket(o);
 		this.#ws.binaryType = "arraybuffer"; 
-		this.#ws.addEventListener("open", event => {
+		this.#ws.addEventListener("open", () => {
 			Timer.clear(this.#reconnect);
 			this.#reconnect = undefined;
 			this.status(connected);
@@ -86,7 +86,7 @@ class WebSocketClient extends Node {
 			for (let node of this.#nodes)
 				node.send(msg);
 		});
-		const close = event => {
+		const close = () => {
 			this.#ws = undefined;
 			this.status(disconnected);
 

@@ -491,7 +491,7 @@ class DebugNode extends Node {
 		}
 
 		if (this.#toStatus) {
-			const statusVal = this.#statusVal(msg);		// NR says: #statusVal shall return typeof string!
+			let statusVal = this.#statusVal(msg);		// NR says: #statusVal shall return typeof string!
 			if (statusVal !== this.#oldStatus) {
 				if (statusVal.length > 32)
 					statusVal = statusVal.slice(0, 32) + "…";

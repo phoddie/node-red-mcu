@@ -20,7 +20,6 @@
 
 import {Node} from "nodered";
 import {File, Directory} from "file";
-import config from "mc/config";
 import Base64 from "base64";
 import Hex from "hex";
 import Timer from "timer";
@@ -144,7 +143,7 @@ class FileRead extends Node {
 			state.encoding = config.encoding;
 	}
 	onMessage(msg) {
-		let payload, state = this.#state;
+		let state = this.#state;
 		const filename = state.filename ?? msg.filename;
 		let file;
 		try {

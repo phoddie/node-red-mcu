@@ -76,8 +76,8 @@ class NeopixelsNode extends Node {
 	}
 	onMessage(msg, done) {
 		if (undefined !== msg.brightness) {
+			const brightness = parseFloat(msg.brightness) / 100 * 255;
 			if (this.#wipe) {
-				brightness = parseFloat(msg.brightness) / 100 * 255;
 				this.push(() => {
 					this.#np.brightness = brightness;
 					return true;				
@@ -91,7 +91,7 @@ class NeopixelsNode extends Node {
 			return void done();
 
 		let payload = msg.payload.toString();
-		const parts = payload.split(",");
+		let parts = payload.split(",");
 		switch (parts.length) {
 			case 1:
 				if (isNaN(payload)) { // it's a single colour word so set background

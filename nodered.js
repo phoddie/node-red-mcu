@@ -850,11 +850,12 @@ class SplitNode extends Node {
 	onMessage(msg) {
 		let payload = msg.payload; 
 		if (payload instanceof Uint8Array) {
-			const parts = {type: "buffer", ch: this.#splt, id: generateId()};
+			const parts = {type: "buffer", id: generateId()};
 			msg.parts = parts;
-	
+
 			if ("len" === this.#spltType) {
 				const length = payload.length;
+				parts.ch = this.#splt;
 				parts.count = Math.idiv((length + this.#splt - 1), this.#splt); 
 				for (let i = 0, j = 0; i < length; i += this.#splt, j += 1) {
 					msg.payload = payload.slice(i, i + this.#splt);
@@ -864,7 +865,8 @@ class SplitNode extends Node {
 			}
 			else if (("bin" === this.#spltType) || ("str" === this.#spltType)) {
 				const b = payload;
-				const splt = ("bin" === this.#spltType) ? this.#splt : ArrayBuffer.fromString(this.#splt);
+				const splt = ("bin" === this.#spltType) ? this.#splt : new Uint8Array(ArrayBuffer.fromString(this.#splt));
+				parts.ch = splt; 
 				payload = [];
 				let position = 0;
 				while (position < b.length) {
@@ -1400,6 +1402,31 @@ class Buffer extends Uint8Array {
 		return value instanceof Buffer;
 	}
 	static concat(list, totalLength) {
+		const length = list.length;
+		if (undefined === totalLength) {
+			totalLength = 0;
+			for (let i = 0; i < length; i++)
+				totalLength += list[i];
+		}
+		const result = new Buffer(totalLength);
+		for (let i = 0, position = 0; i < length; i++) {
+			let buffer = list[i];
+			if (!ArrayBuffer.isView(buffer))
+				buffer = new Uint8Array(buffer);
+
+			if (buffer.byteLength > (totalLength - position))
+				buffer = buffer.subarray(0, totalLength - position);
+
+			result.set(buffer, position);
+			position += buffer.length;
+			if (position >= totalLength)
+				break;
+		}
+
+		return result;
+	}
+	static get [Symbol.species]() {
+		return Buffer;
 	}
 }
 

@@ -78,7 +78,7 @@ function JoinNode(n) {
 						buffers.push(joinBuffer);
 						bufferLen += joinBuffer.length;
 					}
-					if (!Buffer.isBuffer(group.payload[i])) {
+					if (!(group.payload[i] instanceof Uint8Array)) {
 						group.payload[i] = Buffer.from(group.payload[i]);
 					}
 					buffers.push(group.payload[i]);
@@ -268,7 +268,7 @@ function JoinNode(n) {
 			var group = inflight[partId];
 			if (payloadType === 'buffer') {
 				if (property !== undefined) {
-					if (Buffer.isBuffer(property) || (typeof property === "string") || Array.isArray(property)) {
+					if ((property instanceof Uint8Array) || (typeof property === "string") || Array.isArray(property)) {
 						inflight[partId].bufferLen += property.length;
 					}
 					else {

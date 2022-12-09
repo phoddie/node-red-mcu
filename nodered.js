@@ -836,19 +836,53 @@ class FilterNode extends Node {
 class SplitNode extends Node {
 	#arraySplt;
 	#splt;
+	#spltType;
 	#addname;
 
 	onStart(config) {
 		super.onStart(config);
-		
+
+		this.#spltType = config.spltType;
 		this.#splt = config.splt;
 		this.#arraySplt = config.arraySplt;
 		this.#addname = config.addname;
 	}
 	onMessage(msg) {
 		let payload = msg.payload; 
-		if (payload instanceof Buffer)		//@@ verify before committing!
-			throw new Error("buffer unimplemented")
+		if (payload instanceof Uint8Array) {
+			const parts = {type: "buffer", ch: this.#splt, id: generateId()};
+			msg.parts = parts;
+	
+			if ("len" === this.#spltType) {
+				const length = payload.length;
+				parts.count = Math.idiv((length + this.#splt - 1), this.#splt); 
+				for (let i = 0, j = 0; i < length; i += this.#splt, j += 1) {
+					msg.payload = payload.slice(i, i + this.#splt);
+					parts.index = j;
+					this.send(msg);
+				}
+			}
+			else if (("bin" === this.#spltType) || ("str" === this.#spltType)) {
+				const b = payload;
+				const splt = ("bin" === this.#spltType) ? this.#splt : ArrayBuffer.fromString(this.#splt);
+				payload = [];
+				let position = 0;
+				while (position < b.length) {
+					let next = Buffer.prototype.indexOf.call(b, splt, position);
+					if (next < 0)
+						next = b.length;
+					payload.push(b.slice(position, next));
+					position = next + splt.byteLength; 
+				}
+				let length = payload.length;
+				parts.count = length; 
+				for (let i = 0; i < length; i += 1) {
+					msg.payload = payload[i]
+					parts.index = i;
+					this.send(msg);
+				}
+			}
+		}
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;
 			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt, id: generateId()};
@@ -875,7 +909,18 @@ class SplitNode extends Node {
 			}
 		}
 		else {	// string
-			payload = payload.toString().split(this.#splt);
+			payload = payload.toString();
+			if ("str" === this.#spltType)
+				payload = payload.split(this.#splt);
+			else if ("bin" === this.#spltType)
+				payload = payload.split(String.fromArrayBuffer(this.#splt.buffer));
+			else if ("len" === this.#spltType) {
+				const s = payload, length = s.length, splt = this.#splt;
+				payload = new Array(Math.idiv(length + splt - 1, splt));
+				payload.fill(undefined);
+				for (let i = 0, j = 0; i < length; i += splt, j += 1)
+					payload[j] = s.slice(i, i + splt);
+			}
 			const length = payload.length;
 			const parts = {type: "string", count: length, ch: this.#splt, id: generateId()};
 			msg.parts = parts;
@@ -1346,6 +1391,16 @@ globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 
 // placeholder for compatibility
 class Buffer extends Uint8Array {
+	indexOf(search, byteOffset) @ "xs_buffer_prototype_indexOf"
+	slice() {		//@@ not the same... more like subarray
+	}	
+
+//	static from()		//@@ not the same!
+	static isBuffer(value) {
+		return value instanceof Buffer;
+	}
+	static concat(list, totalLength) {
+	}
 }
 
 class Console {

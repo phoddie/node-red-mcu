@@ -1,0 +1,8 @@
+{
+	"modules": {
+		"split": "./split"
+	},
+	"preload": [
+		"split"
+	]
+}

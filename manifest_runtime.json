@@ -18,6 +18,7 @@
 		"./nodes/csv/manifest.json",
 		"./nodes/delay/manifest.json",
 		"./nodes/join/manifest.json",
+		"./nodes/split/manifest.json",
 		"./nodes/batch/manifest.json",
 		"./nodes/random/manifest.json",
 		"./nodes/sort/manifest.json",

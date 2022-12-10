@@ -84,3 +84,50 @@ void xs_buffer_prototype_indexOf(xsMachine *the)
 
 	xsmcSetInteger(xsResult, -1);
 }
+
+void xs_buffer_prototype_lastIndexOf(xsMachine *the)
+{
+	int offset;
+	uint8_t *needle, *haystack, *initialHaystack;
+	xsUnsignedValue needleLength, haystackLength;
+
+	if (xsmcArgc > 1) {
+		offset = xsmcToInteger(xsArg(1));
+		if (xsmcArgc > 2)
+			xsUnknownError("unsupported");
+	}
+
+	if (xsReferenceType != xsmcTypeOf(xsArg(0)))
+		xsUnknownError("unsupported");		// valid to pass string or number for arg(0)
+
+	xsmcGetBufferReadable(xsArg(0), (void **)&needle, &needleLength);
+	xsmcGetBufferReadable(xsThis, (void **)&haystack, &haystackLength);
+	initialHaystack = haystack;
+	
+	if (xsmcArgc < 2)
+		haystack = initialHaystack + haystackLength - 1; 
+	else if (0 == offset)
+		;
+	else if ((offset < 0) && (-offset < (int)haystackLength)) {
+		haystack += haystackLength + offset;
+	}
+	else if ((offset > 0) && (offset < (int)haystackLength)) {
+		haystack += offset;
+	}
+	else
+		xsUnknownError("invalid offset");
+
+	if (needleLength <= haystackLength) {
+		if ((haystack + needleLength) > (initialHaystack + haystackLength))
+			haystack = initialHaystack + haystackLength - needleLength; 
+		for ( ; haystack >= initialHaystack; haystack--) {
+			if (0 == c_memcmp(haystack, needle, needleLength)) {
+				xsmcSetInteger(xsResult, haystack - initialHaystack);
+				return;
+			}
+		}
+	}
+
+	xsmcSetInteger(xsResult, -1);
+}
+

@@ -1394,8 +1394,7 @@ globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 // placeholder for compatibility
 class Buffer extends Uint8Array {
 	indexOf(search, byteOffset) @ "xs_buffer_prototype_indexOf"
-	slice() {		//@@ not the same... more like subarray
-	}	
+	lastIndexOf(search, byteOffset) @ "xs_buffer_prototype_lastIndexOf"
 
 //	static from()		//@@ not the same!
 	static isBuffer(value) {
@@ -1406,7 +1405,7 @@ class Buffer extends Uint8Array {
 		if (undefined === totalLength) {
 			totalLength = 0;
 			for (let i = 0; i < length; i++)
-				totalLength += list[i];
+				totalLength += list[i].length;
 		}
 		const result = new Buffer(totalLength);
 		for (let i = 0, position = 0; i < length; i++) {

@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated December 1, 2022<br>
+Updated December 10, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -566,8 +566,11 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] String
 - [X] Object
 - [X] Copy key to msg.[]
-- [ ] Binary split
-- [ ] "Handle as a stream of messages"
+- [X] Binary
+- [X] "Handle as a stream of messages"
+- [X] Works with Complete nodes
+
+The split implementation has some obscure differences in how it triggers Complete nodes from the Node-RED implementation. These differences are noted in issue reports [3982](https://github.com/node-red/node-red/issues/3982) and [3983](https://github.com/node-red/node-red/issues/3983). The intent is for the MCU implementation to match Node-RED once the expected behavior is better understood.
 
 ### JSON
 - [X] Convert between JSON String & Object, Always Convert to JSON String, Always Convert to JSON Object

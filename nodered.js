@@ -838,6 +838,7 @@ class SplitNode extends Node {
 	#splt;
 	#spltType;
 	#addname;
+	#stream;
 
 	onStart(config) {
 		super.onStart(config);
@@ -846,26 +847,73 @@ class SplitNode extends Node {
 		this.#splt = config.splt;
 		this.#arraySplt = config.arraySplt;
 		this.#addname = config.addname;
+		if (config.stream)
+			this.#stream = {};
 	}
 	onMessage(msg) {
 		let payload = msg.payload; 
 		if (payload instanceof Uint8Array) {
+			let splt = this.#splt;
+			if ("str" === this.#spltType)
+				splt = new Uint8Array(ArrayBuffer.fromString(splt));
+
+			const stream = this.#stream;
+			if (stream) {
+				if (stream.buffer)
+					payload = Buffer.concat([stream.buffer, payload]);
+
+				const length = payload.length;
+				if ("len" === this.#spltType) {
+					if (length < splt) {
+						stream.buffer = payload;
+						return;		//@@ remember done
+					}
+					const i = length % splt;
+					if (i) {
+						stream.buffer = Uint8Array.prototype.slice.call(payload, length - i); 
+						payload = payload.subarray(0, length - i);
+					}
+					else
+						delete stream.buffer;
+				}
+				else {
+					const i = Buffer.prototype.lastIndexOf.call(payload, splt);
+					if (i < 0) {
+						stream.buffer = payload;
+						return;		//@@ remember done
+					}
+					if ((i + splt.length) !== length) {
+						stream.buffer = Uint8Array.prototype.slice.call(payload, i + splt.length); 
+						payload = payload.subarray(0, i);
+					}
+					else {
+						delete stream.buffer;
+						payload = payload.subarray(0, i);
+					}
+				}
+			}
+
 			const parts = {type: "buffer", id: generateId()};
 			msg.parts = parts;
 
+			if (stream)
+				parts.index = stream.i ?? 0;
+			else
+				parts.index = 0;
+
 			if ("len" === this.#spltType) {
 				const length = payload.length;
-				parts.ch = this.#splt;
-				parts.count = Math.idiv((length + this.#splt - 1), this.#splt); 
-				for (let i = 0, j = 0; i < length; i += this.#splt, j += 1) {
-					msg.payload = payload.slice(i, i + this.#splt);
-					parts.index = j;
+				parts.ch = splt;
+				if (!stream)
+					parts.count = Math.idiv((length + splt - 1), splt); 
+				for (let i = 0; i < length; i += splt) {
+					msg.payload = Uint8Array.prototype.slice.call(payload, i, i + splt);
+					parts.index += 1;
 					this.send(msg);
 				}
 			}
 			else if (("bin" === this.#spltType) || ("str" === this.#spltType)) {
 				const b = payload;
-				const splt = ("bin" === this.#spltType) ? this.#splt : new Uint8Array(ArrayBuffer.fromString(this.#splt));
 				parts.ch = splt; 
 				payload = [];
 				let position = 0;
@@ -873,17 +921,20 @@ class SplitNode extends Node {
 					let next = Buffer.prototype.indexOf.call(b, splt, position);
 					if (next < 0)
 						next = b.length;
-					payload.push(b.slice(position, next));
+					payload.push(Uint8Array.prototype.slice.call(b, position, next));
 					position = next + splt.byteLength; 
 				}
 				let length = payload.length;
-				parts.count = length; 
+				if (!stream)
+					parts.count = length; 
 				for (let i = 0; i < length; i += 1) {
 					msg.payload = payload[i]
-					parts.index = i;
+					parts.index += 1;
 					this.send(msg);
 				}
 			}
+			if (stream)
+				stream.i = parts.index;
 		}
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;
@@ -912,24 +963,71 @@ class SplitNode extends Node {
 		}
 		else {	// string
 			payload = payload.toString();
-			if ("str" === this.#spltType)
-				payload = payload.split(this.#splt);
-			else if ("bin" === this.#spltType)
-				payload = payload.split(String.fromArrayBuffer(this.#splt.buffer));
-			else if ("len" === this.#spltType) {
-				const s = payload, length = s.length, splt = this.#splt;
+			let splt = this.#splt;
+			if ("bin" === this.#spltType)
+				splt = String.fromArrayBuffer(splt)
+
+			const stream = this.#stream;
+			if (stream) {
+				if (stream.remainder)
+					payload = stream.remainder + payload;
+
+				const length = payload.length;
+				if ("len" === this.#spltType) {
+					if (length < splt) {
+						stream.remainder = payload;
+						return;		//@@ remember done
+					}
+					const i = length % splt;
+					if (i) {
+						stream.remainder = payload.slice(length - i); 
+						payload = payload.slice(0, length - i);
+					}
+					else
+						delete stream.remainder;
+				}
+				else {
+					const i = payload.lastIndexOf(splt);
+					if (i < 0) {
+						stream.remainder = payload;
+						return;		//@@ remember done
+					}
+					if ((i + splt.length) !== length) {
+						stream.remainder = payload.slice(i + splt.length); 
+						payload = payload.slice(0, i);
+					}
+					else {
+						delete stream.remainder;
+						payload = payload.slice(0, i);
+					}
+				}
+			} 
+
+			if ("len" === this.#spltType) {
+				const s = payload, length = s.length;
 				payload = new Array(Math.idiv(length + splt - 1, splt));
 				payload.fill(undefined);
 				for (let i = 0, j = 0; i < length; i += splt, j += 1)
 					payload[j] = s.slice(i, i + splt);
 			}
+			else
+				payload = payload.split(splt);
+
 			const length = payload.length;
-			const parts = {type: "string", count: length, ch: this.#splt, id: generateId()};
+			const parts = {type: "string", ch: splt, id: generateId()};
+			if (stream) {
+				parts.index = stream.index ?? 0;
+				stream.index = parts.index + length;
+			}
+			else {
+				parts.count = length;
+				parts.index = 0;
+			}
 			msg.parts = parts;
 			for (let i = 0; i < length; i += 1) {
 				msg.payload = payload[i];
-				parts.index = i;
 				this.send(msg);
+				parts.index += 1;
 			}
 		}
 	}
@@ -1424,8 +1522,9 @@ class Buffer extends Uint8Array {
 
 		return result;
 	}
-	static get [Symbol.species]() {
-		return Buffer;
+	
+	static {
+		this.prototype.slice = this.prototype.subarray; 
 	}
 }
 

@@ -1,0 +1,8 @@
+{
+	"include": [
+	],
+	"modules": {
+		"*": "./tcpnodes"
+	},
+	"preload": "tcpnodes"
+}

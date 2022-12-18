@@ -19,8 +19,7 @@
  */
 
 /*
-	tcp-im: automatic reconnect on dropped output connection
-
+	status
 */
 
 import {Node} from "nodered";
@@ -68,6 +67,10 @@ class TCPConnection {
 				o.host = options.host;
 			o.port = options.port;
 			this.socket = new TCP(o);
+			this.socket.address = o.address;
+			this.socket.port = o.port;
+			if (o.host)
+				this.socket.host = o.host;
 		}
 
 		connections.push(this);
@@ -79,8 +82,19 @@ class TCPConnection {
 			delete this.remainder;
 		}
 
-		connections.splice(connections.indexOf(item => item.socket === this), 1);
+		connections.splice(connections.indexOf(this), 1);
 		this.socket.close();
+		
+		if (this.socket.address) {	// reconnect... might want/need to wait?
+			new TCPConnection({
+				config: this.config,
+				node: this.node,
+				address: this.socket.address,
+				host: this.socket.host,
+				port: this.socket.port
+			});
+		}
+
 		delete this.socket;
 	}
 	onReadable(count) {
@@ -97,7 +111,7 @@ class TCPConnection {
 					if (newline < 0)
 						break;
 
-					this.send(remainder.slice(position, newline + (config.trim ? 0 : config.newline.byteLength)));
+					this.send(remainder.slice(position, newline + (config.trim ? config.newline.byteLength : 0)));
 					position = newline + config.newline.byteLength;
 				}
 				if (position) {
@@ -108,7 +122,9 @@ class TCPConnection {
 			}
 		}
 		else {
-			this.send(new Uint8Array(this.socket.read()));
+			const data = this.socket.read();
+			if (config.read)
+				this.send(new Uint8Array(data));
 		}
 	}
 	send(payload) {
@@ -132,6 +148,8 @@ class TCPConnection {
 	}
 	onWritable(count) {
 		this.writable = count;
+		if (this.end)
+			return void this.onError();		// close and reconnect
 		this.flush();
 	}
 	write(buffer) {
@@ -158,8 +176,11 @@ class TCPConnection {
 			if (buffer.position === buffer.byteLength)
 				output.shift();
 		}
-		if (!output.length)
+		if (!output.length) {
 			delete this.output;
+			if (this.config.end)
+				this.end = true;
+		}
 	}
 	
 	static find(id) {
@@ -168,7 +189,6 @@ class TCPConnection {
 }
 
 class TCPIn extends Node {
-	#listener;
 	#config;
 
 	onStart(config) {
@@ -177,6 +197,7 @@ class TCPIn extends Node {
 		this.#config = {
 			datatype: config.datatype,
 			datamode: config.datamode,
+			read: true
 		};
 		if (config.newline?.length)
 			this.#config.newline = ArrayBuffer.fromString(config.newline);
@@ -186,7 +207,7 @@ class TCPIn extends Node {
 			this.#config.trim = config.trim;
 
 		if ("server" === config.server) {
-			this.#listener = new Listener({
+			new Listener({
 				port: config.port,
 				target: this,
 				onReadable(count) {
@@ -241,18 +262,65 @@ class TCPOut extends Node {
 		};
 		if (config.base64)
 			this.#config.base64 = config.base64; 
+		if (config.end)
+			this.#config.end = true; 
+
+		if ("server" === config.beserver) {
+			new Listener({
+				port: config.port,
+				target: this,
+				onReadable(count) {
+					while (count--) {
+						new TCPConnection({
+							config: this.target.#config,
+							node: this.target,
+							from: this.read()
+						});
+					}
+				}
+			});
+		}
+		else if ("client" === config.beserver) {
+			const DNS = device.network.http.dns;		//@@ should have device.network.dns
+			const dns = new DNS.io(DNS);
+			const port = config.port;
+			dns.resolve({
+				host: config.host, 
+				onResolved: (host, address) => {
+					new TCPConnection({
+						config: this.#config,
+						node: this,
+						address,
+						host,
+						port
+					});
+				},
+				onError: (err) => {
+					debugger;
+				},
+			});
+
+		} 
 	}
 	onMessage(msg) {
-		let payload = msg.payload;
-
 		if ("reply" === this.#config.beserver) {
 			const connection = TCPConnection.find(msg._session?.id);
-			if (!connection)
-				return void this.error("invalid connection");
-			connection.write(payload);
+			if (connection)
+				connection.write(msg.payload);
+			else
+				this.error("invalid connection");
 		}
-		else {	//@@ write to all connections attached to this node
-			debugger;
+		else {
+			if (msg._session) {
+				const connection = TCPConnection.find(msg._session?.id);
+				if (connection && (connection.node === this))
+					return void connection.write(msg.payload);
+			}
+
+			connections.forEach(connection => {
+				if (connection.node === this)
+					connection.write(msg.payload);
+			});
 		}
 	}
 

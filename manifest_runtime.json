@@ -22,6 +22,7 @@
 		"./nodes/batch/manifest.json",
 		"./nodes/random/manifest.json",
 		"./nodes/sort/manifest.json",
+		"./nodes/tcp/manifest.json",
 		"./nodes/trigger/manifest.json",
 		"./nodes/sensor/manifest.json",
 		"./nodes/file/manifest.json",

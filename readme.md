@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated December 10, 2022<br>
+Updated December 17, 2022<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -499,6 +499,34 @@ Implemented using HTML5 `WebSocket` extensions in Moddable SDK and `HTTPServer` 
 - [X] "Connect to"
 - [X] "Listen on"
 
+### TCP In
+- [X] "Connect to"
+- [X] "Listen on"
+- [X] Output stream or single
+- [X] Output String, Buffer, Base64
+- [X] Split stream by delimiter
+- [X] Re-attach delimiter
+- [X] Topic
+- [ ] Status
+- [ ] TLS (always insecure)
+
+Implemented using ECMA-419 `TCP` and `Listener` sockets,
+
+### TCP Out
+- [X] "Connect to"
+- [X] "Listen on"
+- [X] "Reply to TCP"
+- [X] "Close connection after each message is sent"
+- [X] "Decode Base64 message"
+- [ ] Status
+- [ ] TLS (always insecure)
+
+Implemented using ECMA-419 `TCP` and `Listener` sockets.
+
+### TCP Request
+
+Not yet
+
 ### UDP In
 - [X] "Listen for udp messages"
 - [X] Listen port
@@ -546,8 +574,8 @@ Implemented using `UDP` I/O class from ECMA-419.
 - [X] flow., global., expression
 - [X] "recreate message sequences"
 - [X] env variable
-- [ ] is of type: buffer
-- [ ] contains, matches regexp, is empty, is not empty, sequence rules, JSONata exp
+- [x] is empty, is not empty
+- [ ] contains, matches regexp, sequence rules, JSONata exp
 
 ### Filter
 - [X] "block unless value changes"
@@ -696,7 +724,7 @@ The compatibility goal should be to provide the same behaviors as much as possib
 Possible future work on built-in nodes:
 
 - **Function nodes**. Exec may not make sense.
-- **Network nodes**. The TCP nodes should be possible to implement using ECMA-419 in the same way MQTT has been implemented. WebSocket server is possible.
+- **Network nodes**. TLS client is possible and pending.
 - **Parser**. XML may be possible. HTML, YAML are likely impractical. 
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 

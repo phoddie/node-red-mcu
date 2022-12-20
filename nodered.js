@@ -372,7 +372,7 @@ export class Node {
 							id: source.id,
 							type: source.constructor.type,
 							name: source.name ?? "",
-							count: 0	
+							count: 0		//@@ recursion counter	
 						}
 					}
 				}
@@ -746,6 +746,14 @@ class SwitchNode extends Node {
 			}
 			this.send(result);
 		}
+	}
+	empty(value) {		// adapted from 10-switch.js
+		const type = typeof value;
+		if ((type === "string") || Array.isArray(value) || (value instanceof Uint8Array))
+			return 0 === value.length;
+		if ((type === "object") && value)
+			return 0 === Object.keys(value).length;
+		return false;
 	}
 
 	static type = "switch";

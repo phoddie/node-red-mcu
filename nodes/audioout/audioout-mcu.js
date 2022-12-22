@@ -20,11 +20,11 @@
 
 import {Node} from "nodered";
 
-import AudioOut from "pins/audioout"
 import Resource from "Resource"
 import WavStreamer from "wavstreamer";
 import SBCStreamer from "sbcstreamer";
 import URL from "url";
+import Modules from "modules";
 
 let audioOut;
 
@@ -36,6 +36,7 @@ class AudioOutNode extends Node {
 		super.onStart(config);
 
 		if (!audioOut) {
+			const AudioOut = Modules.importNow("pins/audioout")
 			audioOut = new AudioOut({});
 			audioOut.callbacks = [];
 			audioOut.start();
@@ -45,12 +46,11 @@ class AudioOutNode extends Node {
 			return void this.error("no more audio streams available")
 
 		this.#stream = audioOut.stream++;
-		audioOut.enqueue(this.#stream, AudioOut.Volume, 256 * Number(config.volume ?? 1));
+		audioOut.enqueue(this.#stream, audioOut.constructor.Volume, 256 * Number(config.volume ?? 1));
 	}
 	onMessage(msg, done) {
-		if (msg.flush)
-			audioOut.enqueue(this.#stream, AudioOut.Flush);
-
+		const AudioOut = audioOut.constructor;
+	
 		if (msg.volume)
 			audioOut.enqueue(this.#stream, AudioOut.Volume, 256 * Number(msg.volume));
 
@@ -58,7 +58,7 @@ class AudioOutNode extends Node {
 		if (play || msg.flush) {
 			audioOut.enqueue(this.#stream, AudioOut.Flush);
 			this.#streamer?.close?.();
-			this.#streamer?.done();
+			this.#streamer?.done?.();
 			this.#streamer = undefined;
 			audioOut.callbacks[this.#stream] = undefined;
 		}
@@ -81,6 +81,7 @@ class AudioOutNode extends Node {
 				port: url.port || 80,
 				host: url.hostname,
 				path: url.pathname + url.search,
+				waveHeaderBytes: 2048,		// WavStreamer only
 				audio: {
 					out: audioOut,
 					stream: this.#stream

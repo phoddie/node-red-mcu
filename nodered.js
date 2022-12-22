@@ -1014,16 +1014,15 @@ class MQTTBrokerNode extends Node {
 				if (options.more)
 					throw new Error("fragmented receive unimplemented!");
 
-				let payload = this.#mqtt.read(count);
+				const payload = this.#mqtt.read(count);
 				const msg = {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
 
 				const topic = options.topic.split("/");
-				topic.shift();
 			subscriptions:
 				for (let subscriptions = this.#subscriptions, i = 0, length = subscriptions.length; i < length; i++) {
+					let p = payload;				
 					const subscription = subscriptions[i];
 					const parts = subscription.topic.split("/");
-					parts.shift();
 					let ti = 0;
 					for (let k = 0; k < parts.length; k++) {
 						const part = parts[k];
@@ -1043,30 +1042,30 @@ class MQTTBrokerNode extends Node {
 					if (ti === topic.length) {
 						switch (subscription.format) {
 							case "utf8":
-								payload = String.fromArrayBuffer(payload);		//@@ TextDecoder with fatal: false seems to be the intent here
+								p = String.fromArrayBuffer(p);		//@@ TextDecoder with fatal: false seems to be the intent here
 								break;
 							case "buffer":
 								break;
 							case "json":
 								try {
-									payload = JSON.parse(String.fromArrayBuffer(payload));
+									p = JSON.parse(String.fromArrayBuffer(p));
 								}
 								catch {
 									this.error("invalid JSON");
 								}
 								break;
 							case "base64":
-								payload = Base64.encode(payload);
+								p = Base64.encode(p);
 								break;
 							default:		// "auto-detect"
 								try {
-									payload = String.fromArrayBuffer(payload);
+									p = String.fromArrayBuffer(p);
 								}
 								catch {
 								}
 								break;
 						}
-						msg.payload = payload
+						msg.payload = p
 						subscription.node.send(msg);
 					}
 				}

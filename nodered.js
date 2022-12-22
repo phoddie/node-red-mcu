@@ -39,13 +39,13 @@ class RED {
 	static settings = Object.freeze({
 	});
 
-	static _(msg, obj) {	// https://nodered.org/docs/creating-nodes/i18n
+	static _(msg /*, obj */) {	// https://nodered.org/docs/creating-nodes/i18n
 		return msg;		// not localizing
 	}
 	static util = class {
 		static cloneMessage = structuredClone;
 		static compareObjects = deepEqual;
-		static evaluateNodeProperty(inputField, inputFieldType, node, msg, callback) {
+		static evaluateNodeProperty(/* inputField, inputFieldType, node, msg, callback */) {
 			throw new Error;
 		}
 		static generateId = generateId;
@@ -261,7 +261,7 @@ export class Node {
 		if (config.errors)
 			this.#outputs.errors = config.errors.map(target => this.#flow.getNode(target));
 	}
-	onMessage(msg) {
+	onMessage(/* msg */) {
 	}
 	send(msg) {
 		const outputs = this.#outputs;
@@ -730,7 +730,7 @@ class SwitchNode extends Node {
 
 		// send messages in order received
 		for (let i = 0, length = sequence.length; i < length; i++) {
-			const msg = sequence.shift();
+			let msg = sequence.shift();
 			const result = onwards.shift();
 			for (let j = 0, first = true; j < result.length; j++) {
 				if (!result[j])
@@ -1253,7 +1253,7 @@ class CompatibiltyNode extends Node {
 		if (!events)
 			return false;
 
-		events.forEach(input => {
+		events.forEach(() => {
 			RED.mcu.enqueue(msg, this);
 		});
 

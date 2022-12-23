@@ -663,6 +663,24 @@ class ChangeNode extends Node {
 
 		Object.defineProperty(this, "onMessage", {value: config.onMessage});
 	}
+	change(current, fromValue, fromType, toValue) {		// based on 15-change.js
+		const type = typeof current;
+		if ("string" === type) {
+			if (((fromType === "num") || (fromType === "bool") || (fromType === "str")) &&
+				(current === fromValue.toString()))		// fromValue.toString because nodered2mcu converts to number or boolean 
+				return toValue;
+			return ("re" === fromType) ? current.replace(fromValue, toValue) : current.replaceAll(fromValue, toValue);
+		}
+		else if ((fromType === "num") && (("number" === type) || (current instanceof Number))) {
+			if (current == Number(fromValue))
+				return toValue;
+		}
+		else if (("boolean" === type) && (fromType === "bool")) {
+			if (current.toString() === fromValue)
+				return toValue;
+		}
+		return current;
+	}
 
 	static type = "change";
 	static {

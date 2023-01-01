@@ -1024,6 +1024,11 @@ class MQTTBrokerNode extends Node {
 		if (config.credentials?.password)
 			this.#options.password = config.credentials.password; 
 
+		Timer.set(() => this.connect());
+	}
+	connect() {
+		this.status({fill: "yellow", shape: "ring", text: "node-red:common.status.connecting"});
+
 		const MQTTClient = device.network.mqtt.io;
 		this.#mqtt = new device.network.mqtt.io({
 			...device.network.mqtt,
@@ -1089,17 +1094,20 @@ class MQTTBrokerNode extends Node {
 				}
 			},
 			onWritable: (count) => {
-				if ((undefined === this.#writable) && this.#subscriptions.length) {
-					const msg = {
-						operation: MQTTClient.SUBSCRIBE,
-						items: this.#subscriptions.map(subscription => {
-							return {
-								topic: subscription.topic,
-								QoS: Number(subscription.QoS)
-							};
-						})
-					};
-					count = this.#mqtt.write(null, msg);	
+				if (undefined === this.#writable) {
+					this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+					if (this.#subscriptions.length) {
+						const msg = {
+							operation: MQTTClient.SUBSCRIBE,
+							items: this.#subscriptions.map(subscription => {
+								return {
+									topic: subscription.topic,
+									QoS: subscription.QoS
+								};
+							})
+						};
+						count = this.#mqtt.write(null, msg);
+					}
 				}
 
 				this.#writable = count
@@ -1108,6 +1116,17 @@ class MQTTBrokerNode extends Node {
 					for (let i = 0, queue = this.#queue.splice(0), length = queue.length; i < length; i++)
 						this.onMessage(queue[i]);
 				}
+			},
+			onError: () => {
+				if (undefined !== this.#writable) {
+					this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+					this.#writable = undefined;
+					this.#options.wait = 1000;
+				}
+				else if (this.#options.wait <= 32_000)
+					this.#options.wait *= 2;
+				this.#mqtt = undefined;
+				Timer.set(() => this.connect(), this.#options.wait);
 			}
 		});
 	}
@@ -1128,6 +1147,7 @@ class MQTTBrokerNode extends Node {
 	subscribe(node, topic, format, QoS = 0) {
 		const MQTTClient = device.network.mqtt.io;
 
+		QoS = Number(QoS);
 		this.#subscriptions.push({node, topic, format, QoS});
 		if (undefined === this.#writable)
 			return;

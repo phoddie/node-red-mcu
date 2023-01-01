@@ -34,9 +34,11 @@
 	"modules": {
 		"*": [
 			"./nodered"
-		]
+		],
+		"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
 	},
 	"preload": [
+		"wifi/connection",
 		"nodered"
 	],
 	"defines": {
@@ -51,6 +53,27 @@
 	"platforms": {
 		"win": {
 			"error": "Node-RED MCU does not currently run on Windows "
+		},
+		"esp": {
+			"modules": {
+				"~": [
+					"$(BUILD)/devices/esp/setup/network"
+				]
+			}
+		},
+		"esp32": {
+			"modules": {
+				"~": [
+					"$(BUILD)/devices/esp32/setup/network"
+				]
+			}
+		},
+		"pico": {
+			"modules": {
+				"~": [
+					"$(BUILD)/devices/pico/setup/network"
+				]
+			}
 		}
 	}	
 }

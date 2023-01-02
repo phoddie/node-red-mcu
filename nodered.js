@@ -1004,7 +1004,8 @@ class MQTTBrokerNode extends Node {
 	#options;
 	#subscriptions = [];
 	#writable;
-	#queue = [];
+	#queue;
+	#status = [];
 
 	onStart(config) {
 		super.onStart(config);
@@ -1112,7 +1113,7 @@ class MQTTBrokerNode extends Node {
 
 				this.#writable = count
 
-				if (this.#queue.length) {
+				if (this.#queue?.length) {
 					for (let i = 0, queue = this.#queue.splice(0), length = queue.length; i < length; i++)
 						this.onMessage(queue[i]);
 				}
@@ -1120,6 +1121,7 @@ class MQTTBrokerNode extends Node {
 			onError: () => {
 				if (undefined !== this.#writable) {
 					this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+					this.#queue = undefined;
 					this.#writable = undefined;
 					this.#options.wait = 1000;
 				}
@@ -1133,7 +1135,12 @@ class MQTTBrokerNode extends Node {
 	onMessage(msg) {
 		//@@ fragmented send unimplemented so will stall if message is bigger than output buffer
 		const payload = msg.payload;
-		if ((undefined === this.#writable) || this.#queue.length || ((payload.byteLength + msg.topic.length + 10) > this.#writable)) {
+		
+		if (undefined === this.#writable)
+			return;		// drop messages when disconnected
+		
+		if (this.#queue?.length || ((payload.byteLength + msg.topic.length) > this.#writable)) {
+			this.#queue ??= [];
 			this.#queue.push(msg);
 			return;
 		}
@@ -1175,6 +1182,13 @@ class MQTTBrokerNode extends Node {
 			items
 		});
 	}
+	requestStatus(node) {
+		// if no node.#outputs.statuses and !config.noderedmcu?.editor... could safely ignore this 
+		this.#status.push(node);
+	}
+	status(msg) {
+		this.#status.forEach(node => node.status(msg));
+	}
 
 	static type = "mqtt-broker";
 	static {
@@ -1187,7 +1201,8 @@ class MQTTInNode extends Node {
 		super.onStart(config);
 
 		const broker = flows.get(configFlowID).getNode(config.broker);
-		broker.subscribe(this, config.topic, config.datatype, config.qos); 
+		broker.subscribe(this, config.topic, config.datatype, config.qos);
+		broker.requestStatus(this);
 	}
 
 	static type = "mqtt in";
@@ -1209,6 +1224,7 @@ class MQTTOutNode extends Node {
 		this.#topic = config.topic;
 		this.#QoS = config.qos;
 		this.#retain = config.retain;
+		this.#broker.requestStatus(this);
 	}
 	onMessage(msg, done) {
 		let payload = msg.payload;

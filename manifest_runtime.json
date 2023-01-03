@@ -58,21 +58,24 @@
 			"modules": {
 				"~": [
 					"$(BUILD)/devices/esp/setup/network"
-				]
+				],
+				"setup/network": "./setupwifi"
 			}
 		},
 		"esp32": {
 			"modules": {
 				"~": [
 					"$(BUILD)/devices/esp32/setup/network"
-				]
+				],
+				"setup/network": "./setupwifi"
 			}
 		},
 		"pico": {
 			"modules": {
 				"~": [
 					"$(BUILD)/devices/pico/setup/network"
-				]
+				],
+				"setup/network": "./setupwifi"
 			}
 		}
 	}	

@@ -48,7 +48,8 @@
 	},
 	"config": {
 		"noderedmcu": {
-		}
+		},
+		"sntp": "pool.ntp.org"
 	},
 	"platforms": {
 		"win": {

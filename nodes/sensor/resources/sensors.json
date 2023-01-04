@@ -1,0 +1,99 @@
+{
+	"sensor": {
+		"embedded:sensor/Accelerometer/LIS3DH": {
+			"model": "LIS3DH",
+			"manufacturer": "STMicroelectronics",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
+			"io": {
+				"sensor": {
+					"type": "SMBus"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true
+				}
+			}
+		},
+		"embedded:sensor/Accelerometer-Gyroscope/MPU6050": {
+			"model": "MPU6050",
+			"manufacturer": "InvenSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6050.md",
+			"io": {
+				"sensor": {
+					"type": "SMBus"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/SI7020": {
+			"model": "Si7020",
+			"manufacturer": "Silicon Labs",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-SiliconLabs-SI7020.md",
+			"io": {
+				"sensor": {
+					"type": "I2C"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/NTC_Thermistor": {
+			"model": "NTC Thermistor",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-NTC_Thermistor.md",
+			"io": {
+				"sensor": {
+					"type": "Analog"
+				}
+			}
+		},
+		"embedded:sensor/touch/FT6x06": {
+			"model": "FT6x06",
+			"manufacturer": "FocalTech",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+			"io": {
+				"sensor": {
+					"type": "I2C"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true
+				},
+				"reset": {
+					"type": "Digital",
+					"mode": "Output",
+					"optional": true
+				}
+			}
+		}
+	},
+	"platform": {
+		"nrf52/moddable_four": {
+			"name": "Moddable Four",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-three.md",
+			"sensor": {
+				"embedded:sensor/Accelerometer/LIS3DH": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
+					"constructor": "device.sensor.Accelerometer"
+				}
+			}
+		},
+		"esp32/moddable_five": {
+			"name": "Moddable Five",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md",
+			"sensor": {
+				"embedded:sensor/Accelerometer/LIS3DH": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
+					"constructor": "device.sensor.Accelerometer"
+				},
+				"embedded:sensor/touch/FT6x06": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+					"constructor": "device.sensor.Touch"
+				}
+			}
+		}
+	}
+}

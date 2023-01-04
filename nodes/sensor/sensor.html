@@ -1,17 +1,181 @@
 <script type="text/javascript">
-    RED.nodes.registerType('sensor',{
+	let database;
+	$.getJSON("resources/@moddable-node-red/sensor/sensors.json", function(data) {
+		database = data
+	});
+	const helper = {
+		appendIOs(platformKey, moduleKey, options) {
+			let index = 0;
+			let sensor;
+			if (platformKey === "") {
+				sensor = database.sensor[moduleKey];
+				const ios = sensor.io;
+				for (let key in ios) {
+					const io = ios[key];
+					const div = $(`#node-sensor-io-${index}`);
+					helper.appendIO(div, key, io);
+					div.show();
+					if (options)
+						helper.restoreIO(options, key, io);
+					index++;
+				}
+			}
+			else {
+				const platform = database.platform[platformKey];
+				sensor = platform.sensor[moduleKey];
+				const div = $(`#node-sensor-io-${index}`);
+				div.empty();
+				div.append(`
+					<div class="red-ui-help">
+						<hr/>
+						<b>I/O</b> options defined by the <a class="" href="${platform.url}" target="_blank">${platform.name}</a> platform.
+					</div>
+				`);
+				div.show();
+				index++;
+			}
+			while (index <= 2) {
+				const div = $(`#node-sensor-io-${index}`);
+				div.empty();
+				div.hide();
+				index++;
+			}
+			const div = $(`#node-sensor-link`);
+			div.empty();
+			if (sensor.url) {
+				div.append(`
+					<div class="red-ui-help">
+						See the <a class="" href="${sensor.url}" target="_blank">Ecma-419 class</a> for configuration details.
+					</div>
+				`);
+			}
+		},
+		appendIO(div, name, io) {
+			div.empty();
+			let type = io.type;
+			if ("mode" in io)
+				type += " " + io.mode;
+			if (io.optional) {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">${name.toUpperCase()}</label>
+						<label>${type}</label>
+						<input type="checkbox" id="node-input-${name}-optional" style="display:inline-block; width:16px; margin-bottom:8px">
+						<label for="node-input-${name}-optional">Active</label>
+					</div>
+				`);
+			}
+			else {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">I/O</label>
+						<label>${type}</label>
+					</div>
+				`);
+			}
+			this.appendProperties[io.type](div, name);
+		},
+		appendProperties: {
+			appendProperty(div, name, key, label) {
+				div.append(`
+					<div class="form-row">
+						<label for="node-input-${name}-${key}">${label}</label>
+						<input type="text" id="node-input-${name}-${key}" placeholder="default">
+					<div>
+				`);
+			},
+			Analog(div, name) {
+				this.appendProperty(div, name, "pin", "Pin");
+			},
+			Digital(div, name) {
+				this.appendProperty(div, name, "pin", "Pin");
+			},
+			I2C(div, name) {
+				this.appendProperty(div, name, "bus", "Bus");
+				this.appendProperty(div, name, "data", "Data Pin");
+				this.appendProperty(div, name, "clock", "Clock Pin");
+				this.appendProperty(div, name, "hz", "Speed");
+				this.appendProperty(div, name, "address", "Address");
+			},
+			SMBus(div, name) {
+				this.I2C(div, name);
+			},
+		},
+		restoreIO(options, name, io) {
+			if (name in options) {
+				if (io.optional)
+					$(`#node-input-${name}-optional`).prop('checked', true);
+				this.restoreProperties[io.type](options[name], name, io);
+			}
+		},
+		restoreProperties: {
+			restoreProperty(option, name, key) {
+				if (key in option) {
+					$(`#node-input-${name}-${key}`).val(option[key]);
+				}
+			},
+			Analog(option, name, io) {
+				this.restoreProperty(option, name, "pin");
+			},
+			Digital(option, name, io) {
+				this.restoreProperty(option, name, "pin");
+			},
+			I2C(option, name, io) {
+				this.restoreProperty(option, name, "bus");
+				this.restoreProperty(option, name, "clock");
+				this.restoreProperty(option, name, "data");
+				this.restoreProperty(option, name, "hz");
+				this.restoreProperty(option, name, "address");
+			},
+			SMBus(div, name) {
+				this.I2C(div, name);
+			},
+		},
+		saveIO(options, name, io) {
+			if (io.optional) {
+				if (!$(`#node-input-${name}-optional`).prop('checked'))
+					return;
+			}
+			const option = options[name] = {
+				io: io.type,
+			}
+			this.saveProperties[io.type](option, name, io);
+		},
+		saveProperties: {
+			saveProperty(option, name, key) {
+				let value = $(`#node-input-${name}-${key}`).val();
+				if (value !== "")
+					option[key] = value;
+			},
+			Analog(option, name, io) {
+				this.saveProperty(option, name, "pin");
+			},
+			Digital(option, name, io) {
+				this.saveProperty(option, name, "pin");
+			},
+			I2C(option, name, io) {
+				this.saveProperty(option, name, "bus");
+				this.saveProperty(option, name, "clock");
+				this.saveProperty(option, name, "data");
+				this.saveProperty(option, name, "hz");
+				this.saveProperty(option, name, "address");
+			},
+			SMBus(div, name) {
+				this.I2C(div, name);
+			},
+		},
+	}
+	
+   RED.nodes.registerType('sensor',{
         category: 'MCU',
         color: '#a6bbcf',
         defaults: {
             name: {value:""},
-            io: {value:"I2C"},
-            bus: {value:"default"},
-            module: {
-				value:"",
-				validate: function(v) {
-					return v !== "";
-				}
-			},
+			platform: {value:""},
+			module: {value:""},
+			options: {value:{}},
 			configuration: {
 				value: "{}",
 				validate: function(v) {
@@ -31,68 +195,63 @@
         icon: "file.png",
         label: function() {
             return this.name||"sensor";
-        }
+        },
+        oneditprepare: function() {
+ 			const menu = $("#node-input-selection");
+            const options = this.options;
+ 			const modules = database.sensor;
+ 			const platforms = database.platform;
+ 			for (let moduleKey in modules) {
+ 				const module = modules[moduleKey];
+ 				const key = "#" + moduleKey;
+ 				const parts = moduleKey.split("/");
+ 				menu.append(`<option value="${key}">${parts[1]} - ${module.model}</option>`);
+ 			}
+ 			for (let platformKey in platforms) {
+ 				const platform = platforms[platformKey];
+ 				menu.append(`<hr/>`);
+				const modules = platform.sensor;
+ 				for (let moduleKey in modules) {
+ 					const key = platformKey + "#" + moduleKey;
+  					const parts = moduleKey.split("/");
+					menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+ 				}	
+ 			}
+            menu.on("change", function() {
+            	const selection = $("#node-input-selection").val();
+            	const parts = selection.split("#");
+            	helper.appendIOs(parts[0], parts[1], null);
+  			})
+ 			menu.val(this.platform + "#" + this.module);
+            helper.appendIOs(this.platform, this.module, this.options);
+			$("#node-input-configuration").typedInput({
+				type:"json",
+				types:["json"]
+			});
+		},
+        oneditsave: function() {
+            const selection = $("#node-input-selection").val();
+            const parts = selection.split("#");
+            const platformKey = parts[0];
+            const moduleKey = parts[1];
+ 			let options;
+         	if (platformKey === "") {
+				const ios = database.sensor[moduleKey].io;
+				options = {};
+				for (let key in ios) {
+					const io = ios[key];
+					helper.saveIO(options, key, io);
+				}
+			}
+			else {
+				options = database.platform[platformKey].sensor[moduleKey].constructor;
+			}
+  			this.platform = platformKey;
+  			this.module = moduleKey;
+			this.options = options;
+     	},
     });
 </script>
-
-<!-- stolen from MQTT -->
-<style>
-
-    .sensor-form-row-cols2 > input.sensor-form-row-col1 {
-        width: calc(35% - 75px);
-    }
-    .sensor-form-row-cols2 > select.sensor-form-row-col1 {
-        width: calc(35% - 75px);
-    }
-
-    .sensor-form-row-cols2 > label.sensor-form-row-col2 {
-        width: 100px;
-        margin-left: 42px;
-        display: inline-block;
-    }
-    .sensor-form-row-cols2 > input.sensor-form-row-col2 {
-        width: calc(35% - 75px);
-        display: inline-block;
-    }
-    .sensor-form-row-cols2 > select.sensor-form-row-col2 {
-        width: calc(35% - 75px);
-        display: inline-block;
-    }
-    .form-row.sensor5-out > label {
-        width: 130px;
-    }
-    .form-row.sensor-flags-row > label {
-        vertical-align: top;
-    }
-    .form-row.sensor-flags-row > .sensor-flags {
-        display: inline-block;
-        width: 70%
-    }
-
-    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label {
-        display: block;
-        width: 100%;
-    }
-    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label > input {
-        position: relative;
-        vertical-align: bottom;
-        top: -2px;
-        width: 15px;
-        height: 15px;
-    }
-    .form-row-sensor5 {
-        display: none;
-    }
-    .form-row-sensor5.form-row-sensor5-active:not(.form-row-sensor-static-disabled) {
-        display: block
-    }
-    .form-row-sensor-static-disabled {
-        display: none;
-        /* opacity: 0.3;
-        pointer-events: none; */
-    }
-
-</style>
 
 <script type="text/html" data-template-name="sensor">
     <div class="form-row">
@@ -101,27 +260,28 @@
     </div>
 
     <div class="form-row">
-        <label for="node-input-module"><i class="fa fa-tasks"></i> Module</label>
-        <input type="text" id="node-input-module" placeholder="embedded:sensor/AtmosphericPressure-Temperature/BMP180">
+        <label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Module</label>
+        <select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
+        </select>
     </div>
 
-    <div class="form-row form-row-sensor-static">
-		<label for="node-input-io" class="sensor-form-row-col1"><i class="fa fa-empire"></i> I/O</label>
-		<select id="node-input-io" class="sensor-form-row-col1">
-			<option value="I2C">I²C</option>
-			<option value="SMBus">SMBus</option>
-		</select>
-	</div>
+    <div id="node-sensor-io-0">
+    </div>
 
+    <div id="node-sensor-io-1">
+    </div>
+
+    <div id="node-sensor-io-2">
+    </div>
+    
     <div class="form-row">
-        <label for="node-input-bus"><i class="fa fa-tasks"></i> Bus</label>
-        <input type="text" id="node-input-bus" placeholder="default">
-    </div>
-
-    <div class="form-row">
-        <label for="node-input-configuration"><i class="fa fa-tasks"></i> Configure</label>
-        <input type="text" id="node-input-configuration" placeholder="{}">
-    </div>
+		<hr/>
+		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
+		<input type="text" id="node-input-configuration">
+   </div>
+    <div class="form-row" id="node-sensor-link">
+   </div>
+    
 </script>
 
 <script type="text/html" data-help-name="sensor">

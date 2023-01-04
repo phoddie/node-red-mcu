@@ -12,7 +12,7 @@
 				const ios = sensor.io;
 				for (let key in ios) {
 					const io = ios[key];
-					const div = $(`#node-sensor-io-${index}`);
+					div = $(`#node-sensor-io-${index}`);
 					helper.appendIO(div, key, io);
 					div.show();
 					if (options)
@@ -23,7 +23,7 @@
 			else {
 				const platform = database.platform[platformKey];
 				sensor = platform.sensor[moduleKey];
-				const div = $(`#node-sensor-io-${index}`);
+				div = $(`#node-sensor-io-${index}`);
 				div.empty();
 				div.append(`
 					<div class="red-ui-help">
@@ -35,12 +35,12 @@
 				index++;
 			}
 			while (index <= 2) {
-				const div = $(`#node-sensor-io-${index}`);
+				div = $(`#node-sensor-io-${index}`);
 				div.empty();
 				div.hide();
 				index++;
 			}
-			const div = $(`#node-sensor-link`);
+			div = $(`#node-sensor-link`);
 			div.empty();
 			if (sensor.url) {
 				div.append(`
@@ -65,6 +65,32 @@
 						<label for="node-input-${name}-optional">Active</label>
 					</div>
 				`);
+				const checkbox = $(`#node-input-${name}-optional`);
+	            checkbox.on("change", function() {
+					helper.toggleIO(checkbox.prop('checked'), name, io);
+				});
+				this.appendProperties[io.type](div, name);
+				helper.toggleIO(false, name, io);
+			}
+			else if ((type == "I2C") || (type == "SMBus")) {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">I/O</label>
+						<label>${type}</label>
+						<span class="button-group">
+							<button type="button" class="red-ui-button toggle selected" id="button-group-${name}-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-${name}-pins">Pins</button>
+						</span>
+					</div>
+				`);
+				$(`#button-group-${name}-bus`).on("click", function() {
+					helper.toggleIO(false, name, io);
+				})			
+				$(`#button-group-${name}-pins`).on("click", function() {
+					helper.toggleIO(true, name, io);
+				})			
+				this.appendProperties[io.type](div, name);
+				helper.toggleIO(false, name, io);
 			}
 			else {
 				div.append(`
@@ -74,28 +100,34 @@
 						<label>${type}</label>
 					</div>
 				`);
+				this.appendProperties[io.type](div, name);
 			}
-			this.appendProperties[io.type](div, name);
 		},
 		appendProperties: {
-			appendProperty(div, name, key, label) {
+			appendProperty(div, name, key, label, type, value) {
 				div.append(`
-					<div class="form-row">
+					<div class="form-row" id="form-row-${name}-${key}">
 						<label for="node-input-${name}-${key}">${label}</label>
-						<input type="text" id="node-input-${name}-${key}" placeholder="default">
-					<div>
+						<input type="text" id="node-input-${name}-${key}">
+					</div>
 				`);
+				if (type) {
+					const input = $(`#node-input-${name}-${key}`);
+					input.typedInput({ type });
+					if (value)
+						input.typedInput("value", value);
+				}
 			},
 			Analog(div, name) {
-				this.appendProperty(div, name, "pin", "Pin");
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 			},
 			Digital(div, name) {
-				this.appendProperty(div, name, "pin", "Pin");
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 			},
 			I2C(div, name) {
-				this.appendProperty(div, name, "bus", "Bus");
-				this.appendProperty(div, name, "data", "Data Pin");
-				this.appendProperty(div, name, "clock", "Clock Pin");
+				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
+				this.appendProperty(div, name, "data", "Data", "num", "?");
+				this.appendProperty(div, name, "clock", "Clock", "num", "?");
 				this.appendProperty(div, name, "hz", "Speed");
 				this.appendProperty(div, name, "address", "Address");
 			},
@@ -103,36 +135,44 @@
 				this.I2C(div, name);
 			},
 		},
+		
 		restoreIO(options, name, io) {
 			if (name in options) {
-				if (io.optional)
+				if (io.optional) {
 					$(`#node-input-${name}-optional`).prop('checked', true);
+					helper.toggleIO(true, name, io);
+				}
 				this.restoreProperties[io.type](options[name], name, io);
 			}
 		},
 		restoreProperties: {
-			restoreProperty(option, name, key) {
+			restoreProperty(option, name, key, type) {
 				if (key in option) {
-					$(`#node-input-${name}-${key}`).val(option[key]);
+					if (type) 
+						$(`#node-input-${name}-${key}`).typedInput("value", option[key]);
+					else
+						$(`#node-input-${name}-${key}`).val(option[key]);
 				}
 			},
 			Analog(option, name, io) {
-				this.restoreProperty(option, name, "pin");
+				this.restoreProperty(option, name, "pin", "num");
 			},
 			Digital(option, name, io) {
-				this.restoreProperty(option, name, "pin");
+				this.restoreProperty(option, name, "pin", "num");
 			},
 			I2C(option, name, io) {
+				helper.toggleIO(("clock" in option) || ("data" in option), name, io);
 				this.restoreProperty(option, name, "bus");
-				this.restoreProperty(option, name, "clock");
-				this.restoreProperty(option, name, "data");
+				this.restoreProperty(option, name, "clock", "num");
+				this.restoreProperty(option, name, "data", "num");
 				this.restoreProperty(option, name, "hz");
 				this.restoreProperty(option, name, "address");
 			},
-			SMBus(div, name) {
-				this.I2C(div, name);
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
 			},
 		},
+		
 		saveIO(options, name, io) {
 			if (io.optional) {
 				if (!$(`#node-input-${name}-optional`).prop('checked'))
@@ -144,33 +184,77 @@
 			this.saveProperties[io.type](option, name, io);
 		},
 		saveProperties: {
-			saveProperty(option, name, key) {
-				let value = $(`#node-input-${name}-${key}`).val();
+			saveProperty(option, name, key, type) {
+				let value;
+				if (type)
+					value = $(`#node-input-${name}-${key}`).typedInput("value");
+				else
+					value = $(`#node-input-${name}-${key}`).val();
 				if (value !== "")
 					option[key] = value;
 			},
 			Analog(option, name, io) {
-				this.saveProperty(option, name, "pin");
+				this.saveProperty(option, name, "pin", "num");
 			},
 			Digital(option, name, io) {
-				this.saveProperty(option, name, "pin");
+				this.saveProperty(option, name, "pin", "num");
 			},
 			I2C(option, name, io) {
-				this.saveProperty(option, name, "bus");
-				this.saveProperty(option, name, "clock");
-				this.saveProperty(option, name, "data");
+				if ($(`#button-group-${name}-bus`).hasClass("selected"))
+					this.saveProperty(option, name, "bus");
+				else {
+					this.saveProperty(option, name, "clock", "num");
+					this.saveProperty(option, name, "data", "num");
+				}
 				this.saveProperty(option, name, "hz");
 				this.saveProperty(option, name, "address");
 			},
-			SMBus(div, name) {
-				this.I2C(div, name);
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
+			},
+		},
+		
+		toggleIO(show, name, io) {
+			this.toggleProperties[io.type](show, name);
+		},
+		toggleProperties: {
+			toggleProperty(show, name, key) {
+				if (show)
+					$(`#form-row-${name}-${key}`).show();
+				else
+					$(`#form-row-${name}-${key}`).hide();
+			},
+			Analog(show, name) {
+				this.toggleProperty(show, name, "pin");
+			},
+			Digital(show, name) {
+				this.toggleProperty(show, name, "pin");
+			},
+			I2C(show, name) {
+				if (show) {
+					$(`#button-group-${name}-bus`).removeClass("selected");
+					$(`#button-group-${name}-pins`).addClass("selected");
+					this.toggleProperty(false, name, "bus");
+					this.toggleProperty(true, name, "clock");
+					this.toggleProperty(true, name, "data");
+				}
+				else {
+					$(`#button-group-${name}-bus`).addClass("selected");
+					$(`#button-group-${name}-pins`).removeClass("selected");
+					this.toggleProperty(true, name, "bus");
+					this.toggleProperty(false, name, "clock");
+					this.toggleProperty(false, name, "data");
+				}
+			},
+			SMBus(show, name) {
+				this.I2C(show, name);
 			},
 		},
 	}
 	
    RED.nodes.registerType('sensor',{
         category: 'MCU',
-        color: '#a6bbcf',
+        color: '#a2aaff',
         defaults: {
             name: {value:""},
 			platform: {value:""},
@@ -192,7 +276,7 @@
         },
         inputs:1,
         outputs:1,
-        icon: "file.png",
+        icon: "mcu.png",
         label: function() {
             return this.name||"sensor";
         },
@@ -205,7 +289,9 @@
  				const module = modules[moduleKey];
  				const key = "#" + moduleKey;
  				const parts = moduleKey.split("/");
- 				menu.append(`<option value="${key}">${parts[1]} - ${module.model}</option>`);
+ 				const names = parts[1].split("-");
+ 				const name = (names.length > 1) ? names[0] + " - " + names[1]: names[0];
+ 				menu.append(`<option value="${key}">${name} - ${module.model}</option>`);
  			}
  			for (let platformKey in platforms) {
  				const platform = platforms[platformKey];
@@ -256,14 +342,14 @@
 <script type="text/html" data-template-name="sensor">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="sensor">
     </div>
 
-    <div class="form-row">
-        <label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Module</label>
-        <select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
-        </select>
-    </div>
+	<div class="form-row">
+		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Module</label>
+		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
+		</select>
+	</div>
 
     <div id="node-sensor-io-0">
     </div>

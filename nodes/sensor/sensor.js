@@ -14,7 +14,7 @@ const Compounds = {
 module.exports = function(RED) {
     function SensorNode(config) {
         RED.nodes.createNode(this,config);
-		console.log(config)
+
 		let sensors;
 		const prefix = "embedded:sensor/";		// embedded:sensor/AtmosphericPressure-Temperature/BMP180
         if (config.module.startsWith(prefix)) {

@@ -77,7 +77,7 @@
 			"sensor": {
 				"embedded:sensor/Accelerometer/LIS3DH": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
-					"constructor": "device.sensor.Accelerometer"
+					"reference": "device.sensor.Accelerometer"
 				}
 			}
 		},
@@ -87,11 +87,11 @@
 			"sensor": {
 				"embedded:sensor/Accelerometer/LIS3DH": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
-					"constructor": "device.sensor.Accelerometer"
+					"reference": "device.sensor.Accelerometer"
 				},
 				"embedded:sensor/touch/FT6x06": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
-					"constructor": "device.sensor.Touch"
+					"reference": "device.sensor.Touch"
 				}
 			}
 		}

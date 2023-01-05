@@ -45,22 +45,19 @@
 			if (sensor.url) {
 				div.append(`
 					<div class="red-ui-help">
-						See the <a class="" href="${sensor.url}" target="_blank">Ecma-419 class</a> for configuration details.
+						See the <a class="" href="${sensor.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
 					</div>
 				`);
 			}
 		},
 		appendIO(div, name, io) {
 			div.empty();
-			let type = io.type;
-			if ("mode" in io)
-				type += " " + io.mode;
 			if (io.optional) {
 				div.append(`
 					<div class="form-row">
 						<hr/>
 						<label style="font-weight:bold;">${name.toUpperCase()}</label>
-						<label>${type}</label>
+						<label>${io.type}</label>
 						<input type="checkbox" id="node-input-${name}-optional" style="display:inline-block; width:16px; margin-bottom:8px">
 						<label for="node-input-${name}-optional">Active</label>
 					</div>
@@ -69,15 +66,15 @@
 	            checkbox.on("change", function() {
 					helper.toggleIO(checkbox.prop('checked'), name, io);
 				});
-				this.appendProperties[io.type](div, name);
+				this.appendProperties[io.type](div, name, io);
 				helper.toggleIO(false, name, io);
 			}
-			else if ((type == "I2C") || (type == "SMBus")) {
+			else if ((io.type == "I2C") || (io.type == "SMBus")) {
 				div.append(`
 					<div class="form-row">
 						<hr/>
 						<label style="font-weight:bold;">I/O</label>
-						<label>${type}</label>
+						<label>${io.type}</label>
 						<span class="button-group">
 							<button type="button" class="red-ui-button toggle selected" id="button-group-${name}-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-${name}-pins">Pins</button>
 						</span>
@@ -89,7 +86,7 @@
 				$(`#button-group-${name}-pins`).on("click", function() {
 					helper.toggleIO(true, name, io);
 				})			
-				this.appendProperties[io.type](div, name);
+				this.appendProperties[io.type](div, name, io);
 				helper.toggleIO(false, name, io);
 			}
 			else {
@@ -97,18 +94,19 @@
 					<div class="form-row">
 						<hr/>
 						<label style="font-weight:bold;">I/O</label>
-						<label>${type}</label>
+						<label>${io.type}</label>
 					</div>
 				`);
-				this.appendProperties[io.type](div, name);
+				this.appendProperties[io.type](div, name, io);
 			}
 		},
 		appendProperties: {
-			appendProperty(div, name, key, label, type, value) {
+			appendProperty(div, name, key, label, type, value, unit="") {
 				div.append(`
 					<div class="form-row" id="form-row-${name}-${key}">
 						<label for="node-input-${name}-${key}">${label}</label>
-						<input type="text" id="node-input-${name}-${key}">
+						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;">
+						<span>${unit}</span>
 					</div>
 				`);
 				if (type) {
@@ -121,14 +119,39 @@
 			Analog(div, name) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 			},
-			Digital(div, name) {
+			
+			Digital(div, name, io) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				if (io.mode == "Input") {
+					div.append(`
+						<div class="form-row" id="form-row-${name}-mode">
+							<label for="node-input-${name}-mode">Mode</label>
+							<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+								<option value="Input">Input</option>
+								<option value="InputPullUp">Input Pull Up</option>
+								<option value="InputPullDown">Input Pull Down</option>
+								<option value="InputPullUpDown">Input Pull Up Down</option>
+							</select>
+						</div>
+					`);
+				}
+				else {
+					div.append(`
+						<div class="form-row" id="form-row-${name}-mode">
+							<label for="node-input-${name}-mode">Mode</label>
+							<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+								<option value="Output">Output</option>
+								<option value="OutputOpenDrain">Output Open Drain</option>
+							</select>
+						</div>
+					`);
+				}	
 			},
 			I2C(div, name) {
 				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
 				this.appendProperty(div, name, "data", "Data", "num", "?");
 				this.appendProperty(div, name, "clock", "Clock", "num", "?");
-				this.appendProperty(div, name, "hz", "Speed");
+				this.appendProperty(div, name, "hz", "Speed", undefined, undefined, "Hz");
 				this.appendProperty(div, name, "address", "Address");
 			},
 			SMBus(div, name) {
@@ -159,6 +182,7 @@
 			},
 			Digital(option, name, io) {
 				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "mode");
 			},
 			I2C(option, name, io) {
 				helper.toggleIO(("clock" in option) || ("data" in option), name, io);
@@ -198,6 +222,7 @@
 			},
 			Digital(option, name, io) {
 				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "mode");
 			},
 			I2C(option, name, io) {
 				if ($(`#button-group-${name}-bus`).hasClass("selected"))
@@ -229,6 +254,7 @@
 			},
 			Digital(show, name) {
 				this.toggleProperty(show, name, "pin");
+				this.toggleProperty(show, name, "mode");
 			},
 			I2C(show, name) {
 				if (show) {
@@ -320,17 +346,16 @@
             const parts = selection.split("#");
             const platformKey = parts[0];
             const moduleKey = parts[1];
- 			let options;
+ 			const options = {};
          	if (platformKey === "") {
 				const ios = database.sensor[moduleKey].io;
-				options = {};
 				for (let key in ios) {
 					const io = ios[key];
 					helper.saveIO(options, key, io);
 				}
 			}
 			else {
-				options = database.platform[platformKey].sensor[moduleKey].constructor;
+				options.reference = database.platform[platformKey].sensor[moduleKey].reference;
 			}
   			this.platform = platformKey;
   			this.module = moduleKey;
@@ -346,7 +371,7 @@
     </div>
 
 	<div class="form-row">
-		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Module</label>
+		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Sensor</label>
 		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
 		</select>
 	</div>
@@ -363,7 +388,7 @@
     <div class="form-row">
 		<hr/>
 		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
-		<input type="text" id="node-input-configuration">
+		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
    </div>
     <div class="form-row" id="node-sensor-link">
    </div>

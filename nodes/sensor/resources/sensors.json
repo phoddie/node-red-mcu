@@ -6,7 +6,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6050.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x68,0x69"
 				},
 				"alert": {
 					"type": "Digital",
@@ -21,7 +22,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU9250.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x68,0x69"
 				},
 				"alert": {
 					"type": "Digital",
@@ -36,7 +38,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-Senodia-SH200Q.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x6C,0x6D"
 				}
 			}
 		},
@@ -46,7 +49,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x18,0x19"
 				},
 				"alert": {
 					"type": "Digital",
@@ -61,7 +65,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AirQuality-ScioSense-CCS811.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x5A,0x5B"
 				}
 			}
 		},
@@ -71,7 +76,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-Proximity-STMicroelectronics-VL6180.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x29"
 				}
 			}
 		},
@@ -81,7 +87,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP180.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x77"
 				}
 			}
 		},
@@ -91,7 +98,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP280.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x76,0x77"
 				}
 			}
 		},
@@ -101,7 +109,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Gyroscope-STMicroelectronics-L3GD20.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x6B,0x6A"
 				},
 				"alert": {
 					"type": "Digital",
@@ -116,7 +125,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Aosong-AHT10.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x38"
 				}
 			}
 		},
@@ -126,7 +136,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Aosong-AM2320.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x5C"
 				}
 			}
 		},
@@ -136,7 +147,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x44"
 				}
 			}
 		},
@@ -146,7 +158,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x70"
 				}
 			}
 		},
@@ -156,7 +169,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-SiliconLabs-SI7020.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x40"
 				}
 			}
 		},
@@ -166,7 +180,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Magnetometer-AsahiKasei-AK8963.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x0C,0x0D,0x0E,0x0F"
 				}
 			}
 		},
@@ -176,7 +191,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Magnetometer-Honeywell-HMC5883.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x1E"
 				},
 				"alert": {
 					"type": "Digital",
@@ -201,7 +217,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Moisture-SmartPrototyping-ZioQwiicSoilMoisture.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x28"
 				}
 			}
 		},
@@ -211,7 +228,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Proximity-Temperature-DFRobot-URM09.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x11,*"
 				}
 			}
 		},
@@ -221,7 +239,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-Melexis-MLX90614.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x5A,*"
 				}
 			}
 		},
@@ -240,7 +259,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-NXP-LM75.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x48,0x49,0x4A,0x4B,0x4C,0x4D,0x4E,0x4F"
 				},
 				"alert": {
 					"type": "Digital",
@@ -255,7 +275,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-TexasInstruments-TMP102.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x48,0x49,0x4A,0x4B"
 				},
 				"alert": {
 					"type": "Digital",
@@ -270,7 +291,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-TexasInstruments-TMP117.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "I2C",
+					"address": "0x48"
 				},
 				"alert": {
 					"type": "Digital",
@@ -285,7 +307,8 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
 			"io": {
 				"sensor": {
-					"type": "SMBus"
+					"type": "SMBus",
+					"address": "0x48"
 				},
 				"interrupt": {
 					"type": "Digital",

@@ -55,7 +55,7 @@
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
 			"io": {
 				"sensor": {
-					"type": "I2C"
+					"type": "SMBus"
 				},
 				"interrupt": {
 					"type": "Digital",

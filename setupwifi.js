@@ -23,27 +23,33 @@ import Time from "time";
 import WiFi from "wifi/connection";
 import Net from "net";
 import SNTP from "sntp";
+import Modules from "modules";
 
 export default function (done) {
+	const modconfig = Modules.has("mod/config") ? Modules.importNow("mod/config") : {};
+
 	WiFi.mode = 1;
 
-	if (!config.ssid) {
+	const ssid = modconfig.ssid ?? config.ssid;
+	const password = modconfig.password ?? config.password;
+	const sntp = modconfig.sntp ?? config.sntp;
+	if (!ssid) {
 		trace("No Wi-Fi SSID\n");
 		return done();
 	}
 
-	new WiFi({ssid: config.ssid, password: config.password}, function(msg, code) {
+	new WiFi({ssid, password}, function(msg, code) {
 	   switch (msg) {
 		   case WiFi.gotIP:
 				trace(`IP address ${Net.get("IP")}\n`);
 
-				if (!config.sntp || (Date.now() > 1672722071_000)) {
+				if (!sntp || (Date.now() > 1672722071_000)) {
 					done?.();
 					done = undefined;
 					return;
 				}
 
-				new SNTP({host: config.sntp}, function(message, value) {
+				new SNTP({host: sntp}, function(message, value) {
 					if (SNTP.time === message) {
 						trace("got time\n");
 						Time.set(value);

@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
-Copyright 2022, Moddable Tech, Inc. All rights reserved.<br>
+Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated December 17, 2022<br>
+Updated January 9, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -718,7 +718,7 @@ The compatibility goal should be to provide the same behaviors as much as possib
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.
 - [X] Messages sent between nodes sent asynchronously to avoid JavaScript stack overflows on long chains of nodes. This also appears to match full Node-RED's message queuing behavior.
-- [ ] Implement support to instantiate nodes from a [Mod](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/mods.md). This would allow updated flows to be installed on embedded devices in seconds.
+- [x] Implement support to instantiate nodes from a [Mod](https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/xs/mods.md). This would allow updated flows to be installed on embedded devices in seconds. [Build instructions](./mods/readme.md).
 
 ### Nodes
 Possible future work on built-in nodes:

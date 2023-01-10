@@ -1,0 +1,22 @@
+{
+	"include": [
+		"../../manifest_host.json"
+	],
+	"modules": {
+		"*": "./main"
+	},
+	"strip": [
+		"Atomics",
+		"eval",
+		"FinalizationRegistry",
+		"Function",
+		"Generator",
+		"RegExp",
+		"WeakMap",
+		"WeakRef",
+		"WeakSet"
+	],
+	"defines": {
+		"XS_MODS": 1
+	}
+}

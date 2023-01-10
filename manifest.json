@@ -1,6 +1,6 @@
 {
 	"include": [
-		"./manifest_runtime.json"
+		"./manifest_host.json"
 	],
 	"modules": {
 		"*": [
@@ -13,34 +13,5 @@
 	},
 	"preload": [
 		"flows"
-	],
-	"creation": {
-		"keys": {
-			"available": 128
-		},
-		"stack": 320
-	},
-	"platforms": {
-		"esp32": {
-			"creation": {
-				"static": 0,
-				"chunk": {
-					"initial": 81920,
-					"incremental": 0
-				},
-				"heap": {
-					"initial": 5120,
-					"incremental": 0
-				},
-				"keys": {
-					"available": 512
-				}
-			}
-		},
-		"pico": {
-			"creation": {
-				"static": 131072
-			}
-		}
-	}	
+	]
 }

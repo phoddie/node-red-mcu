@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			{
+				"source": "../../flows",
+				"transform": "nodered2mcu"
+			}
+		]
+	}
+}

@@ -147,15 +147,44 @@
 					`);
 				}	
 			},
-			I2C(div, name) {
+			I2C(div, name, io) {
 				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
 				this.appendProperty(div, name, "data", "Data", "num", "?");
 				this.appendProperty(div, name, "clock", "Clock", "num", "?");
-				this.appendProperty(div, name, "hz", "Speed", undefined, undefined, "Hz");
-				this.appendProperty(div, name, "address", "Address");
+				div.append(`
+					<div class="form-row" id="form-row-${name}-hz">
+						<label for="node-input-${name}-hz">Speed</label>
+						<input type="text" id="node-input-${name}-hz" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="default">
+						<span>Hz</span>
+					</div>
+				`);
+				
+				let address = io.address || ",*";
+				let addresses = address.split(",");
+				let string;
+				if ((addresses.length == 2) && (addresses[1] == "*")) {
+					string = `<input type="text" id="node-input-${name}-address" style="display:inline-block; width:70%; vertical-align:baseline;">`
+				}
+				else {
+					string = `<select type="text" id="node-input-${name}-address" style="display:inline-block; width:70%; vertical-align:baseline;">`
+					for (address of addresses) {
+						string += `<option value="${address}">${address}</option>`;
+					}
+					string += `</select>`;
+				}
+				div.append(`
+					<div class="form-row" id="form-row-${name}-address">
+						<label for="node-input-${name}-address">Address</label>
+						${string}
+						</div>
+					`);
+				const input = $(`#node-input-${name}-address`);
+				input.val(addresses[0]);
+				if (addresses.length == 1)
+					input.prop('disabled', true)
 			},
-			SMBus(div, name) {
-				this.I2C(div, name);
+			SMBus(div, name, io) {
+				this.I2C(div, name, io);
 			},
 		},
 		
@@ -205,6 +234,8 @@
 			const option = options[name] = {
 				io: io.type,
 			}
+			if (io.callback)
+				option.callback = io.callback;
 			this.saveProperties[io.type](option, name, io);
 		},
 		saveProperties: {

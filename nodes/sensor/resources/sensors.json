@@ -59,14 +59,20 @@
 				}
 			}
 		},
-		"embedded:sensor/CarbonDioxideGasSensor-VOCSensor/CCS811": {
-			"model": "CCS811",
-			"manufacturer": "ScioSense",
-			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AirQuality-ScioSense-CCS811.md",
+		"embedded:sensor/AmbientLight/APDS9301": {
+			"model": "APDS-9301",
+			"manufacturer": "Avago",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-APDS9301.md",
 			"io": {
 				"sensor": {
 					"type": "SMBus",
-					"address": "0x5A,0x5B"
+					"address": "0x39,0x29,0x49"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
 				}
 			}
 		},
@@ -100,6 +106,17 @@
 				"sensor": {
 					"type": "I2C",
 					"address": "0x76,0x77"
+				}
+			}
+		},
+		"embedded:sensor/CarbonDioxideGasSensor-VOCSensor/CCS811": {
+			"model": "CCS811",
+			"manufacturer": "ScioSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AirQuality-ScioSense-CCS811.md",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x5A,0x5B"
 				}
 			}
 		},

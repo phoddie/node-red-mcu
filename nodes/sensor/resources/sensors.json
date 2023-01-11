@@ -326,7 +326,7 @@
 				}
 			}
 		},
-		"embedded:sensor/touch/FT6x06": {
+		"embedded:sensor/Touch/FT6x06": {
 			"model": "FT6x06",
 			"manufacturer": "FocalTech",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
@@ -345,6 +345,23 @@
 					"type": "Digital",
 					"mode": "Output",
 					"optional": true
+				}
+			}
+		},
+		"embedded:sensor/Touch/GT911": {
+			"model": "GT911",
+			"manufacturer": "Goodix",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-Goodix-GT911.md",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x5D,0x14"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onSample"
 				}
 			}
 		}
@@ -370,7 +387,7 @@
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
 					"reference": "device.sensor.Accelerometer"
 				},
-				"embedded:sensor/touch/FT6x06": {
+				"embedded:sensor/Touch/FT6x06": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
 					"reference": "device.sensor.Touch"
 				}

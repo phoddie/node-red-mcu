@@ -1271,7 +1271,10 @@ class CompatibiltyNode extends Node {
 
 		const module = this.#events;
 		this.#events = {};
-		module.call(this, config);
+		module.call(this, {
+			...config,
+			name: this.name
+		});
 	}
 	onMessage(msg, done) {
 		this.#events.input?.forEach(input => input.call(this, msg, this.#send, done));

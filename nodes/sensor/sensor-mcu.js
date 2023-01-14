@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2023  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -19,36 +19,53 @@
  */
 
 import {Node} from "nodered";
-import Modules from "modules";
 
 class Sensor extends Node {
-	#io;
 	#sensor;
-	#configuration;
 
 	onStart(config) {
 		super.onStart(config);
 
-		this.#io = config.io;
-		const configuration = config.configuration ? JSON.parse(config.configuration) : undefined;
-
 		try {
-			const Sensor = Modules.importNow(config.module);
-			let sensor;
-			const bus = config.bus ?? "default";
-			if ("SMBus" === this.#io) 
-				sensor = {...device.I2C[bus], io: device.io.SMBus}
-			else
-				sensor = device[this.#io][bus];
-			this.#sensor = new Sensor({sensor});
-			if (configuration)
-				this.#sensor.configure(configuration);
+			this.#sensor = config.initialize.call(this);
+			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
 		}
 		catch {
+			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
 		}
 	}
-	onMessage(msg) {
-		msg.payload = this.#sensor?.sample();
+	onMessage(msg, done) {
+		if (!this.#sensor)
+			return;
+
+		if (msg.configuration) {
+			try {
+				this.#sensor.configure(msg.configuration);
+				done?.();
+			}
+			catch (e) {
+				done?.(e);
+			}
+			return;
+		}
+		
+		try {
+			const payload = this.#sensor.sample();
+			if (payload)
+				msg.payload = payload;
+			else
+				msg = undefined;
+		}
+		catch {
+			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+			this.#sensor.close();
+			this.#sensor = undefined;
+			msg = undefined;
+		}
+		finally {
+			done?.();
+		}
+
 		return msg;
 	}
 

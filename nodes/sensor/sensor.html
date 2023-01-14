@@ -1,17 +1,322 @@
 <script type="text/javascript">
-    RED.nodes.registerType('sensor',{
-        category: 'MCU',
-        color: '#a6bbcf',
-        defaults: {
-            name: {value:""},
-            io: {value:"I2C"},
-            bus: {value:"default"},
-            module: {
-				value:"",
-				validate: function(v) {
-					return v !== "";
+	let database;
+	$.getJSON("resources/@moddable-node-red/sensor/sensors.json", function(data) {
+		database = data
+	});
+	const helper = {
+		appendIOs(platformKey, moduleKey, options) {
+			let index = 0;
+			let sensor;
+			if (platformKey === "") {
+				sensor = database.sensor[moduleKey];
+				const ios = sensor.io;
+				for (let key in ios) {
+					const io = ios[key];
+					div = $(`#node-sensor-io-${index}`);
+					helper.appendIO(div, key, io);
+					div.show();
+					if (options)
+						helper.restoreIO(options, key, io);
+					index++;
+				}
+			}
+			else {
+				const platform = database.platform[platformKey];
+				sensor = platform.sensor[moduleKey];
+				div = $(`#node-sensor-io-${index}`);
+				div.empty();
+				div.append(`
+					<div class="red-ui-help">
+						<hr/>
+						<b>I/O</b> options defined by the <a class="" href="${platform.url}" target="_blank">${platform.name}</a> platform.
+					</div>
+				`);
+				div.show();
+				index++;
+			}
+			while (index <= 2) {
+				div = $(`#node-sensor-io-${index}`);
+				div.empty();
+				div.hide();
+				index++;
+			}
+			div = $(`#node-sensor-link`);
+			div.empty();
+			if (sensor.url) {
+				div.append(`
+					<div class="red-ui-help">
+						See the <a class="" href="${sensor.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
+					</div>
+				`);
+			}
+		},
+		appendIO(div, name, io) {
+			div.empty();
+			if (io.optional) {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">${name.toUpperCase()}</label>
+						<label>${io.type}</label>
+						<input type="checkbox" id="node-input-${name}-optional" style="display:inline-block; width:16px; margin-bottom:8px">
+						<label for="node-input-${name}-optional">Active</label>
+					</div>
+				`);
+				const checkbox = $(`#node-input-${name}-optional`);
+	            checkbox.on("change", function() {
+					helper.toggleIO(checkbox.prop('checked'), name, io);
+				});
+				this.appendProperties[io.type](div, name, io);
+				helper.toggleIO(false, name, io);
+			}
+			else if ((io.type == "I2C") || (io.type == "SMBus")) {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">I/O</label>
+						<label>${io.type}</label>
+						<span class="button-group">
+							<button type="button" class="red-ui-button toggle selected" id="button-group-${name}-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-${name}-pins">Pins</button>
+						</span>
+					</div>
+				`);
+				$(`#button-group-${name}-bus`).on("click", function() {
+					helper.toggleIO(false, name, io);
+				})			
+				$(`#button-group-${name}-pins`).on("click", function() {
+					helper.toggleIO(true, name, io);
+				})			
+				this.appendProperties[io.type](div, name, io);
+				helper.toggleIO(false, name, io);
+			}
+			else {
+				div.append(`
+					<div class="form-row">
+						<hr/>
+						<label style="font-weight:bold;">I/O</label>
+						<label>${io.type}</label>
+					</div>
+				`);
+				this.appendProperties[io.type](div, name, io);
+			}
+		},
+		appendProperties: {
+			appendProperty(div, name, key, label, type, value, unit="") {
+				div.append(`
+					<div class="form-row" id="form-row-${name}-${key}">
+						<label for="node-input-${name}-${key}">${label}</label>
+						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;">
+						<span>${unit}</span>
+					</div>
+				`);
+				if (type) {
+					const input = $(`#node-input-${name}-${key}`);
+					input.typedInput({ type });
+					if (value)
+						input.typedInput("value", value);
 				}
 			},
+			Analog(div, name) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+			},
+			
+			Digital(div, name, io) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				if (io.mode == "Input") {
+					div.append(`
+						<div class="form-row" id="form-row-${name}-mode">
+							<label for="node-input-${name}-mode">Mode</label>
+							<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+								<option value="Input">Input</option>
+								<option value="InputPullUp">Input Pull Up</option>
+								<option value="InputPullDown">Input Pull Down</option>
+								<option value="InputPullUpDown">Input Pull Up Down</option>
+							</select>
+						</div>
+					`);
+				}
+				else {
+					div.append(`
+						<div class="form-row" id="form-row-${name}-mode">
+							<label for="node-input-${name}-mode">Mode</label>
+							<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+								<option value="Output">Output</option>
+								<option value="OutputOpenDrain">Output Open Drain</option>
+							</select>
+						</div>
+					`);
+				}	
+			},
+			I2C(div, name, io) {
+				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
+				this.appendProperty(div, name, "data", "Data", "num", "?");
+				this.appendProperty(div, name, "clock", "Clock", "num", "?");
+				div.append(`
+					<div class="form-row" id="form-row-${name}-hz">
+						<label for="node-input-${name}-hz">Speed</label>
+						<input type="text" id="node-input-${name}-hz" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="default">
+						<span>Hz</span>
+					</div>
+				`);
+				
+				let address = io.address || ",*";
+				let addresses = address.split(",");
+				let string;
+				if ((addresses.length == 2) && (addresses[1] == "*")) {
+					string = `<input type="text" id="node-input-${name}-address" style="display:inline-block; width:70%; vertical-align:baseline;">`
+				}
+				else {
+					string = `<select type="text" id="node-input-${name}-address" style="display:inline-block; width:70%; vertical-align:baseline;">`
+					for (address of addresses) {
+						string += `<option value="${address}">${address}</option>`;
+					}
+					string += `</select>`;
+				}
+				div.append(`
+					<div class="form-row" id="form-row-${name}-address">
+						<label for="node-input-${name}-address">Address</label>
+						${string}
+						</div>
+					`);
+				const input = $(`#node-input-${name}-address`);
+				input.val(addresses[0]);
+// 				if (addresses.length == 1)
+// 					input.prop('disabled', true)
+			},
+			SMBus(div, name, io) {
+				this.I2C(div, name, io);
+			},
+		},
+		
+		restoreIO(options, name, io) {
+			if (name in options) {
+				if (io.optional) {
+					$(`#node-input-${name}-optional`).prop('checked', true);
+					helper.toggleIO(true, name, io);
+				}
+				this.restoreProperties[io.type](options[name], name, io);
+			}
+		},
+		restoreProperties: {
+			restoreProperty(option, name, key, type) {
+				if (key in option) {
+					if (type) 
+						$(`#node-input-${name}-${key}`).typedInput("value", option[key]);
+					else
+						$(`#node-input-${name}-${key}`).val(option[key]);
+				}
+			},
+			Analog(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+			},
+			Digital(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "mode");
+			},
+			I2C(option, name, io) {
+				helper.toggleIO(("clock" in option) || ("data" in option), name, io);
+				this.restoreProperty(option, name, "bus");
+				this.restoreProperty(option, name, "clock", "num");
+				this.restoreProperty(option, name, "data", "num");
+				this.restoreProperty(option, name, "hz");
+				this.restoreProperty(option, name, "address");
+			},
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
+			},
+		},
+		
+		saveIO(options, name, io) {
+			if (io.optional) {
+				if (!$(`#node-input-${name}-optional`).prop('checked'))
+					return;
+			}
+			const option = options[name] = {
+				io: io.type,
+			}
+			if (io.callback)
+				option.callback = io.callback;
+			this.saveProperties[io.type](option, name, io);
+		},
+		saveProperties: {
+			saveProperty(option, name, key, type) {
+				let value;
+				if (type)
+					value = $(`#node-input-${name}-${key}`).typedInput("value");
+				else
+					value = $(`#node-input-${name}-${key}`).val();
+				if (value !== "")
+					option[key] = value;
+			},
+			Analog(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+			},
+			Digital(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "mode");
+			},
+			I2C(option, name, io) {
+				if ($(`#button-group-${name}-bus`).hasClass("selected"))
+					this.saveProperty(option, name, "bus");
+				else {
+					this.saveProperty(option, name, "clock", "num");
+					this.saveProperty(option, name, "data", "num");
+				}
+				this.saveProperty(option, name, "hz");
+				this.saveProperty(option, name, "address");
+			},
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
+			},
+		},
+		
+		toggleIO(show, name, io) {
+			this.toggleProperties[io.type](show, name);
+		},
+		toggleProperties: {
+			toggleProperty(show, name, key) {
+				if (show)
+					$(`#form-row-${name}-${key}`).show();
+				else
+					$(`#form-row-${name}-${key}`).hide();
+			},
+			Analog(show, name) {
+				this.toggleProperty(show, name, "pin");
+			},
+			Digital(show, name) {
+				this.toggleProperty(show, name, "pin");
+				this.toggleProperty(show, name, "mode");
+			},
+			I2C(show, name) {
+				if (show) {
+					$(`#button-group-${name}-bus`).removeClass("selected");
+					$(`#button-group-${name}-pins`).addClass("selected");
+					this.toggleProperty(false, name, "bus");
+					this.toggleProperty(true, name, "clock");
+					this.toggleProperty(true, name, "data");
+				}
+				else {
+					$(`#button-group-${name}-bus`).addClass("selected");
+					$(`#button-group-${name}-pins`).removeClass("selected");
+					this.toggleProperty(true, name, "bus");
+					this.toggleProperty(false, name, "clock");
+					this.toggleProperty(false, name, "data");
+				}
+			},
+			SMBus(show, name) {
+				this.I2C(show, name);
+			},
+		},
+	}
+	
+   RED.nodes.registerType('sensor',{
+        category: 'MCU',
+        color: '#a2aaff',
+        defaults: {
+            name: {value:""},
+			platform: {value:""},
+			module: {value:""},
+			options: {value:{}},
 			configuration: {
 				value: "{}",
 				validate: function(v) {
@@ -28,100 +333,97 @@
         },
         inputs:1,
         outputs:1,
-        icon: "file.png",
+        icon: "mcu.png",
         label: function() {
             return this.name||"sensor";
-        }
+        },
+        oneditprepare: function() {
+ 			const menu = $("#node-input-selection");
+            const options = this.options;
+ 			const modules = database.sensor;
+ 			const platforms = database.platform;
+ 			for (let moduleKey in modules) {
+ 				const module = modules[moduleKey];
+ 				const key = "#" + moduleKey;
+ 				const parts = moduleKey.split("/");
+ 				const names = parts[1].split("-");
+ 				const name = (names.length > 1) ? names[0] + " - " + names[1]: names[0];
+ 				menu.append(`<option value="${key}">${name} - ${module.model}</option>`);
+ 			}
+ 			for (let platformKey in platforms) {
+ 				const platform = platforms[platformKey];
+ 				menu.append(`<hr/>`);
+				const modules = platform.sensor;
+ 				for (let moduleKey in modules) {
+ 					const key = platformKey + "#" + moduleKey;
+  					const parts = moduleKey.split("/");
+					menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+ 				}	
+ 			}
+            menu.on("change", function() {
+            	const selection = $("#node-input-selection").val();
+            	const parts = selection.split("#");
+            	helper.appendIOs(parts[0], parts[1], null);
+  			})
+ 			menu.val(this.platform + "#" + this.module);
+            helper.appendIOs(this.platform, this.module, this.options);
+			$("#node-input-configuration").typedInput({
+				type:"json",
+				types:["json"]
+			});
+		},
+        oneditsave: function() {
+            const selection = $("#node-input-selection").val();
+            const parts = selection.split("#");
+            const platformKey = parts[0];
+            const moduleKey = parts[1];
+ 			const options = {};
+         	if (platformKey === "") {
+				const ios = database.sensor[moduleKey].io;
+				for (let key in ios) {
+					const io = ios[key];
+					helper.saveIO(options, key, io);
+				}
+			}
+			else {
+				options.reference = database.platform[platformKey].sensor[moduleKey].reference;
+			}
+  			this.platform = platformKey;
+  			this.module = moduleKey;
+			this.options = options;
+     	},
     });
 </script>
-
-<!-- stolen from MQTT -->
-<style>
-
-    .sensor-form-row-cols2 > input.sensor-form-row-col1 {
-        width: calc(35% - 75px);
-    }
-    .sensor-form-row-cols2 > select.sensor-form-row-col1 {
-        width: calc(35% - 75px);
-    }
-
-    .sensor-form-row-cols2 > label.sensor-form-row-col2 {
-        width: 100px;
-        margin-left: 42px;
-        display: inline-block;
-    }
-    .sensor-form-row-cols2 > input.sensor-form-row-col2 {
-        width: calc(35% - 75px);
-        display: inline-block;
-    }
-    .sensor-form-row-cols2 > select.sensor-form-row-col2 {
-        width: calc(35% - 75px);
-        display: inline-block;
-    }
-    .form-row.sensor5-out > label {
-        width: 130px;
-    }
-    .form-row.sensor-flags-row > label {
-        vertical-align: top;
-    }
-    .form-row.sensor-flags-row > .sensor-flags {
-        display: inline-block;
-        width: 70%
-    }
-
-    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label {
-        display: block;
-        width: 100%;
-    }
-    .form-row.sensor-flags-row > .sensor-flags > .sensor-flag > label > input {
-        position: relative;
-        vertical-align: bottom;
-        top: -2px;
-        width: 15px;
-        height: 15px;
-    }
-    .form-row-sensor5 {
-        display: none;
-    }
-    .form-row-sensor5.form-row-sensor5-active:not(.form-row-sensor-static-disabled) {
-        display: block
-    }
-    .form-row-sensor-static-disabled {
-        display: none;
-        /* opacity: 0.3;
-        pointer-events: none; */
-    }
-
-</style>
 
 <script type="text/html" data-template-name="sensor">
     <div class="form-row">
         <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="Name">
+        <input type="text" id="node-input-name" placeholder="sensor">
     </div>
 
-    <div class="form-row">
-        <label for="node-input-module"><i class="fa fa-tasks"></i> Module</label>
-        <input type="text" id="node-input-module" placeholder="embedded:sensor/AtmosphericPressure-Temperature/BMP180">
-    </div>
-
-    <div class="form-row form-row-sensor-static">
-		<label for="node-input-io" class="sensor-form-row-col1"><i class="fa fa-empire"></i> I/O</label>
-		<select id="node-input-io" class="sensor-form-row-col1">
-			<option value="I2C">I²C</option>
-			<option value="SMBus">SMBus</option>
+	<div class="form-row">
+		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Sensor</label>
+		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
 		</select>
 	</div>
 
-    <div class="form-row">
-        <label for="node-input-bus"><i class="fa fa-tasks"></i> Bus</label>
-        <input type="text" id="node-input-bus" placeholder="default">
+    <div id="node-sensor-io-0">
     </div>
 
-    <div class="form-row">
-        <label for="node-input-configuration"><i class="fa fa-tasks"></i> Configure</label>
-        <input type="text" id="node-input-configuration" placeholder="{}">
+    <div id="node-sensor-io-1">
     </div>
+
+    <div id="node-sensor-io-2">
+    </div>
+    
+    <div class="form-row">
+		<hr/>
+		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
+		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
+   </div>
+    <div class="form-row" id="node-sensor-link">
+   </div>
+    
 </script>
 
 <script type="text/html" data-help-name="sensor">

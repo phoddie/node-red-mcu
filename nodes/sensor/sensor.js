@@ -53,6 +53,9 @@ function simulateOne(sensor) {
 			sample.y = 1 - (Math.random() * 2);
 			sample.z = 1 - (Math.random() * 2);
 			break;
+		case "AmbientLight":
+			sample.illuminance = (Math.random() * 5500) + 20;
+			break;
 		case "AtmosphericPressure":
 		case "Barometer":
 			sample.pressure = 101_325 + (10_000 - (Math.random() * 20_000)); 
@@ -69,6 +72,10 @@ function simulateOne(sensor) {
 			break;
 		case "Temperature":
 			sample.temperature = 22.5 - (Math.random() * 5)
+			break;
+		case "Touch":
+			sample.x = Math.round(Math.random() * 240);
+			sample.y = Math.round(Math.random() * 320);
 			break;
 	}
 

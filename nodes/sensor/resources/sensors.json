@@ -366,27 +366,11 @@
 			}
 		}
 	},
-	
-
 	"platform": {
-		"nrf52/moddable_four": {
-			"name": "Moddable Four",
-			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-three.md",
-			"sensor": {
-				"embedded:sensor/Accelerometer/LIS3DH": {
-					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
-					"reference": "device.sensor.Accelerometer"
-				}
-			}
-		},
-		"esp32/moddable_five": {
-			"name": "Moddable Five",
+		"esp32/moddable_two_io": {
+			"name": "Moddable Two (I/O)",
 			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md",
 			"sensor": {
-				"embedded:sensor/Accelerometer/LIS3DH": {
-					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
-					"reference": "device.sensor.Accelerometer"
-				},
 				"embedded:sensor/Touch/FT6x06": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
 					"reference": "device.sensor.Touch"

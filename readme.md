@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 9, 2023<br>
+Updated January 15, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -413,10 +413,11 @@ The MCU implementation the Neopixel node calls `done()`  after processing each m
 - [X] Keep alive (defaults to 60 seconds)
 - [X] Clean session flag (defaults to true)
 - [X] User name and password credentials
-- [ ] Birth, close, will topics
+- [X] Birth message
+- [ ] Close & will messages
 - [ ] Protocol version (always 3.1.1)
 - [ ] TLS (always insecure)
-- [ ] Auto-connect (connects once at start-up)
+- [X] Auto-connect
 - [ ] Session expiry
 - [ ] QoS 1 and 2
 - [ ] Fragmented read and write

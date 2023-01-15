@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2023  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -1010,7 +1010,7 @@ class MQTTBrokerNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 
-		if (config.birthTopic || config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || config.usetls || !config.autoConnect || config.sessionExpiry)
+		if (config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || config.usetls || !config.autoConnect || config.sessionExpiry)
 			throw new Error("unimplemented");
 
 		this.#options = {
@@ -1024,6 +1024,15 @@ class MQTTBrokerNode extends Node {
 			this.#options.user = config.credentials.user; 
 		if (config.credentials?.password)
 			this.#options.password = config.credentials.password; 
+
+		if (config.birthTopic && config.birthPayload) {
+			this.#options.birthTopic = config.birthTopic;
+			this.#options.birthPayload = ArrayBuffer.fromString(config.birthPayload);
+			if ("true" === config.birthRetain)
+				this.#options.birthRetain = true;
+			if ("0" != config.birthQos)
+				this.#options.birthQos = Number(config.birthQos);
+		}
 
 		Timer.set(() => this.connect());
 	}
@@ -1108,6 +1117,15 @@ class MQTTBrokerNode extends Node {
 							})
 						};
 						count = this.#mqtt.write(null, msg);
+					}
+
+					if (this.#options.birthTopic) {
+						this.#queue = [{
+							topic: this.#options.birthTopic,
+							QoS: this.#options.birthQos ?? 0,
+							retain: this.#options.birthRetain ?? false,
+							payload: this.#options.birthPayload
+						}];
 					}
 				}
 

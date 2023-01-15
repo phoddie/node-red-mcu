@@ -1,5 +1,5 @@
 /*
- *     Copyright (C) 2016-2017 Moddable Tech, Inc.
+ *     Copyright (C) 2016-2023 Moddable Tech, Inc.
  *     All rights reserved.
  */
 
@@ -99,6 +99,7 @@ class ScrollerStillMode extends ScrollerMode {
     behavior.direction = 0;
     behavior.mode = this;
     behavior.bouncing = false;
+	behavior.first = behavior.last = null;
     if (scroller.tracking) {
       scroller.tracking = false;
       scroller.distribute("onScrolled");
@@ -169,7 +170,7 @@ class ScrollerScrollMode extends ScrollerMode {
         if (behavior.direction != direction) {
           behavior.boost = 1;
           behavior.direction = direction;
-          behavior.first = { previous: null, coordinate: coordinate, ticks: ticks };
+          behavior.first = behavior.last = { previous: null, coordinate: coordinate, ticks: ticks };
         }
       }
       behavior.last = { previous: behavior.last, coordinate: coordinate, ticks: ticks };
@@ -330,7 +331,7 @@ class ScrollerBounceMode extends ScrollerTossMode {
     if (scroller.looping)
       stop = behavior.snap(scroller, start, 0);
     else
-      stop = behavior.snap(scroller, behavior.selectPosition(scroller.constraint), "wow");
+      stop = behavior.snap(scroller, behavior.selectPosition(scroller.constraint), 0);
     if (start != stop) {
       behavior.mode = this;
       behavior.start = start;

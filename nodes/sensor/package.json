@@ -1,11 +1,12 @@
 {
-	"name": "@moddable-node-red/sensor",
+	"name": "@moddable-node-red-mcu",
 	"version": "1.0.0",
-	"description": "example",
+	"description": "A set of MCU nodes for Node-RED",
 	"license": "UNLICENSED",
 	"node-red" : {
 		"nodes": {
-			"sensor": "sensor.js"
+			"sensor": "sensor.js",
+			"mcu_io": "mcu_io.js"
 		}
 	}
 }

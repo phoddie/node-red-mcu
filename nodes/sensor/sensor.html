@@ -215,7 +215,7 @@
 			},
 			I2C(option, name, io) {
 				helper.toggleIO(("clock" in option) || ("data" in option), name, io);
-				this.restoreProperty(option, name, "bus");
+				this.restoreProperty(option, name, "bus", "str");
 				this.restoreProperty(option, name, "clock", "num");
 				this.restoreProperty(option, name, "data", "num");
 				this.restoreProperty(option, name, "hz");

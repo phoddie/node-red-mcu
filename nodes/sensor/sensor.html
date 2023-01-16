@@ -49,6 +49,21 @@
 					</div>
 				`);
 			}
+			div.append(`
+				<div class="form-row">
+					<hr/>
+					<label>Module</label>
+					<div style="display:inline-block; width:70%; vertical-align:top;">${moduleKey}</div>
+				</div>
+			`);
+			if (sensor.driver) {
+				div.append(`
+					<div class="form-row">
+						<label>Driver</label>
+						<div style="display:inline-block; width:70%; vertical-align:top;">${sensor.driver}</div>
+					</div>
+				`);
+			}
 		},
 		appendIO(div, name, io) {
 			div.empty();

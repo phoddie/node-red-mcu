@@ -1,0 +1,409 @@
+{
+	"sensor": {
+		"embedded:sensor/Accelerometer-Gyroscope/MPU6050": {
+			"model": "MPU6050",
+			"manufacturer": "InvenSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6050.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/mpu6050/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x68,0x69"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Accelerometer-Gyroscope/MPU9250": {
+			"model": "MPU9250",
+			"manufacturer": "InvenSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU9250.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/mpu9250/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x68,0x69"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Accelerometer-Gyroscope/SH200Q": {
+			"model": "SH200Q",
+			"manufacturer": "Senodia",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-Senodia-SH200Q.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/sh200q/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x6C,0x6D"
+				}
+			}
+		},
+		"embedded:sensor/Accelerometer/LIS3DH": {
+			"model": "LIS3DH",
+			"manufacturer": "STMicroelectronics",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-STMicroelectronics-LIS3DH.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/lis3dh/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x18,0x19"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/AmbientLight/APDS9301": {
+			"model": "APDS-9301",
+			"manufacturer": "Avago",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-APDS9301.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/apds9301/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x39,0x29,0x49"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/AmbientLight-Proximity/VL6180": {
+			"model": "VL6180",
+			"manufacturer": "ST Microelectronics",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-Proximity-STMicroelectronics-VL6180.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/vl6180/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x29"
+				}
+			}
+		},
+		"embedded:sensor/Barometer-Temperature/BMP180": {
+			"model": "BMP180",
+			"manufacturer": "Bosch",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP180.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bm180/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x77"
+				}
+			}
+		},
+		"embedded:sensor/Barometer-Temperature/BMP280": {
+			"model": "BMP280",
+			"manufacturer": "Bosch",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP280.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bm280/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x76,0x77"
+				}
+			}
+		},
+		"embedded:sensor/CarbonDioxideGasSensor-VOCSensor/CCS811": {
+			"model": "CCS811",
+			"manufacturer": "ScioSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AirQuality-ScioSense-CCS811.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/ccs811/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x5A,0x5B"
+				}
+			}
+		},
+		"embedded:sensor/Gyroscope/L3GD20H": {
+			"model": "L3GD20H",
+			"manufacturer": "ST Microelectronics",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Gyroscope-STMicroelectronics-L3GD20.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/l3gd20h/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x6B,0x6A"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/AHT10": {
+			"model": "AHT10",
+			"manufacturer": "Aosong",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Aosong-AHT10.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/aht10/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x38"
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/AM2320": {
+			"model": "AM2320",
+			"manufacturer": "Aosong",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Aosong-AM2320.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/am2320/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x5C"
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/SHT3x": {
+			"model": "SHT3x",
+			"manufacturer": "Sensirion",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/sht3x/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x44"
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/SHTC3": {
+			"model": "SHTC3",
+			"manufacturer": "Sensirion",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/shtc3/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x70"
+				}
+			}
+		},
+		"embedded:sensor/Humidity-Temperature/SI7020": {
+			"model": "SI7020",
+			"manufacturer": "Silicon Labs",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-SiliconLabs-SI7020.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/si7020/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x40"
+				}
+			}
+		},
+		"embedded:sensor/Magnetometer/AK8963": {
+			"model": "AK8963",
+			"manufacturer": "AsahiKasei",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Magnetometer-AsahiKasei-AK8963.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/ak8963/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x0C,0x0D,0x0E,0x0F"
+				}
+			}
+		},
+		"embedded:sensor/Magnetometer/HMC5883": {
+			"model": "HMC5883",
+			"manufacturer": "Honeywell",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Magnetometer-Honeywell-HMC5883.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/hmc5883/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x1E"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/SoilMoistureSensor/Capacitive": {
+			"model": "Capacitive Moisture Sensor",
+			"manufacturer": "DFRobot",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Moisture-Capacitive-DFRobot-SEN0193.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/capacitiveMoisture/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "Analog"
+				}
+			}
+		},
+		"embedded:sensor/SoilMoistureSensor/ZIOQWIICMOISTURE": {
+			"model": "Zio Qwiic Soil Moisture Sensor",
+			"manufacturer": "Smart Prototyping",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Moisture-SmartPrototyping-ZioQwiicSoilMoisture.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/zioQwiicSoilMoisture/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x28"
+				}
+			}
+		},
+		"embedded:sensor/Proximity-Temperature/URM09": {
+			"model": "URM09",
+			"manufacturer": "DFRobot",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Proximity-Temperature-DFRobot-URM09.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/urm09/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x11,*"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/MLX90614": {
+			"model": "MLX90614",
+			"manufacturer": "Melexis",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-Melexis-MLX90614.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/mlx90614/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x5A,*"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/NTC_Thermistor": {
+			"model": "NTC Thermistor",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-NTC_Thermistor.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/ntcThermistor/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "Analog"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/LM75": {
+			"model": "LM75B",
+			"manufacturer": "NXP Semiconductors",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-NXP-LM75.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/lm75/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x48,0x49,0x4A,0x4B,0x4C,0x4D,0x4E,0x4F"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/TMP102": {
+			"model": "TMP102",
+			"manufacturer": "TI",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-TexasInstruments-TMP102.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x48,0x49,0x4A,0x4B"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/TMP117": {
+			"model": "TMP117",
+			"manufacturer": "TI",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Temperature-TexasInstruments-TMP117.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/tmp117/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x48"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
+		"embedded:sensor/Touch/FT6x06": {
+			"model": "FT6x06",
+			"manufacturer": "FocalTech",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/ft6x06/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x48"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onSample"
+				},
+				"reset": {
+					"type": "Digital",
+					"mode": "Output",
+					"optional": true
+				}
+			}
+		},
+		"embedded:sensor/Touch/GT911": {
+			"model": "GT911",
+			"manufacturer": "Goodix",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-Goodix-GT911.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x5D,0x14"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onSample"
+				}
+			}
+		}
+	},
+	"platform": {
+		"esp32/moddable_two_io": {
+			"name": "Moddable Two (I/O)",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
+			"sensor": {
+				"embedded:sensor/Touch/FT6x06": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+					"reference": "device.sensor.Touch"
+				}
+			}
+		}
+	}
+}

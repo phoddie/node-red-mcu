@@ -6,6 +6,8 @@
 			name: { value:"" },
 			pin: { value:"?" },
 			mode: { value:"Input" },
+			debounce: { value:0 },
+			initial: { value:false },
 		},
 		inputs:0,
 		outputs:1,
@@ -30,6 +32,7 @@
 			name: { value:"" },
 			pin: { value:"?" },
 			mode: { value:"Output" },
+			initial: { value:false },
 		},
 		inputs:1,
 		outputs:0,
@@ -56,6 +59,16 @@
 	</div>
 	<div id="node-mcu-rows">
 	</div>
+	<div class="form-row"">
+		<label for="node-input-debounce">Debounce</label>
+		<input type="text" id="node-input-debounce" style="display:inline-block; width:70%; vertical-align:baseline;">
+		<span>ms</span>
+	</div>
+	<div class="form-row">
+		<label></label>
+		<input type="checkbox" id="node-input-initial" style="display:inline-block; width:16px; margin-bottom:8px">
+		<label for="node-input-initial" style="width:70%;">Read initial state of pin on restart?</label>
+	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
 			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
@@ -72,6 +85,11 @@
 		<input type="text" id="node-input-name" placeholder="digital out">
 	</div>
 	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<label></label>
+		<input type="checkbox" id="node-input-initial" style="display:inline-block; width:16px; margin-bottom:8px">
+		<label for="node-input-initial" style="width:70%;">Initialize pin state?</label>
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">

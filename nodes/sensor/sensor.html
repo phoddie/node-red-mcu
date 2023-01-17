@@ -330,10 +330,10 @@
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
-			name: {value:""},
-			platform: {value:""},
-			module: {value:""},
-			options: {value:{}},
+			name: { value:"" },
+			platform: { value:"" },
+			module: { value:"embedded:sensor/Touch/FT6x06" },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } } },
 			configuration: {
 				value: "{}",
 				validate: function(v) {

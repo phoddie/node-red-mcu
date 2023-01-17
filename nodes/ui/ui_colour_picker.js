@@ -48,6 +48,7 @@ class UIColorPickerNode extends UIControlNode {
 			}
 		}
 		this.msg.payload = payload;
+		this.msg.topic = this.topic({});
 		this.send(this.msg);
 	}
 	onMessage(msg) {
@@ -76,11 +77,12 @@ class UIColorPickerNode extends UIControlNode {
 		this.format = config.format;
 		this.label = config.label;
 		this.outformat = config.outformat;
-		this.msg = { topic: config.topic }
+		this.msg = { }
 		this.passthru = config.passthru;
 		this.showAlpha = config.showAlpha;
 		this.showHue = config.showHue;
 		this.showLightness = config.showLightness;
+		this.topic = config.topic;
 		this.color = { r:128, g:128, b:128, a:255 };
 		this.Template = this.lookupTemplate(config, REDColorPicker);
 	}

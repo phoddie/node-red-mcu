@@ -411,6 +411,86 @@
 			}
 		}
 	},
+	"clock": {
+		"embedded:RTC/DS1307": {
+			"model": "DS1307",
+			"manufacturer": "Maxim Integrated",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS1307.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/ds1307/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/DS3231": {
+			"model": "DS3231",
+			"manufacturer": "Maxim Integrated",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS3231.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/ds3231/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/RV3028": {
+			"model": "RV3028",
+			"manufacturer": "Micro Crystal",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MicroCrystal-RV3028.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/rv3028/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x52"
+				}
+			}
+		},
+		"embedded:RTC/MCP7940": {
+			"model": "MCP7940",
+			"manufacturer": "Microchip",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/Microchip-MCP7940.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/mcp7940/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x6F"
+				}
+			}
+		},
+		"embedded:RTC/PCF8523": {
+			"model": "PCF8523",
+			"manufacturer": "NXP Semiconductors",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8523.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8523/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/PCF8563": {
+			"model": "PCF8563",
+			"manufacturer": "NXP Semiconductors",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+			"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x51"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlarm"
+				}
+			}
+		}
+	},
 	"platform": {
 		"esp32/moddable_two_io": {
 			"name": "Moddable Two (I/O)",

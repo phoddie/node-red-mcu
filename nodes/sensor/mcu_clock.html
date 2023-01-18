@@ -1,0 +1,108 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_clock',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			platform: { value:"" },
+			module: { value:"embedded:RTC/DS1307" },
+			options: { value:{ clock:{ io:"SMBus", bus:"default", address:"0x68" } } },
+			configuration: {
+				value: "{}",
+				validate: function(v) {
+					try {
+						if ("" !== v)
+							JSON.parse(v);
+					}
+					catch {
+						return false;
+					}
+					return true;
+				}
+			}
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'clock',
+		label: function() {
+			return this.name || "clock";
+		},
+		oneditprepare: function() {
+			const menu = $("#node-input-selection");
+			const options = this.options;
+			const modules = mcuDatabase.clock;
+			for (let moduleKey in modules) {
+				const module = modules[moduleKey];
+				const key = "#" + moduleKey;
+				menu.append(`<option value="${key}">${module.manufacturer} ${module.model}</option>`);
+			}
+			menu.on("change", function() {
+				const selection = $("#node-input-selection").val();
+				const parts = selection.split("#");
+				mcuHelper.appendIOs(parts[0], parts[1], "clock", null);
+			})
+			menu.val(this.platform + "#" + this.module);
+			mcuHelper.appendIOs(this.platform, this.module, "clock", this.options);
+			$("#node-input-configuration").typedInput({
+				type:"json",
+				types:["json"]
+			});
+		},
+		oneditsave: function() {
+			const selection = $("#node-input-selection").val();
+			const parts = selection.split("#");
+			const platformKey = parts[0];
+			const moduleKey = parts[1];
+			const options = {};
+			if (platformKey === "") {
+				const ios = mcuDatabase.clock[moduleKey].io;
+				for (let key in ios) {
+					const io = ios[key];
+					mcuHelper.saveIO(options, key, io);
+				}
+			}
+			else {
+				options.reference = mcuDatabase.platform[platformKey].clock[moduleKey].reference;
+			}
+			this.platform = platformKey;
+			this.module = moduleKey;
+			this.options = options;
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_clock">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="real-time clock">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Clock</label>
+		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
+		</select>
+	</div>
+
+	<div id="node-mcu-rows-0">
+	</div>
+
+	<div id="node-mcu-rows-1">
+	</div>
+
+	<div id="node-mcu-rows-2">
+	</div>
+	
+	<div class="form-row">
+		<hr/>
+		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
+		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
+	</div>
+	
+	<div id="node-mcu-infos">
+	</div>
+</script>
+
+<script type="text/html" data-help-name="mcu_clock">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>

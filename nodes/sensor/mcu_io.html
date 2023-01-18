@@ -6,6 +6,7 @@
 			name: { value:"" },
 			pin: { value:"?" },
 			mode: { value:"Input" },
+			edge: { value:"3" },
 			debounce: { value:0 },
 			initial: { value:false },
 		},
@@ -50,6 +51,78 @@
 			mcuHelper.saveProperties.Digital(this, "io");
 		},
 	});
+	RED.nodes.registerType('analog',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?" },
+			resolution: { value:"" },
+		},
+		inputs:0,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'analog',
+		label: function() {
+			return this.name || "analog " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.Analog(div, "io", {});
+			mcuHelper.restoreProperties.Analog(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.Analog(this, "io");
+		},
+	});
+	RED.nodes.registerType('pulse_count',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			signal: { value:"?" },
+			control: { value:"?" },
+		},
+		inputs:0,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'pulse count',
+		label: function() {
+			return this.name || "pulse count";
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.PulseCount(div, "io", {});
+			mcuHelper.restoreProperties.PulseCount(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.PulseCount(this, "io");
+		},
+	});
+	RED.nodes.registerType('pwm',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?" },
+			hz: { value:"" },
+		},
+		inputs:1,
+		outputs:0,
+		icon: "mcu.png",
+		paletteLabel: 'pwm',
+		label: function() {
+			return this.name || "pwm " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.PWM(div, "io", {});
+			mcuHelper.restoreProperties.PWM(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.PWM(this, "io");
+		},
+	});
 </script>
 
 <script type="text/html" data-template-name="digital_in">
@@ -58,6 +131,14 @@
 		<input type="text" id="node-input-name" placeholder="digital in">
 	</div>
 	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<label for="node-input-edge">Edge</label>
+		<select type="text" id="node-input-edge" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="1">Rising</option>
+			<option value="2">Falling</option>
+			<option value="3">Rising & Falling</option>
+		</select>
 	</div>
 	<div class="form-row"">
 		<label for="node-input-debounce">Debounce</label>
@@ -98,5 +179,62 @@
 	</div>
 </script>
 <script type="text/html" data-help-name="digital_out">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>
+
+<script type="text/html" data-template-name="analog">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="analog">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row"">
+		<label for="node-input-resolution">Resolution</label>
+		<input type="text" id="node-input-resolution" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="default">
+		<span>bits</span>
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-analog-input" target="_blank">Ecma-419 specification</a>.
+		</div>
+   </div>
+</script>
+<script type="text/html" data-help-name="analog">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>
+
+<script type="text/html" data-template-name="pulse_count">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="pulse count">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-count" target="_blank">Ecma-419 specification</a>.
+		</div>
+   </div>
+</script>
+<script type="text/html" data-help-name="pulse_count">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>
+
+
+<script type="text/html" data-template-name="pwm">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="pwm">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">Ecma-419 specification</a>.
+		</div>
+	</div>
+</script>
+<script type="text/html" data-help-name="pwm">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>

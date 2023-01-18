@@ -1,20 +1,46 @@
 <script type="text/javascript">
 	let mcuDatabase;
-	$.getJSON("resources/@moddable-node-red-mcu/sensors.json", function(data) {
+	$.getJSON("resources/@moddable-node-red/sensor/sensors.json", function(data) {
 		mcuDatabase = data
+		const categories = {
+			AmbientLight: "Ambient Light",
+			CarbonDioxideGasSensor: "Carbon Dioxide Gas",
+			SoilMoistureSensor: "Soil Moisture",
+			VOCSensor: "VOC",
+		};
+		const sensors = mcuDatabase.sensor;
+		for (let moduleKey in sensors) {
+			const parts = moduleKey.split("/");
+			const names = parts[1].split("-");
+			let category = "";
+			for (let name of names) {
+				if (name in categories)
+					name = categories[name];
+				if (category)
+					category += " - ";
+				category += name;
+			}
+			sensors[moduleKey].category = category;
+		}
 	});
 	const mcuHelper = {
 		category: 'MCU',
 		color: '#a2aaff',
-		appendIOs(platformKey, moduleKey, options) {
+		appendIOs(platformKey, moduleKey, entryKey, options) {
 			let index = 0;
-			let sensor;
+			let entry;
+			let div;
 			if (platformKey === "") {
-				sensor = mcuDatabase.sensor[moduleKey];
-				const ios = sensor.io;
+				entry = mcuDatabase[entryKey][moduleKey];
+				if (entry.category) {
+					div = $(`#node-mcu-category`);
+					div.empty();
+					div.append(`${entry.category}`);
+				}
+				const ios = entry.io;
 				for (let key in ios) {
 					const io = ios[key];
-					div = $(`#node-sensor-io-${index}`);
+					div = $(`#node-mcu-rows-${index}`);
 					mcuHelper.appendIO(div, key, io);
 					div.show();
 					if (options)
@@ -24,8 +50,10 @@
 			}
 			else {
 				const platform = mcuDatabase.platform[platformKey];
-				sensor = platform.sensor[moduleKey];
-				div = $(`#node-sensor-io-${index}`);
+				entry = platform[entryKey][moduleKey];
+				div = $(`#node-mcu-category`);
+				div.empty();
+				div = $(`#node-mcu-rows-${index}`);
 				div.empty();
 				div.append(`
 					<div class="red-ui-help">
@@ -37,17 +65,17 @@
 				index++;
 			}
 			while (index <= 2) {
-				div = $(`#node-sensor-io-${index}`);
+				div = $(`#node-mcu-rows-${index}`);
 				div.empty();
 				div.hide();
 				index++;
 			}
-			div = $(`#node-sensor-link`);
+			div = $(`#node-mcu-infos`);
 			div.empty();
-			if (sensor.url) {
+			if (entry.url) {
 				div.append(`
 					<div class="red-ui-help">
-						See the <a class="" href="${sensor.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
+						See the <a class="" href="${entry.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
 					</div>
 				`);
 			}
@@ -58,11 +86,11 @@
 					<div style="display:inline-block; width:70%; vertical-align:top;">${moduleKey}</div>
 				</div>
 			`);
-			if (sensor.driver) {
+			if (entry.driver) {
 				div.append(`
 					<div class="form-row">
 						<label>Driver</label>
-						<div style="display:inline-block; width:70%; vertical-align:top;">${sensor.driver}</div>
+						<div style="display:inline-block; width:70%; vertical-align:top;">${entry.driver}</div>
 					</div>
 				`);
 			}
@@ -118,11 +146,11 @@
 			}
 		},
 		appendProperties: {
-			appendProperty(div, name, key, label, type, value, unit="") {
+			appendProperty(div, name, key, label, type, value, placeholder="", unit="") {
 				div.append(`
 					<div class="form-row" id="form-row-${name}-${key}">
 						<label for="node-input-${name}-${key}">${label}</label>
-						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;">
+						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="${placeholder}">
 						<span>${unit}</span>
 					</div>
 				`);
@@ -165,16 +193,10 @@
 				}	
 			},
 			I2C(div, name, io) {
-				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
+				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");
 				this.appendProperty(div, name, "data", "Data", "num", "?");
 				this.appendProperty(div, name, "clock", "Clock", "num", "?");
-				div.append(`
-					<div class="form-row" id="form-row-${name}-hz">
-						<label for="node-input-${name}-hz">Speed</label>
-						<input type="text" id="node-input-${name}-hz" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="default">
-						<span>Hz</span>
-					</div>
-				`);
+				this.appendProperty(div, name, "hz", "Speed", "", "", "default", "Hz");
 				
 				let address = io.address || ",*";
 				let addresses = address.split(",");
@@ -202,6 +224,14 @@
 			},
 			SMBus(div, name, io) {
 				this.I2C(div, name, io);
+			},
+			PulseCount(div, name, io) {
+				this.appendProperty(div, name, "signal", "Signal Pin", "num", "?");
+				this.appendProperty(div, name, "control", "Control Pin", "num", "?");
+			},
+			PWM(div, name, io) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				this.appendProperty(div, name, "hz", "Frequency", "", "", "default", "Hz");
 			},
 		},
 		
@@ -240,6 +270,14 @@
 			},
 			SMBus(option, name, io) {
 				this.I2C(option, name, io);
+			},
+			PulseCount(option, name, io) {
+				this.restoreProperty(option, name, "signal", "num");
+				this.restoreProperty(option, name, "control", "num");
+			},
+			PWM(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "hz");
 			},
 		},
 		
@@ -284,6 +322,14 @@
 			},
 			SMBus(option, name, io) {
 				this.I2C(option, name, io);
+			},
+			PulseCount(option, name, io) {
+				this.saveProperty(option, name, "signal", "num");
+				this.saveProperty(option, name, "control", "num");
+			},
+			PWM(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "hz");
 			},
 		},
 		
@@ -359,30 +405,43 @@
 			const options = this.options;
 			const modules = mcuDatabase.sensor;
 			const platforms = mcuDatabase.platform;
+			let former = null;
 			for (let moduleKey in modules) {
 				const module = modules[moduleKey];
 				const key = "#" + moduleKey;
-				const parts = moduleKey.split("/");
-				const names = parts[1].split("-");
-				const name = (names.length > 1) ? names[0] + " - " + names[1]: names[0];
-				menu.append(`<option value="${key}">${name} - ${module.model}</option>`);
+				const category = module.category;
+				if (former != category) {
+					if (former != null)
+						menu.append(`</optgroup>`);
+					menu.append(`<optgroup label="${category}">`);
+					former = category;
+				}
+				if (module.manufacturer)
+					menu.append(`<option value="${key}">${module.manufacturer} ${module.model}</option>`);
+				else
+					menu.append(`<option value="${key}">${module.model}</option>`);
 			}
+			if (former != null)
+				menu.append(`</optgroup>`);
 			for (let platformKey in platforms) {
 				const platform = platforms[platformKey];
 				menu.append(`<hr/>`);
 				const modules = platform.sensor;
-				for (let moduleKey in modules) {
-					const key = platformKey + "#" + moduleKey;					const parts = moduleKey.split("/");
-					menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+				if (modules) {
+					for (let moduleKey in modules) {
+						const key = platformKey + "#" + moduleKey;
+						const parts = moduleKey.split("/");
+						menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+					}	
 				}	
 			}
 			menu.on("change", function() {
 				const selection = $("#node-input-selection").val();
 				const parts = selection.split("#");
-				mcuHelper.appendIOs(parts[0], parts[1], null);
+				mcuHelper.appendIOs(parts[0], parts[1], "sensor", null);
 			})
 			menu.val(this.platform + "#" + this.module);
-			mcuHelper.appendIOs(this.platform, this.module, this.options);
+			mcuHelper.appendIOs(this.platform, this.module, "sensor", this.options);
 			$("#node-input-configuration").typedInput({
 				type:"json",
 				types:["json"]
@@ -419,17 +478,19 @@
 
 	<div class="form-row">
 		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Sensor</label>
-		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
-		</select>
+		<div style="display:inline-block; width:70%;">
+			<div style="color:#aaaaaa;" id="node-mcu-category"></div>
+			<select style="display:block; width:100%;" type="text" id="node-input-selection" style=""></select>
+		</div>
 	</div>
 
-	<div id="node-sensor-io-0">
+	<div id="node-mcu-rows-0">
 	</div>
 
-	<div id="node-sensor-io-1">
+	<div id="node-mcu-rows-1">
 	</div>
 
-	<div id="node-sensor-io-2">
+	<div id="node-mcu-rows-2">
 	</div>
 	
 	<div class="form-row">
@@ -437,9 +498,9 @@
 		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
 		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
 	</div>
-	<div class="form-row" id="node-sensor-link">
-	</div>
 	
+	<div id="node-mcu-infos">
+	</div>
 </script>
 
 <script type="text/html" data-help-name="sensor">

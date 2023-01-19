@@ -495,11 +495,45 @@
 		"esp32/moddable_two_io": {
 			"name": "Moddable Two (I/O)",
 			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
 			"sensor": {
 				"embedded:sensor/Touch/FT6x06": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
 					"reference": "device.sensor.Touch"
+				}
+			}
+		},
+		"esp32/m5core_ink": {
+			"name": "M5Core Ink",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/m5core_ink.md",
+			"clock": {
+				"embedded:RTC/PCF8563": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+					"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+					"reference": "device.peripheral.RTC"
+				}
+			}
+		},
+		"esp32/m5paper": {
+			"name": "M5Paper",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/m5paper.md",
+			"sensor": {
+				"embedded:sensor/Touch/GT911": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-Goodix-GT911.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
+					"reference": "device.sensor.Touch"
+				},
+				"embedded:sensor/Humidity-Temperature/SHT3x": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/shtc3/manifest.json",
+					"reference": "device.sensor.HumidityTemperature"
+				}
+			},
+			"clock": {
+				"embedded:RTC/PCF8563": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+					"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+					"reference": "device.peripheral.RTC"
 				}
 			}
 		}

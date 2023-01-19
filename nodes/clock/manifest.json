@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"*": "./mcu-clock"
+	},
+	"preload": "mcu-clock"
+}

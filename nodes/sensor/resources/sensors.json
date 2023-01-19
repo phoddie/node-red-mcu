@@ -114,6 +114,16 @@
 				}
 			}
 		},
+		"embedded:sensor/Ammeter/PZEM-004T": {
+			"model": "PZEM-004T",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/pzem-004t/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "Serial",
+					"baud": "9600"
+				}
+			}
+		},
 		"embedded:sensor/Barometer-Temperature/BMP180": {
 			"model": "BMP180",
 			"manufacturer": "Bosch",

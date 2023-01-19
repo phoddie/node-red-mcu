@@ -32,10 +32,22 @@
 			const menu = $("#node-input-selection");
 			const options = this.options;
 			const modules = mcuDatabase.clock;
+			const platforms = mcuDatabase.platform;
 			for (let moduleKey in modules) {
 				const module = modules[moduleKey];
 				const key = "#" + moduleKey;
 				menu.append(`<option value="${key}">${module.manufacturer} ${module.model}</option>`);
+			}
+			menu.append(`<hr/>`);
+			for (let platformKey in platforms) {
+				const platform = platforms[platformKey];
+				const modules = platform.clock;
+				if (modules) {
+					for (let moduleKey in modules) {
+						const key = platformKey + "#" + moduleKey;
+						menu.append(`<option value="${key}">${platform.name}</option>`);
+					}	
+				}	
 			}
 			menu.on("change", function() {
 				const selection = $("#node-input-selection").val();

@@ -222,9 +222,6 @@
 // 				if (addresses.length == 1)
 // 					input.prop('disabled', true)
 			},
-			SMBus(div, name, io) {
-				this.I2C(div, name, io);
-			},
 			PulseCount(div, name, io) {
 				this.appendProperty(div, name, "signal", "Signal Pin", "num", "?");
 				this.appendProperty(div, name, "control", "Control Pin", "num", "?");
@@ -232,6 +229,37 @@
 			PWM(div, name, io) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 				this.appendProperty(div, name, "hz", "Frequency", "", "", "default", "Hz");
+			},
+			Serial(div, name, io) {
+				this.appendProperty(div, name, "receive", "Receive Pin", "num", "?");
+				this.appendProperty(div, name, "transmit", "Transmit Pin", "num", "?");
+				
+				let baud = io.baud || ",*";
+				let bauds = baud.split(",");
+				let string;
+				if ((bauds.length == 2) && (bauds[1] == "*")) {
+					string = `<input type="text" id="node-input-${name}-baud" style="display:inline-block; width:70%; vertical-align:baseline;">`
+				}
+				else {
+					string = `<select type="text" id="node-input-${name}-baud" style="display:inline-block; width:70%; vertical-align:baseline;">`
+					for (baud of bauds) {
+						string += `<option value="${baud}">${baud}</option>`;
+					}
+					string += `</select>`;
+				}
+				div.append(`
+					<div class="form-row" id="form-row-${name}-baud">
+						<label for="node-input-${name}-baud">Baud Rate</label>
+						${string}
+						</div>
+					`);
+				const input = $(`#node-input-${name}-baud`);
+				input.val(bauds[0]);
+				
+				this.appendProperty(div, name, "port", "Port Identifier", "str", "");
+			},
+			SMBus(div, name, io) {
+				this.I2C(div, name, io);
 			},
 		},
 		
@@ -268,9 +296,6 @@
 				this.restoreProperty(option, name, "hz");
 				this.restoreProperty(option, name, "address");
 			},
-			SMBus(option, name, io) {
-				this.I2C(option, name, io);
-			},
 			PulseCount(option, name, io) {
 				this.restoreProperty(option, name, "signal", "num");
 				this.restoreProperty(option, name, "control", "num");
@@ -278,6 +303,15 @@
 			PWM(option, name, io) {
 				this.restoreProperty(option, name, "pin", "num");
 				this.restoreProperty(option, name, "hz");
+			},
+			Serial(option, name, io) {
+				this.restoreProperty(option, name, "receive", "num");
+				this.restoreProperty(option, name, "transmit", "num");
+				this.restoreProperty(option, name, "baud");
+				this.restoreProperty(option, name, "port", "str");
+			},
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
 			},
 		},
 		
@@ -320,9 +354,6 @@
 				this.saveProperty(option, name, "hz");
 				this.saveProperty(option, name, "address");
 			},
-			SMBus(option, name, io) {
-				this.I2C(option, name, io);
-			},
 			PulseCount(option, name, io) {
 				this.saveProperty(option, name, "signal", "num");
 				this.saveProperty(option, name, "control", "num");
@@ -330,6 +361,15 @@
 			PWM(option, name, io) {
 				this.saveProperty(option, name, "pin", "num");
 				this.saveProperty(option, name, "hz");
+			},
+			Serial(option, name, io) {
+				this.saveProperty(option, name, "receive", "num");
+				this.saveProperty(option, name, "transmit", "num");
+				this.saveProperty(option, name, "baud");
+				this.saveProperty(option, name, "port", "str");
+			},
+			SMBus(option, name, io) {
+				this.I2C(option, name, io);
 			},
 		},
 		

@@ -19,9 +19,9 @@ module.exports = function(RED) {
 		console.log(config)
     }
     RED.nodes.registerType("pulse_count", PulseCountNode);
-    function PWMNode(config) {
+    function PWMOutNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("pwm", PWMNode);
+    RED.nodes.registerType("pwm_out", PWMOutNode);
 }

@@ -59,7 +59,7 @@
 			pin: { value:"?" },
 			resolution: { value:"" },
 		},
-		inputs:0,
+		inputs:1,
 		outputs:1,
 		icon: "mcu.png",
 		paletteLabel: 'analog',
@@ -99,7 +99,7 @@
 			mcuHelper.saveProperties.PulseCount(this, "io");
 		},
 	});
-	RED.nodes.registerType('pwm',{
+	RED.nodes.registerType('pwm_out',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -110,9 +110,9 @@
 		inputs:1,
 		outputs:0,
 		icon: "mcu.png",
-		paletteLabel: 'pwm',
+		paletteLabel: 'PWM out',
 		label: function() {
-			return this.name || "pwm " + this.pin;
+			return this.name || "PWM out " + this.pin;
 		},
 		oneditprepare: function() {
 			const div = $("#node-mcu-rows");
@@ -222,10 +222,10 @@
 </script>
 
 
-<script type="text/html" data-template-name="pwm">
+<script type="text/html" data-template-name="pwm_out">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-		<input type="text" id="node-input-name" placeholder="pwm">
+		<input type="text" id="node-input-name" placeholder="PWM out">
 	</div>
 	<div id="node-mcu-rows">
 	</div>
@@ -235,6 +235,6 @@
 		</div>
 	</div>
 </script>
-<script type="text/html" data-help-name="pwm">
+<script type="text/html" data-help-name="pwm_out">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>

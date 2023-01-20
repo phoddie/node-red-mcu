@@ -18,24 +18,24 @@
 				}
 			}
 		},
-                "embedded:sensor/Accelerometer-Gyroscope/MPU6886": {
-                        "model": "MPU6886",
-                        "manufacturer": "InvenSense",
-                        "url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6886.md",
-                        "driver": "$(MODDABLE)/modules/drivers/sensors/mpu6886/manifest.json",
-                        "io": {
-                                "sensor": {
-                                        "type": "SMBus",
-                                        "address": "0x68,0x69"
-                                },
-                                "alert": {
-                                        "type": "Digital",
-                                        "mode": "Input",
-                                        "optional": true,
-                                        "callback": "onAlert"
-                                }
-                        }
-                },
+		"embedded:sensor/Accelerometer-Gyroscope/MPU6886": {
+			"model": "MPU6886",
+			"manufacturer": "InvenSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6886.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/mpu6886/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x68,0x69"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
 		"embedded:sensor/Accelerometer-Gyroscope/MPU9250": {
 			"model": "MPU9250",
 			"manufacturer": "InvenSense",

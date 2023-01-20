@@ -332,6 +332,7 @@
 			platform: {value:""},
 			module: {value:""},
 			options: {value:{}},
+			include: {value:undefined},
 			configuration: {
 				value: "{}",
 				validate: function(v) {
@@ -393,11 +394,18 @@
             const platformKey = parts[0];
             const moduleKey = parts[1];
  			const options = {};
+
+			delete this.include;
          	if (platformKey === "") {
 				const ios = database.sensor[moduleKey].io;
 				for (let key in ios) {
 					const io = ios[key];
 					helper.saveIO(options, key, io);
+				}
+
+				const driver = database.sensor[moduleKey].driver;
+				if (driver) {
+					this.include = [driver];
 				}
 			}
 			else {
@@ -406,14 +414,6 @@
   			this.platform = platformKey;
   			this.module = moduleKey;
 			this.options = options;
-
-			// define data to be injected by the plugin
-			if (this._mcu) {
-				let d = database.sensor[moduleKey].driver;
-				if (d) {
-					this._mcu.include = [d];
-				}
-			}
      	},
     });
 </script>

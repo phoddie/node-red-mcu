@@ -87,10 +87,13 @@
 				</div>
 			`);
 			if (entry.driver) {
+				const url = entry.driver.replace("$(MODDABLE)", "https://github.com/Moddable-OpenSource/moddable/blob/public");
 				div.append(`
 					<div class="form-row">
 						<label>Driver</label>
-						<div style="display:inline-block; width:70%; vertical-align:top;">${entry.driver}</div>
+						<div class="red-ui-help" style="display:inline-block; width:70%; vertical-align:top;">
+							<a class="" href="${url}" target="_blank">${entry.driver}</a>
+						</div>
 					</div>
 				`);
 			}

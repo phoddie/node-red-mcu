@@ -406,6 +406,14 @@
   			this.platform = platformKey;
   			this.module = moduleKey;
 			this.options = options;
+
+			// define data to be injected by the plugin
+			if (this._mcu) {
+				let d = database.sensor[moduleKey].driver;
+				if (d) {
+					this._mcu.include = [d];
+				}
+			}
      	},
     });
 </script>

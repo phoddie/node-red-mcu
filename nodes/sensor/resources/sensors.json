@@ -18,24 +18,24 @@
 				}
 			}
 		},
-                "embedded:sensor/Accelerometer-Gyroscope/MPU6886": {
-                        "model": "MPU6886",
-                        "manufacturer": "InvenSense",
-                        "url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6886.md",
-                        "driver": "$(MODDABLE)/modules/drivers/sensors/mpu6886/manifest.json",
-                        "io": {
-                                "sensor": {
-                                        "type": "SMBus",
-                                        "address": "0x68,0x69"
-                                },
-                                "alert": {
-                                        "type": "Digital",
-                                        "mode": "Input",
-                                        "optional": true,
-                                        "callback": "onAlert"
-                                }
-                        }
-                },
+		"embedded:sensor/Accelerometer-Gyroscope/MPU6886": {
+			"model": "MPU6886",
+			"manufacturer": "InvenSense",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Accelerometer-Gyroscope-InvenSense-MPU6886.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/mpu6886/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x68,0x69"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
 		"embedded:sensor/Accelerometer-Gyroscope/MPU9250": {
 			"model": "MPU9250",
 			"manufacturer": "InvenSense",
@@ -426,7 +426,7 @@
 			"model": "DS1307",
 			"manufacturer": "Maxim Integrated",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS1307.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/ds1307/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/ds1307/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -438,7 +438,7 @@
 			"model": "DS3231",
 			"manufacturer": "Maxim Integrated",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS3231.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/ds3231/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/ds3231/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -450,7 +450,7 @@
 			"model": "RV3028",
 			"manufacturer": "Micro Crystal",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MicroCrystal-RV3028.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/rv3028/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/rv3028/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -462,7 +462,7 @@
 			"model": "MCP7940",
 			"manufacturer": "Microchip",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/Microchip-MCP7940.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/mcp7940/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/mcp7940/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -474,7 +474,7 @@
 			"model": "PCF8523",
 			"manufacturer": "NXP Semiconductors",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8523.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8523/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8523/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -486,7 +486,7 @@
 			"model": "PCF8563",
 			"manufacturer": "NXP Semiconductors",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
-			"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
 			"io": {
 				"clock": {
 					"type": "SMBus",
@@ -519,7 +519,7 @@
 			"clock": {
 				"embedded:RTC/PCF8563": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
-					"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+					"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
 					"reference": "device.peripheral.RTC"
 				}
 			}
@@ -542,7 +542,7 @@
 			"clock": {
 				"embedded:RTC/PCF8563": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
-					"driver": "$(MODDABLE)/modules/drivers/rtc/pcf8563/manifest.json",
+					"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
 					"reference": "device.peripheral.RTC"
 				}
 			}

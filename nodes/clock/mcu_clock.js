@@ -59,7 +59,7 @@ class Clock extends Node {
 		return msg;
 	}
 
-	static type = "mcu-clock";
+	static type = "mcu_clock";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

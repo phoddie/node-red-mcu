@@ -412,7 +412,7 @@
 		},
 	}
 	
-	RED.nodes.registerType('sensor',{
+	RED.nodes.registerType('mcu_sensor',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -437,6 +437,7 @@
 		inputs:1,
 		outputs:1,
 		icon: "mcu.png",
+		paletteLabel: 'sensor',
 		label: function() {
 			return this.name||"sensor";
 		},
@@ -510,7 +511,7 @@
 	});
 </script>
 
-<script type="text/html" data-template-name="sensor">
+<script type="text/html" data-template-name="mcu_sensor">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="sensor">
@@ -543,7 +544,7 @@
 	</div>
 </script>
 
-<script type="text/html" data-help-name="sensor">
+<script type="text/html" data-help-name="mcu_sensor">
 	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">Ecma-419 sensor class</a> implementations</p>
 	<dl class="message-properties">
 		<dt>payload <span class="property-type">object</span></dt>

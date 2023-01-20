@@ -3,25 +3,25 @@ module.exports = function(RED) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("digital_in", DigitalInNode);
+    RED.nodes.registerType("mcu_digital_in", DigitalInNode);
     function DigitalOutNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("digital_out", DigitalOutNode);
+    RED.nodes.registerType("mcu_digital_out", DigitalOutNode);
     function AnalogNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("analog", AnalogNode);
+    RED.nodes.registerType("mcu_analog", AnalogNode);
     function PulseCountNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("pulse_count", PulseCountNode);
+    RED.nodes.registerType("mcu_pulse_count", PulseCountNode);
     function PWMOutNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
-    RED.nodes.registerType("pwm_out", PWMOutNode);
+    RED.nodes.registerType("mcu_pwm_out", PWMOutNode);
 }

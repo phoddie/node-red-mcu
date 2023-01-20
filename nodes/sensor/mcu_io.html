@@ -1,5 +1,5 @@
 <script type="text/javascript">
-	RED.nodes.registerType('digital_in',{
+	RED.nodes.registerType('mcu_digital_in',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -26,14 +26,14 @@
 			mcuHelper.saveProperties.Digital(this, "io");
 		},
 	});
-	RED.nodes.registerType('digital_out',{
+	RED.nodes.registerType('mcu_digital_out',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
 			pin: { value:"?" },
 			mode: { value:"Output" },
-			initial: { value:false },
+			initial: { value:"undefined" },
 		},
 		inputs:1,
 		outputs:0,
@@ -51,7 +51,7 @@
 			mcuHelper.saveProperties.Digital(this, "io");
 		},
 	});
-	RED.nodes.registerType('analog',{
+	RED.nodes.registerType('mcu_analog',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -75,7 +75,7 @@
 			mcuHelper.saveProperties.Analog(this, "io");
 		},
 	});
-	RED.nodes.registerType('pulse_count',{
+	RED.nodes.registerType('mcu_pulse_count',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -99,7 +99,7 @@
 			mcuHelper.saveProperties.PulseCount(this, "io");
 		},
 	});
-	RED.nodes.registerType('pwm_out',{
+	RED.nodes.registerType('mcu_pwm_out',{
 		category: mcuHelper.category,
 		color: mcuHelper.color,
 		defaults: {
@@ -125,7 +125,7 @@
 	});
 </script>
 
-<script type="text/html" data-template-name="digital_in">
+<script type="text/html" data-template-name="mcu_digital_in">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="digital in">
@@ -156,11 +156,11 @@
 		</div>
    </div>
 </script>
-<script type="text/html" data-help-name="digital_in">
+<script type="text/html" data-help-name="mcu_digital_in">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>
 
-<script type="text/html" data-template-name="digital_out">
+<script type="text/html" data-template-name="mcu_digital_out">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="digital out">
@@ -168,9 +168,12 @@
 	<div id="node-mcu-rows">
 	</div>
 	<div class="form-row">
-		<label></label>
-		<input type="checkbox" id="node-input-initial" style="display:inline-block; width:16px; margin-bottom:8px">
-		<label for="node-input-initial" style="width:70%;">Initialize pin state?</label>
+		<label for="node-input-initial">Initial State</label>
+		<select type="text" id="node-input-initial" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="undefined">As-Is</option>
+			<option value="0">Low (0)</option>
+			<option value="1">High (1)</option>
+		</select>
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
@@ -178,11 +181,11 @@
 		</div>
 	</div>
 </script>
-<script type="text/html" data-help-name="digital_out">
+<script type="text/html" data-help-name="mcu_digital_out">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>
 
-<script type="text/html" data-template-name="analog">
+<script type="text/html" data-template-name="mcu_analog">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="analog">
@@ -200,11 +203,11 @@
 		</div>
    </div>
 </script>
-<script type="text/html" data-help-name="analog">
+<script type="text/html" data-help-name="mcu_analog">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>
 
-<script type="text/html" data-template-name="pulse_count">
+<script type="text/html" data-template-name="mcu_pulse_count">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="pulse count">
@@ -217,12 +220,12 @@
 		</div>
    </div>
 </script>
-<script type="text/html" data-help-name="pulse_count">
+<script type="text/html" data-help-name="mcu_pulse_count">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>
 
 
-<script type="text/html" data-template-name="pwm_out">
+<script type="text/html" data-template-name="mcu_pwm_out">
 	<div class="form-row">
 		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
 		<input type="text" id="node-input-name" placeholder="PWM out">
@@ -235,6 +238,6 @@
 		</div>
 	</div>
 </script>
-<script type="text/html" data-help-name="pwm_out">
+<script type="text/html" data-help-name="mcu_pwm_out">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>

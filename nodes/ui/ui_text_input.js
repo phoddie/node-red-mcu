@@ -6,6 +6,7 @@ class UITextInputNode extends UIControlNode {
 	}
 	onChanged() {
 		this.msg.payload = this.value;
+		this.msg.topic = this.topic({});
 		this.send(this.msg);
 	}
 	onMessage(msg) {
@@ -19,11 +20,12 @@ class UITextInputNode extends UIControlNode {
 		this.label = config.label;
 		this.mode = config.mode;
 		this.passthru = config.passthru;
+		this.topic = config.topic;
 		this.value = "";
 		
 		this.Template = this.lookupTemplate(config, REDTextInput);
 		
-		this.msg = { topic: config.topic }
+		this.msg = { };
 	}
 }
 registerConstructor("ui_text_input", UITextInputNode);

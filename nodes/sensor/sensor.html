@@ -491,17 +491,24 @@
 				types:["json"]
 			});
 		},
-		oneditsave: function() {
-			const selection = $("#node-input-selection").val();
-			const parts = selection.split("#");
-			const platformKey = parts[0];
-			const moduleKey = parts[1];
-			const options = {};
-			if (platformKey === "") {
-				const ios = mcuDatabase.sensor[moduleKey].io;
+        oneditsave: function() {
+            const selection = $("#node-input-selection").val();
+            const parts = selection.split("#");
+            const platformKey = parts[0];
+            const moduleKey = parts[1];
+ 			const options = {};
+
+			delete this.include;
+         	if (platformKey === "") {
+				const ios = database.sensor[moduleKey].io;
 				for (let key in ios) {
 					const io = ios[key];
 					mcuHelper.saveIO(options, key, io);
+				}
+
+				const driver = database.sensor[moduleKey].driver;
+				if (driver) {
+					this.include = [driver];
 				}
 			}
 			else {

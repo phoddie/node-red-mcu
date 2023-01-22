@@ -39,18 +39,6 @@ const model = {
 	tabs:[],
 };
 
-function checkValue(value, type) {
-	if (type == "bool") {
-		if (value == "false")
-			value = false;
-		else if (value == "true")
-			value = true;
-		else
-			value = Boolean(value);
-	}
-	return value;
-}
-
 function insert(items, item) {
 	const length = items.length;
 	for (let index = 0; index < length; index++) {
@@ -167,22 +155,23 @@ class UIButtonNode extends UIControlNode {
 		super(id, flow, name);
 	}
 	onMessage(msg) {
-		if (this.passthru && (this.msg._msgid != msg._msgid))
+		if (this.passthru && (this.msg._msgid != msg._msgid)) {
+			this.setter(this.msg, msg);
 			this.send(this.msg);
+		}
 	}
 	onStart(config) {
 		super.onStart(config);
 		this.bgcolor = config.bgcolor;
 		this.color = config.color;
 		this.label = config.label;
-		this.msg = {
-			payload: checkValue(config.payload, config.payloadType),
-			topic: config.topic,
-		}
+		this.msg = {};
 		this.passthru = config.passthru;
+		this.setter = config.setter;
 		this.Template = this.lookupTemplate(config, REDButton);
 	}
 	onTap() {
+		this.setter(this.msg, {});
 		this.send(this.msg);
 	}
 }
@@ -225,6 +214,7 @@ class UINumericNode extends UIControlNode {
 	}
 	onChanged() {
 		this.msg.payload = this.value;
+		this.msg.topic = this.topic({});
 		this.send(this.msg);
 	}
 	onMessage(msg) {
@@ -248,12 +238,13 @@ class UINumericNode extends UIControlNode {
 		this.max = config.max;
 		this.step = config.step;
 		this.passthru = config.passthru;
+		this.topic = config.topic;
 		this.value = this.min;
 		this.wrap = config.wrap;
 		
 		this.Template =  this.lookupTemplate(config, REDNumeric);
 		
-		this.msg = { topic: config.topic }
+		this.msg = { };
 	}
 }
 registerConstructor("ui_numeric", UINumericNode);
@@ -264,6 +255,7 @@ class UISliderNode extends UIControlNode {
 	}
 	onChanged() {
 		this.msg.payload = this.value;
+		this.msg.topic = this.topic({});
 		this.send(this.msg);
 	}
 	onMessage(msg) {
@@ -287,12 +279,13 @@ class UISliderNode extends UIControlNode {
 		this.min = config.min;
 		this.max = config.max;
 		this.step = config.step;
+		this.topic = config.topic;
 		this.passthru = config.passthru;
 		this.value = this.min;
 		
 		this.Template =  this.lookupTemplate(config, REDSlider);
 		
-		this.msg = { topic: config.topic }
+		this.msg = { };
 	}
 }
 registerConstructor("ui_slider", UISliderNode);
@@ -329,11 +322,14 @@ class UISwitchNode extends UIControlNode {
 		super(id, flow, name);
 	}
 	onChanged() {
-		this.msg.payload = this.options[this.selection].value;
+		const option = (this.options({}))[this.selection];
+		this.msg.payload = option.payload;
+		if (option.topic)
+			this.msg.topic = option.topic;
 		this.send(this.msg);
 	}
 	onMessage(msg) {
-		this.selection = this.options.findIndex(option => option.value === msg.payload);
+		this.selection = (this.options(msg)).findIndex(option => option.payload === msg.payload);
 		if (this.selection < 0)
 			this.selection = 0;
 		this.container?.delegate("onUpdate");
@@ -343,10 +339,7 @@ class UISwitchNode extends UIControlNode {
 	onStart(config) {
 		super.onStart(config);
 		this.label = config.label;
-		this.options = [
-			{ value:checkValue(config.offvalue, config.offvalueType), type:config.offvalueType },
-			{ value:checkValue(config.onvalue, config.onvalueType), type:config.onvalueType },
-		];
+		this.options = config.options;
 		this.passthru = config.passthru;
 		this.selection = 0;
 		

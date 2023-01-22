@@ -15,6 +15,23 @@
 			},
 			"preload": "rpi-neopixels"
 		},
+		"esp32/m5stack_core2":{
+			"defines": {
+				"neopixel": {
+					"length": 10,
+					"order": "#GRB",
+					"pin": 25
+				}
+			},
+			"modules": {
+				"*": [
+					"./rpi-neopixels",
+					"$(MODULES)/drivers/neopixel/*",
+					"$(MODULES)/drivers/neopixel/esp32/*"
+				]
+			},
+			"preload": ["neopixel","rpi-neopixels"]
+		},
 		"pico": {
 			"include": "$(MODULES)/drivers/neopixel/manifest.json",
 			"modules": {

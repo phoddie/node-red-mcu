@@ -69,7 +69,7 @@ class Sensor extends Node {
 		return msg;
 	}
 
-	static type = "sensor";
+	static type = "mcu_sensor";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

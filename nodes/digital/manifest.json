@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			"./digital"
+		]
+	},
+	"preload": [
+		"digital"
+	]
+}

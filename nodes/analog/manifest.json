@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			"./analog"
+		]
+	},
+	"preload": [
+		"analog"
+	]
+}

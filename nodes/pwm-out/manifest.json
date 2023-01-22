@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			"./pwm-out"
+		]
+	},
+	"preload": [
+		"pwm-out"
+	]
+}

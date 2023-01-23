@@ -69,7 +69,7 @@ class NeopixelsNode extends Node {
 		if (globalThis.lights)		// for compatibility with hosts that create the NeoPixel driver (M5Atom-Matrix) 
 			this.#np = globalThis.lights;
 		else
-			this.#np = new NeoPixel({length: config.pixels, pin: 10 /* parseInt(config.gpio) */, order: config.rgb.toUpperCase(), timing: Timing_WS2812B});
+			this.#np = new NeoPixel({length: config.pixels, pin: parseInt(config.gpio), order: config.rgb.toUpperCase(), timing: Timing_WS2812B});
 
 		this.#bgnd = this.#np.makeRGB(this.#bgnd.r, this.#bgnd.g, this.#bgnd.b);
 		this.#fgnd = this.#np.makeRGB(this.#fgnd.r, this.#fgnd.g, this.#fgnd.b);

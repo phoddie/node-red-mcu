@@ -229,6 +229,19 @@
 				this.appendProperty(div, name, "signal", "Signal Pin", "num", "?");
 				this.appendProperty(div, name, "control", "Control Pin", "num", "?");
 			},
+			PulseWidth(div, name, io) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				div.append(`
+					<div class="form-row" id="form-row-${name}-mode">
+						<label for="node-input-${name}-mode">Mode</label>
+						<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+							<option value="Input">Input</option>
+							<option value="InputPullUp">Input Pull Up</option>
+							<option value="InputPullDown">Input Pull Down</option>
+						</select>
+					</div>
+				`);
+			},
 			PWM(div, name, io) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 				this.appendProperty(div, name, "hz", "Frequency", "", "", "default", "Hz");
@@ -303,6 +316,10 @@
 				this.restoreProperty(option, name, "signal", "num");
 				this.restoreProperty(option, name, "control", "num");
 			},
+			PulseWidth(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "mode");
+			},
 			PWM(option, name, io) {
 				this.restoreProperty(option, name, "pin", "num");
 				this.restoreProperty(option, name, "hz");
@@ -360,6 +377,10 @@
 			PulseCount(option, name, io) {
 				this.saveProperty(option, name, "signal", "num");
 				this.saveProperty(option, name, "control", "num");
+			},
+			PulseWidth(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "mode");
 			},
 			PWM(option, name, io) {
 				this.saveProperty(option, name, "pin", "num");
@@ -497,16 +518,15 @@
             const platformKey = parts[0];
             const moduleKey = parts[1];
  			const options = {};
-
 			delete this.include;
          	if (platformKey === "") {
-				const ios = database.sensor[moduleKey].io;
+				const sensor = mcuDatabase.sensor[moduleKey];
+				const ios = sensor.io;
 				for (let key in ios) {
 					const io = ios[key];
 					mcuHelper.saveIO(options, key, io);
 				}
-
-				const driver = database.sensor[moduleKey].driver;
+				const driver = sensor.driver;
 				if (driver) {
 					this.include = [driver];
 				}

@@ -291,6 +291,21 @@
 				}
 			}
 		},
+		"embedded:sensor/Proximity/HC-SR04": {
+			"model": "HC-SR04",
+			"manufacturer": "Cytron",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/hc-sr04/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "PulseWidth"
+				},
+				"echo": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true
+				}
+			}
+		},
 		"embedded:sensor/Proximity-Temperature/URM09": {
 			"model": "URM09",
 			"manufacturer": "DFRobot",

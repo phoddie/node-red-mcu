@@ -7,7 +7,8 @@
 		"nodes": {
 			"sensor": "sensor.js",
 			"mcu_clock": "mcu_clock.js",
-			"mcu_io": "mcu_io.js"
+			"mcu_io": "mcu_io.js",
+			"mcu_neopixels": "mcu_neopixels.js"
 		}
 	}
 }

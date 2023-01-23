@@ -1,0 +1,103 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_neopixels',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?" },
+			length: { value:"" },
+			order: { value:"RGB" },
+			mode: { value:"3" },
+			background: { value:"" },
+			foreground: { value:"#FFFFFF" },
+			wipe: { value:"40" },
+			brightness: { value:"100" },
+		},
+		inputs:1,
+		outputs:0,
+		icon: "mcu.png",
+		paletteLabel: 'neopixels',
+		label: function() {
+			return this.name || "neopixels " + this.pin;
+		},
+		oneditprepare: function() {
+			let input;
+			
+			input = $(`#node-input-pin`);
+			input.typedInput({ type: "num" });
+			input.typedInput("value", this.pin);
+			
+			$('#node-input-brightness').on("input", function() {
+				const value = $("#node-input-brightness").val();
+				const span = $('#node-feedback-brightness')
+				span.empty();
+				span.append(value);
+			});
+			$('#node-feedback-brightness').append(this.brightness);
+		},
+		oneditsave: function() {
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_neopixels">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="neopixels">
+	</div>
+	<div class="form-row">
+		<label for="node-input-pin">Pin</label>
+		<input type="text" id="node-input-pin" style="display:inline-block; width:70%; vertical-align:baseline;">
+	</div>
+	<div class="form-row">
+		<label>Pixels</label>
+		<div style="display:inline-block; width:35%;">
+			<label for="node-input-length" style="width:50px;">Length</label>
+			<input type="text" id="node-input-length" style="width:70px;">
+		</div>
+		<div style="display:inline-block; width:35%;">
+			<label for="node-input-foreground" style="width:50px;">Order</label>
+			<select type="text" id="node-input-order" style="display:inline-block; width:70px; vertical-align:baseline;">
+				<option value="RGB">RGB</option>
+				<option value="GRB">GRB</option>
+			</select>
+		</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-mode">Mode</label>
+		<select type="text" id="node-input-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="1">Bar - Percent of length</option>
+			<option value="2">Bar - Number of pixels</option>
+			<option value="3">Needle - Percent of length</option>
+			<option value="4">Needle - Number of pixels</option>
+			<option value="5">Add pixel to start</option>
+			<option value="6">Add pixel to end</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label>Colors</label>
+		<div style="display:inline-block; width:35%;">
+			<label for="node-input-background" style="width:80px;">Background</label>
+			<input type="color" id="node-input-background" style="width:40px; margin:0; padding:0; border:0;">
+		</div>
+		<div style="display:inline-block; width:35%;">
+			<label for="node-input-foreground" style="width:80px;">Foreground</label>
+			<input type="color" id="node-input-foreground" style="width:40px; margin:0; padding:0; border:0;">
+		</div>
+	</div>
+	<div class="form-row">
+		<label for="node-input-brightness">Brightness</label>
+		<input type="range" id="node-input-brightness" min="0" max="100" style="display:inline-block; width:70%; vertical-align:middle;">
+		<span id="node-feedback-brightness"></span>
+	</div>
+	<div class="form-row">
+		<label for="node-input-wipe">Wipe Time</label>
+		<input type="text" id="node-input-wipe" style="display:inline-block; width:70%; vertical-align:baseline;">
+		<span>ms</span>
+	</div>
+
+</script>
+
+<script type="text/html" data-help-name="mcu_neopixels">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>

@@ -148,6 +148,73 @@
 			mcuHelper.saveProperties.PWM(this, "io");
 		},
 	});
+	RED.nodes.registerType('mcu_i2c_in',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			options: { value:{ bus:"default" } },
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'I²C in',
+		label: function() {
+			return this.name || "I²C in";
+		},
+		oneditprepare: function() {
+			const io = { type:"I2C" };
+			$(`#button-group-io-bus`).on("click", function() {
+				mcuHelper.toggleIO(false, "io", io);
+			})			
+			$(`#button-group-io-pins`).on("click", function() {
+				mcuHelper.toggleIO(true, "io", io);
+			})			
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.I2C(div, "io", io);
+			mcuHelper.toggleIO(false, "io", io);
+			mcuHelper.restoreProperties.I2C(this.options, "io", io);
+		},
+		oneditsave: function() {
+ 			const options = {};
+			mcuHelper.saveProperties.I2C(options, "io");
+			this.options = options;
+		},
+	});
+	RED.nodes.registerType('mcu_i2c_out',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			options: { value:{ bus:"default" } },
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+        align: "right",
+		paletteLabel: 'I²C out',
+		label: function() {
+			return this.name || "I²C out";
+		},
+		oneditprepare: function() {
+			const io = { type:"I2C" };
+			$(`#button-group-io-bus`).on("click", function() {
+				mcuHelper.toggleIO(false, "io", io);
+			})			
+			$(`#button-group-io-pins`).on("click", function() {
+				mcuHelper.toggleIO(true, "io", io);
+			})			
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.I2C(div, "io", io);
+			mcuHelper.toggleIO(false, "io", io);
+			mcuHelper.restoreProperties.I2C(this.options, "io", io);
+		},
+		oneditsave: function() {
+ 			const options = {};
+			mcuHelper.saveProperties.I2C(options, "io");
+			this.options = options;
+		},
+	});
 </script>
 
 <script type="text/html" data-template-name="mcu_digital_in">
@@ -289,5 +356,51 @@
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_pwm_out">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>
+
+<script type="text/html" data-template-name="mcu_i2c_in">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="I²C in">
+	</div>
+	<div class="form-row">
+		<label>Options</label>
+		<span class="button-group">
+			<button type="button" class="red-ui-button toggle selected" id="button-group-io-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-io-pins">Pins</button>
+		</span>
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
+		</div>
+   </div>
+</script>
+<script type="text/html" data-help-name="mcu_i2c_in">
+	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+</script>
+
+<script type="text/html" data-template-name="mcu_i2c_out">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="I²C out">
+	</div>
+	<div class="form-row">
+		<label>Options</label>
+		<span class="button-group">
+			<button type="button" class="red-ui-button toggle selected" id="button-group-io-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-io-pins">Pins</button>
+		</span>
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
+		</div>
+	</div>
+</script>
+<script type="text/html" data-help-name="mcu_i2c_out">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
 </script>

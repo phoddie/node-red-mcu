@@ -4,7 +4,7 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			pin: { value:"?" },
+			pin: { value:"?", validate: RED.validators.number() },
 			mode: { value:"Input" },
 			edge: { value:"3" },
 			debounce: { value:0 },
@@ -31,7 +31,7 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			pin: { value:"?" },
+			pin: { value:"?", validate: RED.validators.number() },
 			mode: { value:"Output" },
 			initial: { value:"undefined" },
 		},
@@ -56,7 +56,7 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			pin: { value:"?" },
+			pin: { value:"?", validate: RED.validators.number() },
 			resolution: { value:"" },
 		},
 		inputs:1,
@@ -80,8 +80,8 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			signal: { value:"?" },
-			control: { value:"?" },
+			signal: { value:"?", validate: RED.validators.number() },
+			control: { value:"?", validate: RED.validators.number() },
 		},
 		inputs:0,
 		outputs:1,
@@ -104,7 +104,7 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			pin: { value:"?" },
+			pin: { value:"?", validate: RED.validators.number() },
 			mode: { value:"Input" },
 			edges: { value:"1" },
 		},
@@ -129,7 +129,7 @@
 		color: mcuHelper.color,
 		defaults: {
 			name: { value:"" },
-			pin: { value:"?" },
+			pin: { value:"?", validate: RED.validators.number() },
 			hz: { value:"" },
 		},
 		inputs:1,
@@ -154,6 +154,8 @@
 		defaults: {
 			name: { value:"" },
 			options: { value:{ bus:"default" } },
+			command: { value:0 },
+			bytes: { value:1 },
 		},
 		inputs:1,
 		outputs:1,
@@ -187,6 +189,10 @@
 		defaults: {
 			name: { value:"" },
 			options: { value:{ bus:"default" } },
+			command: { value:0 },
+			bytes: { value:1 },
+            payload: { value:"payload", validate: RED.validators.typedInput("payloadType") },
+            payloadType: { value:"msg" },
 		},
 		inputs:1,
 		outputs:1,
@@ -208,6 +214,23 @@
 			mcuHelper.appendProperties.I2C(div, "io", io);
 			mcuHelper.toggleIO(false, "io", io);
 			mcuHelper.restoreProperties.I2C(this.options, "io", io);
+			
+			let input = $('#node-input-payload');
+            input.typedInput({
+                default: 'msg',
+                typeField: $("#node-input-payloadType"),
+                types:['msg','flow','global','str','num','bool','json','bin']
+            });
+//             $("#node-input-payload").typedInput('type',this.payloadType);
+//             $("#node-input-payloadType").val(this.payloadType);
+            if ((input.typedInput('type') === 'msg') && (input.typedInput('value') === '')) {
+                input.typedInput('value','payload');
+            }
+            input.on('change',function() {
+            	if ((input.typedInput('type') === 'msg') && (input.typedInput('value') === '')) {
+                    input.typedInput('value','payload');
+                }
+            });
 		},
 		oneditsave: function() {
  			const options = {};
@@ -232,6 +255,12 @@
 			<option value="3">Rising & Falling</option>
 		</select>
 	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
+		</div>
+		<hr/>
+   </div>
 	<div class="form-row"">
 		<label for="node-input-debounce">Debounce</label>
 		<input type="text" id="node-input-debounce" style="display:inline-block; width:70%; vertical-align:baseline;">
@@ -242,11 +271,6 @@
 		<input type="checkbox" id="node-input-initial" style="display:inline-block; width:16px; margin-bottom:8px">
 		<label for="node-input-initial" style="width:70%;">Read initial state of pin on restart?</label>
 	</div>
-	<div class="form-row">
-		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
-		</div>
-   </div>
 </script>
 <script type="text/html" data-help-name="mcu_digital_in">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
@@ -260,17 +284,18 @@
 	<div id="node-mcu-rows">
 	</div>
 	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
+		</div>
+		<hr/>
+	</div>
+	<div class="form-row">
 		<label for="node-input-initial">Initial State</label>
 		<select type="text" id="node-input-initial" style="display:inline-block; width:70%; vertical-align:baseline;">
 			<option value="undefined">As-Is</option>
 			<option value="0">Low (0)</option>
 			<option value="1">High (1)</option>
 		</select>
-	</div>
-	<div class="form-row">
-		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
-		</div>
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_digital_out">
@@ -326,10 +351,10 @@
 	<div class="form-row">
 		<label for="node-input-edges">Edges</label>
 		<select type="text" id="node-input-edges" style="display:inline-block; width:70%; vertical-align:baseline;">
-			<option value="1">Rising To Falling</option>
-			<option value="2">Falling To Rising</option>
-			<option value="3">Rising To Rising</option>
-			<option value="3">Falling To Falling</option>
+			<option value="RisingToFalling">Rising To Falling</option>
+			<option value="FallingToRising">Falling To Rising</option>
+			<option value="RisingToRising">Rising To Rising</option>
+			<option value="FallingToFalling">Falling To Falling</option>
 		</select>
 	</div>
 	<div class="form-row">
@@ -377,6 +402,15 @@
 			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
 		</div>
    </div>
+	<div class="form-row">
+		<hr/>
+		<label for="node-input-command">Command</label>
+		<input type="number" id="node-input-command" min="0" max="255" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-bytes">Bytes</label>
+		<input type="number" id="node-input-bytes" min="0" max="31" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
 </script>
 <script type="text/html" data-help-name="mcu_i2c_in">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
@@ -399,7 +433,21 @@
 		<div class="red-ui-help">
 			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
 		</div>
+		<hr/>
 	</div>
+	<div class="form-row">
+		<label for="node-input-command">Command</label>
+		<input type="number" id="node-input-command" min="0" max="255" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-bytes">Bytes</label>
+		<input type="number" id="node-input-bytes" min="0" max="31" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+    <div class="form-row">
+        <label for="node-input-payload">Payload</label>
+        <input type="text" id="node-input-payload" style="width:70%">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
 </script>
 <script type="text/html" data-help-name="mcu_i2c_out">
 	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>

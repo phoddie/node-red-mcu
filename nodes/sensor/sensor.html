@@ -434,6 +434,47 @@
 				this.I2C(show, name);
 			},
 		},
+		
+		validateOptions(options) {
+			const validator = RED.validators.number();
+			let result = true;
+			for (let key in options) {
+				const option = options[key];
+				result &= mcuHelper.validateProperties[option.io](option, validator)
+			}
+			return result;
+		},
+		validateProperties: {
+			Analog(option, validator) {
+				return validator(option.pin);
+			},
+			Digital(option, validator) {
+				return validator(option.pin);
+			},
+			I2C(option, validator) {
+				let result = true;
+				if ("clock" in option)
+					result &= validator(option.clock);
+				if ("data" in option)
+					result &= validator(option.data);
+				return result;
+			},
+			PulseCount(option, validator) {
+				return validator(option.signal) && validator(option.control);
+			},
+			PulseWidth(option, validator) {
+				return validator(option.pin);
+			},
+			PWM(optio, validatorn) {
+				return validator(option.pin);
+			},
+			Serial(option, validator) {
+				return validator(option.receive) && validator(option.transmit);
+			},
+			SMBus(option, validator) {
+				return this.I2C(option, validator);
+			},
+		},
 	}
 	
 	RED.nodes.registerType('mcu_sensor',{
@@ -443,7 +484,7 @@
 			name: { value:"" },
 			platform: { value:"" },
 			module: { value:"embedded:sensor/Touch/FT6x06" },
-			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } } },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate:mcuHelper.validateOptions },
 			configuration: {
 				value: "{}",
 				validate: function(v) {

@@ -102,6 +102,24 @@
 				}
 			}
 		},
+		"embedded:sensor/AmbientLight-Gesture-Proximity/APDS9960": {
+			"model": "APDS-9960",
+			"manufacturer": "Broadcom",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-Gesture-Proximity-APDS9960.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/apds9960/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x39"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
 		"embedded:sensor/AmbientLight-Proximity/VL6180": {
 			"model": "VL6180",
 			"manufacturer": "ST Microelectronics",
@@ -128,7 +146,7 @@
 			"model": "BMP180",
 			"manufacturer": "Bosch",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP180.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/bm180/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bmp180/manifest.json",
 			"io": {
 				"sensor": {
 					"type": "I2C",
@@ -140,7 +158,7 @@
 			"model": "BMP280",
 			"manufacturer": "Bosch",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP280.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/bm280/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bmp280/manifest.json",
 			"io": {
 				"sensor": {
 					"type": "I2C",
@@ -300,9 +318,8 @@
 				},
 				"trigger": {
 					"type": "Digital",
-					"mode": "Input",
-					"optional": true,
-					"callback": "onAlert"
+					"mode": "Output",
+					"optional": true
 				}
 			}
 		},

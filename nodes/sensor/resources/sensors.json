@@ -132,7 +132,7 @@
 				}
 			}
 		},
-		"embedded:sensor/Ammeter/PZEM-004T": {
+		"embedded:sensor/Energy/PZEM004T": {
 			"model": "PZEM-004T",
 			"driver": "$(MODDABLE)/modules/drivers/sensors/pzem-004t/manifest.json",
 			"io": {

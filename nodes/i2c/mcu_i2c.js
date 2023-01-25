@@ -168,7 +168,7 @@ class I2COutNode extends Node {
 			let payload = this.#getter(msg);
 			switch (typeof payload) {
 				case "number": {
-					let buffer = new Uint8Array(this.#bytes);
+					const buffer = new Uint8Array(this.#bytes);
 					let i = 0;
 					payload = payload | 0;
 					while (payload) {
@@ -177,15 +177,14 @@ class I2COutNode extends Node {
 					}
 					i2c.write(buffer);
 					} break;
-				case "buffer":
-					i2c.write(payload);
-					break;
 				case "string":
 					i2c.write(ArrayBuffer.fromString(payload));
 					break;
 				case "object":
 					if (Array.isArray(payload))
 						i2c.write(Uint8Array.from(payload));
+					else if (payload instanceof Uint8Array)
+						i2c.write(payload);
 					break;
 			}
 

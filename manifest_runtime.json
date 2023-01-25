@@ -12,6 +12,7 @@
 		"./nodes/analog/manifest.json",
 		"./nodes/digital/manifest.json",
 		"./nodes/neopixels/manifest.json",
+		"./nodes/i2c/manifest.json",
 		"./nodes/pwm-out/manifest.json",
 		"./nodes/httpserver/manifest.json",
 		"./nodes/httprequest/manifest.json",

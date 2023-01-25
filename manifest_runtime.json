@@ -9,8 +9,10 @@
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
 		"$(MODDABLE)/modules/io/manifest.json",
 		"./nodes/rpi-ds18b20/manifest.json",
-		"./nodes/rpi-gpio/manifest.json",
-		"./nodes/rpi-neopixels/manifest.json",
+		"./nodes/analog/manifest.json",
+		"./nodes/digital/manifest.json",
+		"./nodes/neopixels/manifest.json",
+		"./nodes/pwm-out/manifest.json",
 		"./nodes/httpserver/manifest.json",
 		"./nodes/httprequest/manifest.json",
 		"./nodes/websocketnodes/manifest.json",
@@ -28,7 +30,6 @@
 		"./nodes/file/manifest.json",
 		"./nodes/template/manifest.json",
 		"./nodes/udp/manifest.json",
-		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json",
 		"./nodes/openweathermap/manifest.json"
 	],
 	"modules": {
@@ -53,7 +54,7 @@
 	},
 	"platforms": {
 		"win": {
-			"error": "Node-RED MCU does not currently run on Windows "
+			"error": "Node-RED MCU does not currently run on Windows"
 		},
 		"esp": {
 			"modules": {

@@ -32,7 +32,7 @@ class PulseWidthInNode extends Node {
 		new PulseWidth({
 			pin: config.pin,
 			mode: PulseWidth[config.mode],
-			edges: [0, PulseWidth.RisingToFalling, PulseWidth.FallingToRising, PulseWidth.RisingToRising, PulseWidth.FallingToFalling][config.edges],
+			edges: PulseWidth[config.edges],
 			onReadable() {
 				node.send({payload: this.read()});
 			}

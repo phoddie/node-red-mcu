@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 15, 2023<br>
+Updated January 25, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -353,31 +353,41 @@ Function node implements support for calling `done()` if function's source code 
 ### Junction
 - [X] Supported
 
-Junction nodes are optimized out by `nodered2mcu` by replacing each junction with direct wires between its inputs and outputs.
+Junction nodes are optimized out by `nodered2mcu` by replacing each junction with direct wires between its inputs and outputs. Consequently, Junction nodes have a zero-cost at runtime in Node-RED MCU Edition.
 
-### GPIO In
-Implemented as "rpi-gpio in" node.
-
-- [X] Select GPIO pin
+### MCU Digital In
+- [X] Select pin
 - [X] Pull-up and pull-down resistor options
-- [X] Multiple nodes can share a single GPIO
+- [X] Multiple nodes can share a single pin
 - [X] Sets `topic` on message
-- [X] Read initial state of pin on deploy/restart
+- [X] Read initial state of pin on start
 - [X] Debounce
 - [X] Status
 
 Implemented with ECMA-419 Digital class.
 
-### GPIO Out
-Implemented as "rpi-gpio out" node.
+If the "rpi-gpio in" node is used in flows, it is translated to a Digital In node.
 
-- [X] Select GPIO pin
-- [X] Digital and PWM output modes
+### MCU Digital Out
+- [X] Select pin
 - [X] Initialize initial pin state option
-- [X] Multiple nodes can share a single GPIO
+- [X] Multiple nodes can share a single pin
 - [X] Status & Done
 
-Implemented with ECMA-419 Digital and PWM classes.
+Implemented with ECMA-419 Digital class.
+
+If the "rpi-gpio out" node is used in digital output mode in flows, it is translated to a Digital Out node.
+
+### MCU PWM Out
+- [X] Select pin
+- [X] Initialize initial pin state option
+- [X] Multiple nodes can share a single GPIO
+- [X] Set frequency
+- [X] Status & Done
+
+Implemented with ECMA-419 PWM Out class.
+
+If the "rpi-gpio out" node is used in PWM mode in flows, it is translated to a PWM Out node.
 
 ### DS18B20
 - [X] Multiple temperature sensors
@@ -388,24 +398,69 @@ Implemented with ECMA-419 Digital and PWM classes.
 
 Implemented using "rpi-ds18b20" node with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
 
-### Neopixels
-Implemented as "[rpi-neopixels](https://github.com/node-red/node-red-nodes/tree/master/hardware/neopixel)" node.
-
+### MCU Neopixels
 - [X] Set number of LEDs in string
 - [X] All modes
 - [X] Wipe time
 - [X] Pixel order
 - [X] Brightness
-- [~] Select any pin for output (see note below)
-- [ ] Apply gamma correction
-
-**Note**: The Node-RED editor only allows certain pins to be selected as the Neopixel output. This is not a problem when the host (e.g. M5Atom-Matrix) provides a configured driver. For other devices, the pin number must be manually edited in the exported JSON.
+- [X] Select any pin for output
+- [X] Foreground and background colors
 
 Implemented using [Neopixel driver](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/neopixel) from Moddable SDK which supports ESP32 family and Raspberry Pi Pico.
 
 The MCU implementation the Neopixel node calls `done()`  after processing each message so that `Complete` Nodes may be used. This is useful for chaining animations. The full Node-RED Neopixel Node does not call `done()`.
 
-**Note**: Requires Moddable SDK update from November 28, 2022 or later.
+If the `pin` is left blank, the global instance `lights` is used if available.
+
+If the [rpi-neopixels](https://github.com/node-red/node-red-nodes/tree/master/hardware/neopixel) node is used in flows, it is translated to a Neopixels node.
+
+### MCU Analog
+- [X] Analog input pin
+- [X] Resolution
+- [X] Status and Done
+
+Implemented with ECMA-419 Analog class.
+
+### MCU Pulse Width
+- [X] Input pin
+- [X] Pin resistors
+- [X] Edges
+- [X] Status
+
+Implemented with ECMA-419 PulseWidth class.
+
+### MCU Pulse Count
+- [X] Signal and control pins
+- [X] Status
+
+Implemented with ECMA-419 PulseCount class.
+
+### MCU I²C In
+- [X] Configure bus or pins
+- [X] Bus speed
+- [X] Static & dynamic address
+- [X] Static & dynamic command
+- [X] Byte count to read
+
+Implemented with ECMA-419 I2C class.
+
+### MCU I²C Out
+- [X] Configure bus or pins
+- [X] Bus speed
+- [X] Static & dynamic address
+- [X] Static & dynamic command
+- [X] Byte count for integer payloads
+
+Implemented with ECMA-419 I2C class.
+
+### MCU Clock
+- [X] Select Real-Time Clock driver
+- [X] Set-up clock I/O
+- [X] Get and set time
+- [X] Properties sheet for configuration in Node-RED editor
+
+Implemented with ECMA-419 Real-Time Clock class drivers.
 
 ### MQTT Broker
 - [X] Broker URL and port number
@@ -637,6 +692,8 @@ The File Write node is implemented using the Moddable SDK of integration LittleF
 The File Read node is implemented using the Moddable SDK of integration LittleFS.
 
 ### MCU Sensor
+- [X] Select sensor driver
+- [X] Set-up sensor I/O
 - [X] Retrieve sensor samples from any ECMA-419 Sensor Class Pattern driver
 - [X] Simulated implementation for testing in full Node-RED
 - [X] Properties sheet for configuration in Node-RED editor
@@ -714,7 +771,7 @@ This prototype is a breadth-first effort to implement all the steps required to 
 
 The compatibility goal should be to provide the same behaviors as much as possible so that existing Node-RED developers can apply their knowledge and experience to embedded MCUs without encountered confusing and unnecessary differences. The goal is not to provide all the features of Node-RED, as some are impractical or impossible on the target class of devices.
 
-- [ ] Integrate embedded conversion into Deploy feature of Node-RED (excellent work is being done here by @ralphwetzel with the [node-red-mcu-plugin](https://github.com/ralphwetzel/node-red-mcu-plugin))
+- [X] Integrate embedded conversion into Deploy feature of Node-RED (excellent work has been @ralphwetzel with the [node-red-mcu-plugin](https://github.com/ralphwetzel/node-red-mcu-plugin))
 
 ### Runtime
 - [ ] Align runtime behavior and APIs with Node-RED as much as practical. This would benefit from assistance from developers familiar with Node-RED.

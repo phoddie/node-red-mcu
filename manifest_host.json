@@ -9,6 +9,12 @@
 		"stack": 768
 	},
 	"platforms": {
+		"esp": {
+			"creation": {
+				"static": 38912,
+				"stack": 384
+			}
+		},
 		"esp32": {
 			"creation": {
 				"static": 0,

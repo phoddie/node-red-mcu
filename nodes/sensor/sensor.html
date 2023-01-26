@@ -75,7 +75,7 @@
 			if (entry.url) {
 				div.append(`
 					<div class="red-ui-help">
-						See the <a class="" href="${entry.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
+						See the <a class="" href="${entry.url}#configuration" target="_blank">ECMA-419 class</a> for configuration details.
 					</div>
 				`);
 			}
@@ -616,12 +616,17 @@
 </script>
 
 <script type="text/html" data-help-name="mcu_sensor">
-	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">Ecma-419 sensor class</a> implementations</p>
+	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">ECMA-419 sensor class</a> implementations</p>
+	<h3>Outputs</h3>
 	<dl class="message-properties">
 		<dt>payload <span class="property-type">object</span></dt>
-		<dd>the payload is the object returned by calling "sample()"</dd>
+		<dd>The object returned by the driver's <code>sample()</code> method. If a sample is unavailable, no message is output.</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>configuration <span class="property-type">object</span></dt>
+		<dd>Optional. If present, it is passed to the driver's <code>configure()</code> method and no sample is taken</dd>
 	</dl>
 	<h3>Details</h3>
-	<p>The optional "configuration" JSON data is passed to the "configure" method.</p>
-	<p>When running in full Node-RED the node simulates a tempperature sensor. This is useful for debugging flows before deploying them to the MCU.</p>
+	<p>When running in full Node-RED the node generates simulated sensor values. This is useful for debugging flows before deploying them to the MCU.</p>
 </script>

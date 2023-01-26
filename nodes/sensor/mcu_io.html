@@ -106,7 +106,7 @@
 			name: { value:"" },
 			pin: { value:"?", validate: RED.validators.number() },
 			mode: { value:"Input" },
-			edges: { value:"1" },
+			edges: { value:"RisingToFalling" },
 		},
 		inputs:0,
 		outputs:1,
@@ -257,7 +257,7 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">ECMA-419 specification</a>.
 		</div>
 		<hr/>
    </div>
@@ -273,7 +273,16 @@
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_digital_in">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to monitor an ECMA-419 Digital Input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>0 or 1</dd>
+		<dt>topic <span class="property-type">string</span></dt>
+		<dd>a string of the form <code>gpio/{the pin number}</code> (for compatibilty with the "rpi-gpio in" node)</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.</p>
 </script>
 
 <script type="text/html" data-template-name="mcu_digital_out">
@@ -285,7 +294,7 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">ECMA-419 specification</a>.
 		</div>
 		<hr/>
 	</div>
@@ -299,7 +308,13 @@
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_digital_out">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to set an ECMA-419 Digital Output.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+	</dl>
+	<h3>Details</h3>
+	<p>The input <code>payload</code> is treated as a number, with 0 setting the output to 0 and any other value setting it to 1. </p>
 </script>
 
 <script type="text/html" data-template-name="mcu_analog">
@@ -316,13 +331,21 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-analog-input" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-analog-input" target="_blank">ECMA-419 specification</a>.
 		</div>
    </div>
 </script>
 <script type="text/html" data-help-name="mcu_analog">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
-</script>
+	<p>MCU node to Read an ECMA-419 Analog input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>floating point value from 0 to 1</dd>
+		<dt>resolution <span class="property-type">number</span></dt>
+		<dd>number of bits of resolution provided by the input</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>When a message is received, a message is sent with the current reading.</p></script>
 
 <script type="text/html" data-template-name="mcu_pulse_count">
 	<div class="form-row">
@@ -333,12 +356,19 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-count" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-count" target="_blank">ECMA-419 specification</a>.
 		</div>
    </div>
 </script>
 <script type="text/html" data-help-name="mcu_pulse_count">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to set an ECMA-419 Pulse Count input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>the current reading of the pulse count input (always an integer)</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent with the current pulse count reading whenever a change to the pulse count is detected. </p>
 </script>
 
 <script type="text/html" data-template-name="mcu_pulse_width">
@@ -359,12 +389,19 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">ECMA-419 specification</a>.
 		</div>
    </div>
 </script>
 <script type="text/html" data-help-name="mcu_pulse_width">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to monitor an ECMA-419 Pulse Width input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>in microseconds</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent when a new pulse width reading is detected.</p>
 </script>
 
 <script type="text/html" data-template-name="mcu_pwm_out">
@@ -376,12 +413,19 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">ECMA-419 specification</a>.
 		</div>
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_pwm_out">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to set an ECMA-419 PWM Output.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>a floating point value from 0 to 1.0</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>The <code>payload</code> value is multiplied by the PWM's <code>resolution</code> to calculate the output value. </p>
 </script>
 
 <script type="text/html" data-template-name="mcu_i2c_in">
@@ -399,7 +443,7 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">ECMA-419 specification</a>.
 		</div>
    </div>
 	<div class="form-row">
@@ -413,7 +457,24 @@
 	</div>
 </script>
 <script type="text/html" data-help-name="mcu_i2c_in">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to read from an ECMA-419 I2C instance.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">buffer</span></dt>
+		<dd>the bytes read from the I2C input</dd>
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>the I2C address read from</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
+		<dt>command <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>If the I2C read fails, no output message is sent.</p>
+	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Input Node</a>.</p>
 </script>
 
 <script type="text/html" data-template-name="mcu_i2c_out">
@@ -431,7 +492,7 @@
 	</div>
 	<div class="form-row">
 		<div class="red-ui-help">
-			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">Ecma-419 specification</a>.
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">ECMA-419 specification</a>.
 		</div>
 		<hr/>
 	</div>
@@ -450,5 +511,18 @@
     </div>
 </script>
 <script type="text/html" data-help-name="mcu_i2c_out">
-	<p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Fusce metus nisi, fermentum quis arcu eget, rutrum viverra metus. Sed rutrum ipsum et quam mollis, at tincidunt arcu facilisis. Vestibulum viverra velit sit amet velit ullamcorper aliquet. Sed vulputate fermentum orci, eu scelerisque nulla maximus non. Proin eleifend velit vitae sem tincidunt, non ultrices lectus lacinia. Cras vel ornare lacus. Praesent pharetra iaculis velit sed consequat. Morbi sed placerat orci, vestibulum luctus risus. In laoreet iaculis urna at auctor. Interdum et malesuada fames ac ante ipsum primis in faucibus. Cras eget viverra augue. Aliquam auctor tincidunt dapibus. Nunc a velit augue. Vestibulum ante ipsum primis in faucibus orci luctus et ultrices posuere cubilia curae; Morbi et orci pharetra, laoreet nisl sed, semper urna.</p>
+	<p>MCU node to write to an ECMA-419 I2C instance.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">buffer, array, string, number</span></dt>
+		<dd>the data to write to the I2C instance</dd>
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
+		<dt>command <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>The input message is sent unchanged, unless the I2C write fails, in which case no output message is sent. This allows chaining of I2C Output nodes.</p>
+	<p>If the input <code>payload</code> is a number the <code>Bytes</code> value in the configuration determines the size of the integer output. The value is always writtein in little-endian order.</p>
+	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Output Node</a>.</p>
 </script>

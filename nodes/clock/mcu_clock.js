@@ -44,7 +44,7 @@ class Clock extends Node {
 				msg = undefined;
 			}
 			else if (msg.payload) {
-				this.#clock.time = msg.payload;
+				this.#clock.time = Number(msg.payload);
 				msg = undefined;
 			}
 			else

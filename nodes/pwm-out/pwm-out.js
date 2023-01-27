@@ -20,56 +20,47 @@
 
 import {Node} from "nodered";
 
-class Sensor extends Node {
-	#sensor;
+let cache;		// support multiple nodes sharing the same pin, like the RPi implementation
+
+class PWMOutNode extends Node {
+	#io;
 
 	onStart(config) {
 		super.onStart(config);
 
-		try {
-			this.#sensor = config.initialize.call(this);
-			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+		if (!globalThis.device?.io?.PWM)
+			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
+
+		cache ??= new Map;
+		let io = cache.get(config.pin);
+
+		if (io) {
+			this.#io = io;
 		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+		else {
+			try {
+				const options = {
+					pin: config.pin,
+				};
+				if (config.hz)
+					options.hz = config.hz;
+				this.#io = io = new device.io.PWM(options);
+				cache.set(config.pin, io);
+			}
+			catch {
+				this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
+			}
 		}
 	}
 	onMessage(msg, done) {
-		if (!this.#sensor)
-			return;
-
-		if (msg.configuration) {
-			try {
-				this.#sensor.configure(msg.configuration);
-				done?.();
-			}
-			catch (e) {
-				done?.(e);
-			}
-			return;
+		if (this.#io) {
+			this.#io.write(msg.payload * ((1 << this.#io.resolution) - 1));
+			this.status({fill:"green", shape:"dot", text: msg.payload.toString()});
 		}
-		
-		try {
-			const payload = this.#sensor.sample();
-			if (payload)
-				msg.payload = payload;
-			else
-				msg = undefined;
-		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
-			this.#sensor = undefined;
-			msg = undefined;
-		}
-		finally {
-			done?.();
-		}
-
-		return msg;
+		done();
 	}
 
-	static type = "mcu_sensor";
+	static type = "mcu_pwm_out";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

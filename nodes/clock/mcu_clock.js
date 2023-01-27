@@ -20,14 +20,14 @@
 
 import {Node} from "nodered";
 
-class Sensor extends Node {
-	#sensor;
+class Clock extends Node {
+	#clock;
 
 	onStart(config) {
 		super.onStart(config);
 
 		try {
-			this.#sensor = config.initialize.call(this);
+			this.#clock = config.initialize.call(this);
 			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
 		}
 		catch {
@@ -35,41 +35,31 @@ class Sensor extends Node {
 		}
 	}
 	onMessage(msg, done) {
-		if (!this.#sensor)
+		if (!this.#clock)
 			return;
 
-		if (msg.configuration) {
-			try {
-				this.#sensor.configure(msg.configuration);
-				done?.();
-			}
-			catch (e) {
-				done?.(e);
-			}
-			return;
-		}
-		
 		try {
-			const payload = this.#sensor.sample();
-			if (payload)
-				msg.payload = payload;
-			else
+			if (msg.configuration) {
+				this.#clock.configure(msg.configuration);
 				msg = undefined;
+			}
+			else if (msg.payload) {
+				this.#clock.time = Number(msg.payload);
+				msg = undefined;
+			}
+			else
+				msg.payload = this.#clock.time;
+			done();
 		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
-			this.#sensor = undefined;
+		catch (e) {
+			done(e);
 			msg = undefined;
-		}
-		finally {
-			done?.();
 		}
 
 		return msg;
 	}
 
-	static type = "mcu_sensor";
+	static type = "mcu_clock";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

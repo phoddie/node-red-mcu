@@ -1,0 +1,10 @@
+{
+	"modules": {
+		"*": [
+			"./pulsewidth-in"
+		]
+	},
+	"preload": [
+		"pulsewidth-in"
+	]
+}

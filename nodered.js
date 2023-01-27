@@ -1106,6 +1106,7 @@ class MQTTBrokerNode extends Node {
 			onWritable: (count) => {
 				if (undefined === this.#writable) {
 					this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+					delete this.#options.wait;
 					if (this.#subscriptions.length) {
 						const msg = {
 							operation: MQTTClient.SUBSCRIBE,
@@ -1137,15 +1138,16 @@ class MQTTBrokerNode extends Node {
 				}
 			},
 			onError: () => {
+				this.#mqtt = undefined;
 				if (undefined !== this.#writable) {
 					this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
 					this.#queue = undefined;
 					this.#writable = undefined;
-					this.#options.wait = 1000;
 				}
+				if (!this.#options.wait)
+					this.#options.wait = 1000;
 				else if (this.#options.wait <= 32_000)
 					this.#options.wait *= 2;
-				this.#mqtt = undefined;
 				Timer.set(() => this.connect(), this.#options.wait);
 			}
 		});

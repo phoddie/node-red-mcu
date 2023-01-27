@@ -41,7 +41,7 @@ module.exports = function(RED) {
 			done();
 		});
     }
-    RED.nodes.registerType("sensor", SensorNode);
+    RED.nodes.registerType("mcu_sensor", SensorNode);
 }
 
 function simulateOne(sensor) {

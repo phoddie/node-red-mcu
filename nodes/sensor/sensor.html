@@ -1,29 +1,59 @@
 <script type="text/javascript">
-	let database;
+	let mcuDatabase;
 	$.getJSON("resources/@moddable-node-red/sensor/sensors.json", function(data) {
-		database = data
+		mcuDatabase = data
+		const categories = {
+			AmbientLight: "Ambient Light",
+			CarbonDioxideGasSensor: "Carbon Dioxide Gas",
+			SoilMoistureSensor: "Soil Moisture",
+			VOCSensor: "VOC",
+		};
+		const sensors = mcuDatabase.sensor;
+		for (let moduleKey in sensors) {
+			const parts = moduleKey.split("/");
+			const names = parts[1].split("-");
+			let category = "";
+			for (let name of names) {
+				if (name in categories)
+					name = categories[name];
+				if (category)
+					category += " - ";
+				category += name;
+			}
+			sensors[moduleKey].category = category;
+		}
 	});
-	const helper = {
-		appendIOs(platformKey, moduleKey, options) {
+	const mcuHelper = {
+		category: 'MCU',
+		color: '#a2aaff',
+		appendIOs(platformKey, moduleKey, entryKey, options) {
 			let index = 0;
-			let sensor;
+			let entry;
+			let div;
 			if (platformKey === "") {
-				sensor = database.sensor[moduleKey];
-				const ios = sensor.io;
+				entry = mcuDatabase[entryKey][moduleKey];
+				if (entry.category) {
+					div = $(`#node-mcu-category`);
+					div.empty();
+					div.append(`${entry.category}`);
+				}
+				const ios = entry.io;
 				for (let key in ios) {
 					const io = ios[key];
-					div = $(`#node-sensor-io-${index}`);
-					helper.appendIO(div, key, io);
+					div = $(`#node-mcu-rows-${index}`);
+					mcuHelper.appendIO(div, key, io);
 					div.show();
 					if (options)
-						helper.restoreIO(options, key, io);
+						mcuHelper.restoreIO(options, key, io);
 					index++;
 				}
 			}
 			else {
-				const platform = database.platform[platformKey];
-				sensor = platform.sensor[moduleKey];
-				div = $(`#node-sensor-io-${index}`);
+				const platform = mcuDatabase.platform[platformKey];
+				entry = platform[entryKey][moduleKey];
+				div = $(`#node-mcu-category`);
+				div.empty();
+				div = $(`#node-mcu-rows-${index}`);
 				div.empty();
 				div.append(`
 					<div class="red-ui-help">
@@ -35,17 +65,17 @@
 				index++;
 			}
 			while (index <= 2) {
-				div = $(`#node-sensor-io-${index}`);
+				div = $(`#node-mcu-rows-${index}`);
 				div.empty();
 				div.hide();
 				index++;
 			}
-			div = $(`#node-sensor-link`);
+			div = $(`#node-mcu-infos`);
 			div.empty();
-			if (sensor.url) {
+			if (entry.url) {
 				div.append(`
 					<div class="red-ui-help">
-						See the <a class="" href="${sensor.url}#configuration" target="_blank">Ecma-419 class</a> for configuration details.
+						See the <a class="" href="${entry.url}#configuration" target="_blank">ECMA-419 class</a> for configuration details.
 					</div>
 				`);
 			}
@@ -56,11 +86,14 @@
 					<div style="display:inline-block; width:70%; vertical-align:top;">${moduleKey}</div>
 				</div>
 			`);
-			if (sensor.driver) {
+			if (entry.driver) {
+				const url = entry.driver.replace("$(MODDABLE)", "https://github.com/Moddable-OpenSource/moddable/blob/public");
 				div.append(`
 					<div class="form-row">
 						<label>Driver</label>
-						<div style="display:inline-block; width:70%; vertical-align:top;">${sensor.driver}</div>
+						<div class="red-ui-help" style="display:inline-block; width:70%; vertical-align:top;">
+							<a class="" href="${url}" target="_blank">${entry.driver}</a>
+						</div>
 					</div>
 				`);
 			}
@@ -78,11 +111,11 @@
 					</div>
 				`);
 				const checkbox = $(`#node-input-${name}-optional`);
-	            checkbox.on("change", function() {
-					helper.toggleIO(checkbox.prop('checked'), name, io);
+				checkbox.on("change", function() {
+					mcuHelper.toggleIO(checkbox.prop('checked'), name, io);
 				});
 				this.appendProperties[io.type](div, name, io);
-				helper.toggleIO(false, name, io);
+				mcuHelper.toggleIO(false, name, io);
 			}
 			else if ((io.type == "I2C") || (io.type == "SMBus")) {
 				div.append(`
@@ -96,13 +129,13 @@
 					</div>
 				`);
 				$(`#button-group-${name}-bus`).on("click", function() {
-					helper.toggleIO(false, name, io);
+					mcuHelper.toggleIO(false, name, io);
 				})			
 				$(`#button-group-${name}-pins`).on("click", function() {
-					helper.toggleIO(true, name, io);
+					mcuHelper.toggleIO(true, name, io);
 				})			
 				this.appendProperties[io.type](div, name, io);
-				helper.toggleIO(false, name, io);
+				mcuHelper.toggleIO(false, name, io);
 			}
 			else {
 				div.append(`
@@ -116,11 +149,11 @@
 			}
 		},
 		appendProperties: {
-			appendProperty(div, name, key, label, type, value, unit="") {
+			appendProperty(div, name, key, label, type, value, placeholder="", unit="") {
 				div.append(`
 					<div class="form-row" id="form-row-${name}-${key}">
 						<label for="node-input-${name}-${key}">${label}</label>
-						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;">
+						<input type="text" id="node-input-${name}-${key}" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="${placeholder}">
 						<span>${unit}</span>
 					</div>
 				`);
@@ -163,16 +196,10 @@
 				}	
 			},
 			I2C(div, name, io) {
-				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");;
+				this.appendProperty(div, name, "bus", "Bus Name", "str", "default");
 				this.appendProperty(div, name, "data", "Data", "num", "?");
 				this.appendProperty(div, name, "clock", "Clock", "num", "?");
-				div.append(`
-					<div class="form-row" id="form-row-${name}-hz">
-						<label for="node-input-${name}-hz">Speed</label>
-						<input type="text" id="node-input-${name}-hz" style="display:inline-block; width:70%; vertical-align:baseline;" placeholder="default">
-						<span>Hz</span>
-					</div>
-				`);
+				this.appendProperty(div, name, "hz", "Speed", "", "", "default", "Hz");
 				
 				let address = io.address || ",*";
 				let addresses = address.split(",");
@@ -198,6 +225,55 @@
 // 				if (addresses.length == 1)
 // 					input.prop('disabled', true)
 			},
+			PulseCount(div, name, io) {
+				this.appendProperty(div, name, "signal", "Signal Pin", "num", "?");
+				this.appendProperty(div, name, "control", "Control Pin", "num", "?");
+			},
+			PulseWidth(div, name, io) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				div.append(`
+					<div class="form-row" id="form-row-${name}-mode">
+						<label for="node-input-${name}-mode">Mode</label>
+						<select type="text" id="node-input-${name}-mode" style="display:inline-block; width:70%; vertical-align:baseline;">
+							<option value="Input">Input</option>
+							<option value="InputPullUp">Input Pull Up</option>
+							<option value="InputPullDown">Input Pull Down</option>
+						</select>
+					</div>
+				`);
+			},
+			PWM(div, name, io) {
+				this.appendProperty(div, name, "pin", "Pin", "num", "?");
+				this.appendProperty(div, name, "hz", "Frequency", "", "", "default", "Hz");
+			},
+			Serial(div, name, io) {
+				this.appendProperty(div, name, "receive", "Receive Pin", "num", "?");
+				this.appendProperty(div, name, "transmit", "Transmit Pin", "num", "?");
+				
+				let baud = io.baud || ",*";
+				let bauds = baud.split(",");
+				let string;
+				if ((bauds.length == 2) && (bauds[1] == "*")) {
+					string = `<input type="text" id="node-input-${name}-baud" style="display:inline-block; width:70%; vertical-align:baseline;">`
+				}
+				else {
+					string = `<select type="text" id="node-input-${name}-baud" style="display:inline-block; width:70%; vertical-align:baseline;">`
+					for (baud of bauds) {
+						string += `<option value="${baud}">${baud}</option>`;
+					}
+					string += `</select>`;
+				}
+				div.append(`
+					<div class="form-row" id="form-row-${name}-baud">
+						<label for="node-input-${name}-baud">Baud Rate</label>
+						${string}
+						</div>
+					`);
+				const input = $(`#node-input-${name}-baud`);
+				input.val(bauds[0]);
+				
+				this.appendProperty(div, name, "port", "Port Identifier", "str", "");
+			},
 			SMBus(div, name, io) {
 				this.I2C(div, name, io);
 			},
@@ -207,7 +283,7 @@
 			if (name in options) {
 				if (io.optional) {
 					$(`#node-input-${name}-optional`).prop('checked', true);
-					helper.toggleIO(true, name, io);
+					mcuHelper.toggleIO(true, name, io);
 				}
 				this.restoreProperties[io.type](options[name], name, io);
 			}
@@ -229,12 +305,30 @@
 				this.restoreProperty(option, name, "mode");
 			},
 			I2C(option, name, io) {
-				helper.toggleIO(("clock" in option) || ("data" in option), name, io);
+				mcuHelper.toggleIO(("clock" in option) || ("data" in option), name, io);
 				this.restoreProperty(option, name, "bus", "str");
 				this.restoreProperty(option, name, "clock", "num");
 				this.restoreProperty(option, name, "data", "num");
 				this.restoreProperty(option, name, "hz");
 				this.restoreProperty(option, name, "address");
+			},
+			PulseCount(option, name, io) {
+				this.restoreProperty(option, name, "signal", "num");
+				this.restoreProperty(option, name, "control", "num");
+			},
+			PulseWidth(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "mode");
+			},
+			PWM(option, name, io) {
+				this.restoreProperty(option, name, "pin", "num");
+				this.restoreProperty(option, name, "hz");
+			},
+			Serial(option, name, io) {
+				this.restoreProperty(option, name, "receive", "num");
+				this.restoreProperty(option, name, "transmit", "num");
+				this.restoreProperty(option, name, "baud");
+				this.restoreProperty(option, name, "port", "str");
 			},
 			SMBus(option, name, io) {
 				this.I2C(option, name, io);
@@ -272,13 +366,31 @@
 			},
 			I2C(option, name, io) {
 				if ($(`#button-group-${name}-bus`).hasClass("selected"))
-					this.saveProperty(option, name, "bus");
+					this.saveProperty(option, name, "bus", "str");
 				else {
 					this.saveProperty(option, name, "clock", "num");
 					this.saveProperty(option, name, "data", "num");
 				}
 				this.saveProperty(option, name, "hz");
 				this.saveProperty(option, name, "address");
+			},
+			PulseCount(option, name, io) {
+				this.saveProperty(option, name, "signal", "num");
+				this.saveProperty(option, name, "control", "num");
+			},
+			PulseWidth(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "mode");
+			},
+			PWM(option, name, io) {
+				this.saveProperty(option, name, "pin", "num");
+				this.saveProperty(option, name, "hz");
+			},
+			Serial(option, name, io) {
+				this.saveProperty(option, name, "receive", "num");
+				this.saveProperty(option, name, "transmit", "num");
+				this.saveProperty(option, name, "baud");
+				this.saveProperty(option, name, "port", "str");
 			},
 			SMBus(option, name, io) {
 				this.I2C(option, name, io);
@@ -322,17 +434,57 @@
 				this.I2C(show, name);
 			},
 		},
+		
+		validateOptions(options) {
+			const validator = RED.validators.number();
+			let result = true;
+			for (let key in options) {
+				const option = options[key];
+				result &= mcuHelper.validateProperties[option.io](option, validator)
+			}
+			return result;
+		},
+		validateProperties: {
+			Analog(option, validator) {
+				return validator(option.pin);
+			},
+			Digital(option, validator) {
+				return validator(option.pin);
+			},
+			I2C(option, validator) {
+				let result = true;
+				if ("clock" in option)
+					result &= validator(option.clock);
+				if ("data" in option)
+					result &= validator(option.data);
+				return result;
+			},
+			PulseCount(option, validator) {
+				return validator(option.signal) && validator(option.control);
+			},
+			PulseWidth(option, validator) {
+				return validator(option.pin);
+			},
+			PWM(optio, validatorn) {
+				return validator(option.pin);
+			},
+			Serial(option, validator) {
+				return validator(option.receive) && validator(option.transmit);
+			},
+			SMBus(option, validator) {
+				return this.I2C(option, validator);
+			},
+		},
 	}
 	
-   RED.nodes.registerType('sensor',{
-        category: 'MCU',
-        color: '#a2aaff',
-        defaults: {
-            name: {value:""},
-			platform: {value:""},
-			module: {value:""},
-			options: {value:{}},
-			include: {value:undefined},
+	RED.nodes.registerType('mcu_sensor',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			platform: { value:"" },
+			module: { value:"embedded:sensor/Touch/FT6x06" },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate:mcuHelper.validateOptions },
 			configuration: {
 				value: "{}",
 				validate: function(v) {
@@ -346,43 +498,56 @@
 					return true;
 				}
 			}
-        },
-        inputs:1,
-        outputs:1,
-        icon: "mcu.png",
-        label: function() {
-            return this.name||"sensor";
-        },
-        oneditprepare: function() {
- 			const menu = $("#node-input-selection");
-            const options = this.options;
- 			const modules = database.sensor;
- 			const platforms = database.platform;
- 			for (let moduleKey in modules) {
- 				const module = modules[moduleKey];
- 				const key = "#" + moduleKey;
- 				const parts = moduleKey.split("/");
- 				const names = parts[1].split("-");
- 				const name = (names.length > 1) ? names[0] + " - " + names[1]: names[0];
- 				menu.append(`<option value="${key}">${name} - ${module.model}</option>`);
- 			}
- 			for (let platformKey in platforms) {
- 				const platform = platforms[platformKey];
- 				menu.append(`<hr/>`);
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'sensor',
+		label: function() {
+			return this.name||"sensor";
+		},
+		oneditprepare: function() {
+			const menu = $("#node-input-selection");
+			const options = this.options;
+			const modules = mcuDatabase.sensor;
+			const platforms = mcuDatabase.platform;
+			let former = null;
+			for (let moduleKey in modules) {
+				const module = modules[moduleKey];
+				const key = "#" + moduleKey;
+				const category = module.category;
+				if (former != category) {
+					if (former != null)
+						menu.append(`</optgroup>`);
+					menu.append(`<optgroup label="${category}">`);
+					former = category;
+				}
+				if (module.manufacturer)
+					menu.append(`<option value="${key}">${module.manufacturer} ${module.model}</option>`);
+				else
+					menu.append(`<option value="${key}">${module.model}</option>`);
+			}
+			if (former != null)
+				menu.append(`</optgroup>`);
+			for (let platformKey in platforms) {
+				const platform = platforms[platformKey];
+				menu.append(`<hr/>`);
 				const modules = platform.sensor;
- 				for (let moduleKey in modules) {
- 					const key = platformKey + "#" + moduleKey;
-  					const parts = moduleKey.split("/");
-					menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
- 				}	
- 			}
-            menu.on("change", function() {
-            	const selection = $("#node-input-selection").val();
-            	const parts = selection.split("#");
-            	helper.appendIOs(parts[0], parts[1], null);
-  			})
- 			menu.val(this.platform + "#" + this.module);
-            helper.appendIOs(this.platform, this.module, this.options);
+				if (modules) {
+					for (let moduleKey in modules) {
+						const key = platformKey + "#" + moduleKey;
+						const parts = moduleKey.split("/");
+						menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+					}	
+				}	
+			}
+			menu.on("change", function() {
+				const selection = $("#node-input-selection").val();
+				const parts = selection.split("#");
+				mcuHelper.appendIOs(parts[0], parts[1], "sensor", null);
+			})
+			menu.val(this.platform + "#" + this.module);
+			mcuHelper.appendIOs(this.platform, this.module, "sensor", this.options);
 			$("#node-input-configuration").typedInput({
 				type:"json",
 				types:["json"]
@@ -394,68 +559,74 @@
             const platformKey = parts[0];
             const moduleKey = parts[1];
  			const options = {};
-
 			delete this.include;
          	if (platformKey === "") {
-				const ios = database.sensor[moduleKey].io;
+				const sensor = mcuDatabase.sensor[moduleKey];
+				const ios = sensor.io;
 				for (let key in ios) {
 					const io = ios[key];
-					helper.saveIO(options, key, io);
+					mcuHelper.saveIO(options, key, io);
 				}
-
-				const driver = database.sensor[moduleKey].driver;
+				const driver = sensor.driver;
 				if (driver) {
 					this.include = [driver];
 				}
 			}
 			else {
-				options.reference = database.platform[platformKey].sensor[moduleKey].reference;
+				options.reference = mcuDatabase.platform[platformKey].sensor[moduleKey].reference;
 			}
-  			this.platform = platformKey;
-  			this.module = moduleKey;
+			this.platform = platformKey;
+			this.module = moduleKey;
 			this.options = options;
-     	},
-    });
+		},
+	});
 </script>
 
-<script type="text/html" data-template-name="sensor">
-    <div class="form-row">
-        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
-        <input type="text" id="node-input-name" placeholder="sensor">
-    </div>
+<script type="text/html" data-template-name="mcu_sensor">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="sensor">
+	</div>
 
 	<div class="form-row">
 		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Sensor</label>
-		<select type="text" id="node-input-selection" style="display:inline-block; width:70%; vertical-align:baseline;">
-		</select>
+		<div style="display:inline-block; width:70%;">
+			<div style="color:#aaaaaa;" id="node-mcu-category"></div>
+			<select style="display:block; width:100%;" type="text" id="node-input-selection" style=""></select>
+		</div>
 	</div>
 
-    <div id="node-sensor-io-0">
-    </div>
+	<div id="node-mcu-rows-0">
+	</div>
 
-    <div id="node-sensor-io-1">
-    </div>
+	<div id="node-mcu-rows-1">
+	</div>
 
-    <div id="node-sensor-io-2">
-    </div>
-    
-    <div class="form-row">
+	<div id="node-mcu-rows-2">
+	</div>
+	
+	<div class="form-row">
 		<hr/>
 		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
 		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
-   </div>
-    <div class="form-row" id="node-sensor-link">
-   </div>
-    
+	</div>
+	
+	<div id="node-mcu-infos">
+	</div>
 </script>
 
-<script type="text/html" data-help-name="sensor">
-    <p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">Ecma-419 sensor class</a> implementations</p>
-    <dl class="message-properties">
-        <dt>payload <span class="property-type">object</span></dt>
-        <dd>the payload is the object returned by calling "sample()"</dd>
-    </dl>
-    <h3>Details</h3>
-    <p>The optional "configuration" JSON data is passed to the "configure" method.</p>
-    <p>When running in full Node-RED the node simulates a tempperature sensor. This is useful for debugging flows before deploying them to the MCU.</p>
+<script type="text/html" data-help-name="mcu_sensor">
+	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">ECMA-419 sensor class</a> implementations</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">object</span></dt>
+		<dd>The object returned by the driver's <code>sample()</code> method. If a sample is unavailable, no message is output.</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>configuration <span class="property-type">object</span></dt>
+		<dd>Optional. If present, it is passed to the driver's <code>configure()</code> method and no sample is taken</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>When running in full Node-RED the node generates simulated sensor values. This is useful for debugging flows before deploying them to the MCU.</p>
 </script>

@@ -1,7 +1,7 @@
 # MCU Sensor Node
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 15, 2023<br>
+Updated January 25, 2023<br>
 
 ## Overview
 The sensor node integrates sensor classes that conform the Ecma-419 [Sensor Class Pattern](https://419.ecma-international.org/#-13-sensor-class-pattern) into Node-RED. These include:
@@ -78,7 +78,7 @@ A simple test flow using the Sensor node has an inject node to periodically trig
     },
     {
         "id": "81b44f35bce77331",
-        "type": "sensor",
+        "type": "mcu_sensor",
         "z": "430f6d9e27cbee39",
         "name": "Temperature",
         "platform": "",
@@ -138,7 +138,7 @@ Some hosts have built-in sensors that are automatically configured by the host p
 <img src="./assets/edit-sensor-node-host-provider.png" width=500/>
 
 ### Adding Sensor Driver to the Project Manifest
-To use the sensor, the sensor driver must be installed in your project's manifest.
+To use the sensor, the sensor driver must be installed in your project's manifest. The path of the sensor driver is shown at the bottom of the configuration dialog with the label "Driver" , if available.
 
 ```json
 	"modules": {

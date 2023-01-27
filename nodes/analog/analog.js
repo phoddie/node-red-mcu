@@ -20,56 +20,48 @@
 
 import {Node} from "nodered";
 
-class Sensor extends Node {
-	#sensor;
+let cache;		// support multiple nodes sharing the same pin, like the RPi implementation
+
+class AnalogIn extends Node {
+	#io;
 
 	onStart(config) {
 		super.onStart(config);
 
-		try {
-			this.#sensor = config.initialize.call(this);
-			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+		const Analog = globalThis.device?.io?.Analog;
+		if (Analog) {
+			cache ??= new Map;
+			let io = cache.get(config.pin);
+			if (!io) {
+				const options = {
+					pin: config.pin
+				};
+				if (config.resolution)
+					options.resolution = config.resolution;
+				try {
+					this.#io = io = new Analog(options);
+					cache.set(config.pin, io);
+				}
+				catch {
+				}
+			}
 		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-		}
+
+		if (!this.#io)
+			this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 	}
-	onMessage(msg, done) {
-		if (!this.#sensor)
+	onMessage(msg) {
+		const io = this.#io;
+		if (!io)
 			return;
 
-		if (msg.configuration) {
-			try {
-				this.#sensor.configure(msg.configuration);
-				done?.();
-			}
-			catch (e) {
-				done?.(e);
-			}
-			return;
-		}
-		
-		try {
-			const payload = this.#sensor.sample();
-			if (payload)
-				msg.payload = payload;
-			else
-				msg = undefined;
-		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
-			this.#sensor = undefined;
-			msg = undefined;
-		}
-		finally {
-			done?.();
-		}
-
+		msg.resolution = io.resolution;
+		msg.payload = io.read() / ((1 << msg.resolution) - 1);
+		this.status({fill: "green", shape: "dot", text: msg.payload.toFixed(3)});
 		return msg;
 	}
 
-	static type = "mcu_sensor";
+	static type = "mcu_analog";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

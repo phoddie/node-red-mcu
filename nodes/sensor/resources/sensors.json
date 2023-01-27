@@ -102,6 +102,24 @@
 				}
 			}
 		},
+		"embedded:sensor/AmbientLight-Gesture-Proximity/APDS9960": {
+			"model": "APDS-9960",
+			"manufacturer": "Broadcom",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AmbientLight-Gesture-Proximity-APDS9960.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/apds9960/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x39"
+				},
+				"alert": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlert"
+				}
+			}
+		},
 		"embedded:sensor/AmbientLight-Proximity/VL6180": {
 			"model": "VL6180",
 			"manufacturer": "ST Microelectronics",
@@ -114,11 +132,21 @@
 				}
 			}
 		},
+		"embedded:sensor/Energy/PZEM004T": {
+			"model": "PZEM-004T",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/pzem-004t/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "Serial",
+					"baud": "9600"
+				}
+			}
+		},
 		"embedded:sensor/Barometer-Temperature/BMP180": {
 			"model": "BMP180",
 			"manufacturer": "Bosch",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP180.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/bm180/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bmp180/manifest.json",
 			"io": {
 				"sensor": {
 					"type": "I2C",
@@ -130,7 +158,7 @@
 			"model": "BMP280",
 			"manufacturer": "Bosch",
 			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Temperature-Bosch-BMP280.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/bm280/manifest.json",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bmp280/manifest.json",
 			"io": {
 				"sensor": {
 					"type": "I2C",
@@ -281,6 +309,20 @@
 				}
 			}
 		},
+		"embedded:sensor/Proximity/HC-SR04": {
+			"model": "HC-SR04",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/hc-sr04/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "PulseWidth"
+				},
+				"trigger": {
+					"type": "Digital",
+					"mode": "Output",
+					"optional": true
+				}
+			}
+		},
 		"embedded:sensor/Proximity-Temperature/URM09": {
 			"model": "URM09",
 			"manufacturer": "DFRobot",
@@ -290,6 +332,17 @@
 				"sensor": {
 					"type": "SMBus",
 					"address": "0x11,*"
+				}
+			}
+		},
+		"embedded:sensor/Temperature/AMG88xx": {
+			"model": "AMG88xx",
+			"manufacturer": "Panasonic",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/amg88xx/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x69"
 				}
 			}
 		},
@@ -411,15 +464,129 @@
 			}
 		}
 	},
+	"clock": {
+		"embedded:RTC/DS1307": {
+			"model": "DS1307",
+			"manufacturer": "Maxim Integrated",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS1307.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/ds1307/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/DS3231": {
+			"model": "DS3231",
+			"manufacturer": "Maxim Integrated",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MaximIntegrated-DS3231.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/ds3231/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/RV3028": {
+			"model": "RV3028",
+			"manufacturer": "Micro Crystal",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/MicroCrystal-RV3028.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/rv3028/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x52"
+				}
+			}
+		},
+		"embedded:RTC/MCP7940": {
+			"model": "MCP7940",
+			"manufacturer": "Microchip",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/Microchip-MCP7940.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/mcp7940/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x6F"
+				}
+			}
+		},
+		"embedded:RTC/PCF8523": {
+			"model": "PCF8523",
+			"manufacturer": "NXP Semiconductors",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8523.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8523/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x68"
+				}
+			}
+		},
+		"embedded:RTC/PCF8563": {
+			"model": "PCF8563",
+			"manufacturer": "NXP Semiconductors",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+			"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
+			"io": {
+				"clock": {
+					"type": "SMBus",
+					"address": "0x51"
+				},
+				"interrupt": {
+					"type": "Digital",
+					"mode": "Input",
+					"optional": true,
+					"callback": "onAlarm"
+				}
+			}
+		}
+	},
 	"platform": {
 		"esp32/moddable_two_io": {
 			"name": "Moddable Two (I/O)",
 			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/moddable-two.md",
-			"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
 			"sensor": {
 				"embedded:sensor/Touch/FT6x06": {
 					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-FocalTech-FT6x06.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
 					"reference": "device.sensor.Touch"
+				}
+			}
+		},
+		"esp32/m5core_ink": {
+			"name": "M5Core Ink",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/m5core_ink.md",
+			"clock": {
+				"embedded:RTC/PCF8563": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+					"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
+					"reference": "device.peripheral.RTC"
+				}
+			}
+		},
+		"esp32/m5paper": {
+			"name": "M5Paper",
+			"url": "https://github.com/Moddable-OpenSource/moddable/blob/public/documentation/devices/m5paper.md",
+			"sensor": {
+				"embedded:sensor/Touch/GT911": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Touch-Goodix-GT911.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/gt911/manifest.json",
+					"reference": "device.sensor.Touch"
+				},
+				"embedded:sensor/Humidity-Temperature/SHT3x": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Humidity-Temperature-Sensirion-SHT3x.md",
+					"driver": "$(MODDABLE)/modules/drivers/sensors/shtc3/manifest.json",
+					"reference": "device.sensor.HumidityTemperature"
+				}
+			},
+			"clock": {
+				"embedded:RTC/PCF8563": {
+					"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/real-time-clocks/NXP-PCF8563.md",
+					"driver": "$(MODDABLE)/modules/drivers/peripherals/pcf8563/manifest.json",
+					"reference": "device.peripheral.RTC"
 				}
 			}
 		}

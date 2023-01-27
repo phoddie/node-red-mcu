@@ -20,56 +20,26 @@
 
 import {Node} from "nodered";
 
-class Sensor extends Node {
-	#sensor;
-
+class PulseCountNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 
+		if (!globalThis.device?.io?.PulseCount)
+			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
+
 		try {
-			this.#sensor = config.initialize.call(this);
-			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+			const io = new device.io.PulseCount({
+				signal: config.signal,
+				control: config.control,
+				onReadable: () => this.send({payload: io.read()})
+			});
 		}
 		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+			this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 		}
 	}
-	onMessage(msg, done) {
-		if (!this.#sensor)
-			return;
 
-		if (msg.configuration) {
-			try {
-				this.#sensor.configure(msg.configuration);
-				done?.();
-			}
-			catch (e) {
-				done?.(e);
-			}
-			return;
-		}
-		
-		try {
-			const payload = this.#sensor.sample();
-			if (payload)
-				msg.payload = payload;
-			else
-				msg = undefined;
-		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
-			this.#sensor = undefined;
-			msg = undefined;
-		}
-		finally {
-			done?.();
-		}
-
-		return msg;
-	}
-
-	static type = "mcu_sensor";
+	static type = "mcu_pulse_count";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}

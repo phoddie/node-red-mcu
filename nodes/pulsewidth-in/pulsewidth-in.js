@@ -20,57 +20,28 @@
 
 import {Node} from "nodered";
 
-class Sensor extends Node {
-	#sensor;
-
+class PulseWidthInNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 
-		try {
-			this.#sensor = config.initialize.call(this);
-			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
-		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-		}
-	}
-	onMessage(msg, done) {
-		if (!this.#sensor)
-			return;
+		const PulseWidth = globalThis.device?.io?.PulseWidth;
+		if (!PulseWidth)
+			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 
-		if (msg.configuration) {
-			try {
-				this.#sensor.configure(msg.configuration);
-				done?.();
+		const node = this;
+		new PulseWidth({
+			pin: config.pin,
+			mode: PulseWidth[config.mode],
+			edges: PulseWidth[config.edges],
+			onReadable() {
+				node.send({payload: this.read()});
 			}
-			catch (e) {
-				done?.(e);
-			}
-			return;
-		}
-		
-		try {
-			const payload = this.#sensor.sample();
-			if (payload)
-				msg.payload = payload;
-			else
-				msg = undefined;
-		}
-		catch {
-			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
-			this.#sensor = undefined;
-			msg = undefined;
-		}
-		finally {
-			done?.();
-		}
-
-		return msg;
+		});
 	}
 
-	static type = "mcu_sensor";
+	static type = "mcu_pulse_width";
 	static {
 		RED.nodes.registerType(this.type, this);
 	}
 }
+

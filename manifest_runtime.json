@@ -1,85 +1,45 @@
 {
 	"include": [
-		"$(MODDABLE)/examples/manifest_base.json",
-		"$(MODDABLE)/modules/base/deepEqual/manifest.json",
-		"$(MODDABLE)/modules/base/structuredClone/manifest.json",
-		"$(MODDABLE)/modules/base/modules/manifest.json",
-		"$(MODDABLE)/modules/data/base64/manifest.json",
-		"$(MODDABLE)/modules/data/hex/manifest.json",
-		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
-		"$(MODDABLE)/modules/io/manifest.json",
-		"./nodes/rpi-ds18b20/manifest.json",
+		"./manifest_core.json",
+
 		"./nodes/analog/manifest.json",
 		"./nodes/digital/manifest.json",
-		"./nodes/neopixels/manifest.json",
 		"./nodes/i2c/manifest.json",
 		"./nodes/pwm-out/manifest.json",
-		"./nodes/httpserver/manifest.json",
-		"./nodes/httprequest/manifest.json",
-		"./nodes/websocketnodes/manifest.json",
-		"./nodes/lower-case/manifest.json",
-		"./nodes/csv/manifest.json",
+
+		"./nodes/clock/manifest.json",
+		"./nodes/sensor/manifest.json",
+		"./nodes/rpi-ds18b20/manifest.json",
+
+		"./nodes/tcp/manifest.json",
+		"./nodes/udp/manifest.json",
+
 		"./nodes/delay/manifest.json",
 		"./nodes/join/manifest.json",
-		"./nodes/split/manifest.json",
-		"./nodes/batch/manifest.json",
 		"./nodes/random/manifest.json",
-		"./nodes/sort/manifest.json",
-		"./nodes/tcp/manifest.json",
-		"./nodes/trigger/manifest.json",
-		"./nodes/sensor/manifest.json",
-		"./nodes/file/manifest.json",
 		"./nodes/template/manifest.json",
-		"./nodes/udp/manifest.json",
-		"./nodes/openweathermap/manifest.json"
-	],
-	"modules": {
-		"*": [
-			"./nodered"
-		],
-		"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
-	},
-	"preload": [
-		"wifi/connection",
-		"nodered"
-	],
-	"defines": {
-		"xs": {
-			"xsbug_hooks": 1
-		}
-	},
-	"config": {
-		"noderedmcu": {
-		},
-		"sntp": "pool.ntp.org"
-	},
+		"./nodes/sort/manifest.json",
+		"./nodes/split/manifest.json",
+		"./nodes/trigger/manifest.json",
+		"./nodes/websocketnodes/manifest.json"
+ 	],
 	"platforms": {
-		"win": {
-			"error": "Node-RED MCU does not currently run on Windows"
-		},
 		"esp": {
-			"modules": {
-				"~": [
-					"$(BUILD)/devices/esp/setup/network"
-				],
-				"setup/network": "./setupwifi"
-			}
 		},
-		"esp32": {
-			"modules": {
-				"~": [
-					"$(BUILD)/devices/esp32/setup/network"
-				],
-				"setup/network": "./setupwifi"
-			}
-		},
-		"pico": {
-			"modules": {
-				"~": [
-					"$(BUILD)/devices/pico/setup/network"
-				],
-				"setup/network": "./setupwifi"
-			}
+		"...": {
+			"include": [
+				"./nodes/pulsecount/manifest.json",
+				"./nodes/pulsewidth-in/manifest.json",
+				"./nodes/neopixels/manifest.json",
+
+				"./nodes/batch/manifest.json",
+				"./nodes/csv/manifest.json",
+				"./nodes/file/manifest.json",
+
+				"./nodes/httpserver/manifest.json",
+				"./nodes/httprequest/manifest.json",
+				"./nodes/openweathermap/manifest.json"
+			]
 		}
-	}	
+	}
 }

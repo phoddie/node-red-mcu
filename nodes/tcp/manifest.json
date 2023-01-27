@@ -1,5 +1,6 @@
 {
 	"include": [
+		"$(MODULES)/data/text/decoder/manifest.json"
 	],
 	"modules": {
 		"*": "./tcpnodes"

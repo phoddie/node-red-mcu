@@ -335,6 +335,17 @@
 				}
 			}
 		},
+		"embedded:sensor/Temperature/AMG88xx": {
+			"model": "AMG88xx",
+			"manufacturer": "Panasonic",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/amg88xx/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "SMBus",
+					"address": "0x69"
+				}
+			}
+		},
 		"embedded:sensor/Temperature/MLX90614": {
 			"model": "MLX90614",
 			"manufacturer": "Melexis",

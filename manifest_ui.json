@@ -1,0 +1,77 @@
+{
+	"build": {
+		"UINODES": "./nodes/ui",
+		"UIASSETS": "./nodes/ui/assets"
+	},
+	"include": [
+		"$(MODDABLE)/examples/manifest_piu.json",
+		"$(MODDABLE)/modules/input/expanding-keyboard/vertical/manifest.json"
+	],
+	"modules": {
+		"*": [
+			"$(UINODES)/ScrollerBehaviors",
+			"$(UINODES)/ui_nodes",
+			"$(UINODES)/ui_templates",
+			"$(UINODES)/ui_colour_picker",
+			"$(UINODES)/ui_text_input"
+		]
+	},
+	"preload": [
+		"ScrollerBehaviors",
+		"ui_nodes",
+		"ui_templates",
+		"ui_colour_picker",
+		"ui_text_input"
+	],
+	"config": {
+		"ui_text_input": true
+	},
+	"resources":{
+		"*": [
+			"$(UIASSETS)/ui_colour_picker"
+		],
+		"*-mask": [
+			"$(UIASSETS)/Roboto-Medium-12",
+			"$(UIASSETS)/Roboto-Medium-18",
+			"$(UIASSETS)/Roboto-Regular-18",
+			"$(UIASSETS)/glyphs",
+			"$(UIASSETS)/button",
+			"$(UIASSETS)/popup",
+			"$(UIASSETS)/slider",
+			"$(UIASSETS)/switch",
+			"$(UIASSETS)/ui_colour_picker_mask"
+		]
+	},
+	"platforms": {
+		"esp32": {
+			"include": [
+				"$(MODDABLE)/modules/piu/MC/outline/manifest.json"
+			],
+			"modules": {
+				"*": [
+					"$(UINODES)/ui_chart",
+					"$(UINODES)/ui_gauge"
+				]
+			},
+			"preload": [
+				"ui_chart",
+				"ui_gauge"
+			]
+		},
+		"mac": {
+			"include": [
+				"$(MODDABLE)/modules/piu/MC/outline/manifest.json"
+			],
+			"modules": {
+				"*": [
+					"$(UINODES)/ui_chart",
+					"$(UINODES)/ui_gauge"
+				]
+			},
+			"preload": [
+				"ui_chart",
+				"ui_gauge"
+			]
+		}
+	}	
+}

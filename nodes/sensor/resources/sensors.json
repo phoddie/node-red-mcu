@@ -394,7 +394,7 @@
 			"driver": "$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json",
 			"io": {
 				"sensor": {
-					"type": "I2C",
+					"type": "SMBus",
 					"address": "0x48,0x49,0x4A,0x4B"
 				},
 				"alert": {
@@ -412,7 +412,7 @@
 			"driver": "$(MODDABLE)/modules/drivers/sensors/tmp117/manifest.json",
 			"io": {
 				"sensor": {
-					"type": "I2C",
+					"type": "SMBus",
 					"address": "0x48"
 				},
 				"alert": {

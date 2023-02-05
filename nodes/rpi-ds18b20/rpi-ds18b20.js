@@ -29,6 +29,8 @@ class RpiDS18B20 extends Node {
 	#sensors = [];
 
 	onStart(config) {
+		super.onStart(config);
+		
 		if (config.topic)
 			throw new Error("topic unimplemented");
 

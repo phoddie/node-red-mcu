@@ -149,16 +149,15 @@ class NeopixelsNode extends Node {
 							ll = Math.min(ll, 100);
 						}
 						else
-							ll = Math.min(ll, this.#np.length - 1);
+							ll = Math.min(ll, this.#np.length);
 						if (this.#mode.indexOf("need") >= 0) {
 							this.fill(this.#background, 0, ll);
 							this.setPixel(ll, this.#needle);
 							this.fill(this.#background, ll + 1, this.#np.length);
 						}
 						else {
-							ll = ll - 1;
 							this.fill(this.#foreground, 0, ll);
-							this.fill(this.#background, ll + 1, this.#np.length);
+							this.fill(this.#background, ll, this.#np.length);
 						}
 					}
 					break;
@@ -175,8 +174,12 @@ class NeopixelsNode extends Node {
 					color = this.#np.makeRGB(color.r, color.g, color.b);
 
 					let l = Number(parts[1]);
-					if (this.#mode.indexOf("pcent") >= 0)
+					if (this.#mode.indexOf("pcent") >= 0) {
 						l = Math.round(l / 100 * this.#np.length + 0.5);
+						l = Math.min(l, 100);
+                                        }
+                                        else
+                                                l = Math.min(l, this.#np.length);
 					if (this.#mode.indexOf("need") >= 0) {
 						this.#needle = color;
 
@@ -185,11 +188,10 @@ class NeopixelsNode extends Node {
 						this.fill(this.#background, l + 1, this.#np.length);
 					}
 					else {
-						l = l - 1;
 						this.#foreground = color;
 
 						this.fill(this.#foreground, 0, l);
-						this.fill(this.#background, l + 1, this.#np.length);
+						this.fill(this.#background, l, this.#np.length);
 					}
 					} break;
 

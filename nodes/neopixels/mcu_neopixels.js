@@ -151,6 +151,7 @@ class NeopixelsNode extends Node {
 						else
 							ll = Math.min(ll, this.#np.length);
 						if (this.#mode.indexOf("need") >= 0) {
+							ll = ll - 1;
 							this.fill(this.#background, 0, ll);
 							this.setPixel(ll, this.#needle);
 							this.fill(this.#background, ll + 1, this.#np.length);
@@ -183,6 +184,7 @@ class NeopixelsNode extends Node {
 					if (this.#mode.indexOf("need") >= 0) {
 						this.#needle = color;
 
+						l = l - 1;
 						this.fill(this.#background, 0, l);
 						this.setPixel(l, this.#needle);
 						this.fill(this.#background, l + 1, this.#np.length);

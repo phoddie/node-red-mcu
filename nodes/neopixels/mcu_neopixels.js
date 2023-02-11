@@ -250,14 +250,14 @@ class NeopixelsNode extends Node {
 				case 4:	// set nth pixel: n, r, g, b
 					if (!this.#mode.startsWith("p"))
 						return void done();
-					this.setPixel(parts[0], this.#np.makeRGB(parts[1], parts[2], parts[3]));
+					this.setPixel(parts[0]-1, this.#np.makeRGB(parts[1], parts[2], parts[3]));
 					break;
 
 				case 5: {		// set pixels x through y: x, y, r, g, b
 					if (!this.#mode.startsWith("p"))
 						return void done();
 					const x = parseInt(parts[0]), y = parseInt(parts[1]);
-					this.fill(this.#np.makeRGB(parts[2], parts[3], parts[4]), x, y);
+					this.fill(this.#np.makeRGB(parts[2], parts[3], parts[4]), x-1, y);
 					} break;
 				
 				default:

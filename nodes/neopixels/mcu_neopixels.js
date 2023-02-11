@@ -257,7 +257,7 @@ class NeopixelsNode extends Node {
 					if (!this.#mode.startsWith("p"))
 						return void done();
 					const x = parseInt(parts[0]), y = parseInt(parts[1]);
-					this.fill(this.#np.makeRGB(parts[2], parts[3], parts[4]), x, y - x);
+					this.fill(this.#np.makeRGB(parts[2], parts[3], parts[4]), x, y);
 					} break;
 				
 				default:

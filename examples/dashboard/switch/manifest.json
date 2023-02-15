@@ -1,0 +1,52 @@
+{
+	"include": [
+		"../../../nodes/dashboard/manifest.json"
+	],
+	"creation": {
+		"keys": {
+			"available": 128
+		},
+		"stack": 768
+	},
+	"modules": {
+		"*": [
+			"./main",
+			"./templates",
+			{
+				"source": "./flows",
+				"transform": "nodered2mcu"
+			}
+		]
+	},
+	"preload": [
+		"templates",
+		"flows"
+	],
+	"resources":{
+		"*": [
+			"./assets/color-wheel"
+		],
+		"*-mask": [
+			"./assets/brightness-bar",
+			"./assets/brightness-icon",
+			"./assets/color-thumb",
+			"./assets/power-bar",
+			"./assets/power-thumb"
+		]
+	},
+	"platforms": {
+		"esp32": {
+			"creation": {
+				"static": 0,
+				"chunk": {
+					"initial": 81920,
+					"incremental": 0
+				},
+				"heap": {
+					"initial": 5120,
+					"incremental": 0
+				}
+			}
+		}
+	}	
+}

@@ -1,0 +1,60 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_pulse_width',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?", validate: RED.validators.number() },
+			mode: { value:"Input" },
+			edges: { value:"RisingToFalling" },
+		},
+		inputs:0,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'pulse width',
+		label: function() {
+			return this.name || "pulse width " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.PulseWidth(div, "io", { });
+			mcuHelper.restoreProperties.PulseWidth(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.PulseWidth(this, "io");
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_pulse_width">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="pulse width">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<label for="node-input-edges">Edges</label>
+		<select type="text" id="node-input-edges" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="RisingToFalling">Rising To Falling</option>
+			<option value="FallingToRising">Falling To Rising</option>
+			<option value="RisingToRising">Rising To Rising</option>
+			<option value="FallingToFalling">Falling To Falling</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">ECMA-419 specification</a>.
+		</div>
+   </div>
+</script>
+<script type="text/html" data-help-name="mcu_pulse_width">
+	<p>MCU node to monitor an ECMA-419 Pulse Width input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>in microseconds</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent when a new pulse width reading is detected.</p>
+</script>

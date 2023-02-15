@@ -1,0 +1,43 @@
+{
+	"include": [
+		"$(MODDABLE)/modules/io/manifest.json",
+		"../../../nodes/dashboard/manifest.json",
+		"../../../nodes/weather/openweathermap/manifest.json"
+	],
+	"creation": {
+		"static": 0,
+		"chunk": {
+			"initial": 81920,
+			"incremental": 0
+		},
+		"heap": {
+			"initial": 5120,
+			"incremental": 0
+		},
+		"stack": 1024,
+		"keys": {
+			"available": 128
+		}
+	},
+	"modules": {
+		"*": [
+			"./main",
+			"./templates",
+			{
+				"source": "./flows",
+				"transform": "nodered2mcu"
+			}
+		]
+	},
+	"preload": [
+		"templates",
+		"flows"
+	],
+	"resources":{
+		"*-mask": [
+			"./assets/Roboto-Regular-24",
+			"./assets/Temperature-Bold-48",
+			"./assets/Weather-Regular-120"
+		]
+	}
+}

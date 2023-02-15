@@ -4,7 +4,7 @@
 		"$(MODDABLE)/modules/data/wavreader//manifest.json"
 	],
 	"modules": {
-		"audioout-mcu": "./audioout-mcu",
+		"audioout": "./audioout",
 		"pins/*": [
 			"$(MODULES)/pins/i2s/*"
 		],
@@ -14,7 +14,7 @@
 		]
 	},
 	"preload": [
-		"audioout-mcu",
+		"audioout",
 		"pins/audioout",
 		"wavstreamer",
 		"sbcstreamer"

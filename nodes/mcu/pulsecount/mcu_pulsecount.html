@@ -1,0 +1,50 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_pulse_count',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			signal: { value:"?", validate: RED.validators.number() },
+			control: { value:"?", validate: RED.validators.number() },
+		},
+		inputs:0,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'pulse count',
+		label: function() {
+			return this.name || "pulse count";
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.PulseCount(div, "io", {});
+			mcuHelper.restoreProperties.PulseCount(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.PulseCount(this, "io");
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_pulse_count">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="pulse count">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-count" target="_blank">ECMA-419 specification</a>.
+		</div>
+   </div>
+</script>
+<script type="text/html" data-help-name="mcu_pulse_count">
+	<p>MCU node to set an ECMA-419 Pulse Count input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>the current reading of the pulse count input (always an integer)</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent with the current pulse count reading whenever a change to the pulse count is detected. </p>
+</script>

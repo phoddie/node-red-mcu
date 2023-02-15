@@ -2,43 +2,45 @@
 	"include": [
 		"./manifest_core.json",
 
-		"./nodes/analog/manifest.json",
-		"./nodes/digital/manifest.json",
-		"./nodes/i2c/manifest.json",
-		"./nodes/pwm-out/manifest.json",
+		"./nodes/mcu/analog/manifest.json",
+		"./nodes/mcu/digital/manifest.json",
+		"./nodes/mcu/i2c/manifest.json",
+		"./nodes/mcu/pwm/manifest.json",
 
-		"./nodes/clock/manifest.json",
-		"./nodes/sensor/manifest.json",
-		"./nodes/rpi-ds18b20/manifest.json",
+		"./nodes/mcu/clock/manifest.json",
+		"./nodes/mcu/sensor/manifest.json",
+		
+		
+		"./nodes/rpi/rpi-ds18b20/manifest.json",
 
-		"./nodes/tcp/manifest.json",
-		"./nodes/udp/manifest.json",
+		"./nodes/network/tcp/manifest.json",
+		"./nodes/network/udp/manifest.json",
 
-		"./nodes/delay/manifest.json",
-		"./nodes/join/manifest.json",
-		"./nodes/random/manifest.json",
-		"./nodes/template/manifest.json",
-		"./nodes/sort/manifest.json",
-		"./nodes/split/manifest.json",
-		"./nodes/trigger/manifest.json",
-		"./nodes/websocketnodes/manifest.json"
+		"./nodes/function/delay/manifest.json",
+		"./nodes/sequence/join/manifest.json",
+		"./nodes/function/random/manifest.json",
+		"./nodes/function/template/manifest.json",
+		"./nodes/sequence/sort/manifest.json",
+		"./nodes/sequence/split/manifest.json",
+		"./nodes/function/trigger/manifest.json",
+		"./nodes/network/websocketnodes/manifest.json"
  	],
 	"platforms": {
 		"esp": {
 		},
 		"...": {
 			"include": [
-				"./nodes/pulsecount/manifest.json",
-				"./nodes/pulsewidth-in/manifest.json",
-				"./nodes/neopixels/manifest.json",
+				"./nodes/mcu/pulsecount/manifest.json",
+				"./nodes/mcu/pulsewidth/manifest.json",
+				"./nodes/mcu/neopixels/manifest.json",
 
-				"./nodes/batch/manifest.json",
-				"./nodes/csv/manifest.json",
-				"./nodes/file/manifest.json",
+				"./nodes/sequence/batch/manifest.json",
+				"./nodes/parser/csv/manifest.json",
+				"./nodes/storage/file/manifest.json",
 
-				"./nodes/httpserver/manifest.json",
-				"./nodes/httprequest/manifest.json",
-				"./nodes/openweathermap/manifest.json"
+				"./nodes/network/httpserver/manifest.json",
+				"./nodes/network/httprequest/manifest.json",
+				"./nodes/weather/openweathermap/manifest.json"
 			]
 		}
 	}

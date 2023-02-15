@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"sensor": "./sensor"
+	},
+	"preload": "sensor"
+}

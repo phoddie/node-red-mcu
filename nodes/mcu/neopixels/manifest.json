@@ -1,0 +1,26 @@
+{
+	"modules": {
+		"*": [
+			"./colors"
+		]
+	},
+	"preload": [
+		"colors"
+	],
+	"platforms": {
+		"esp32": {
+			"include": "$(MODULES)/drivers/neopixel/manifest.json",
+			"modules": {
+				"*": "./neopixels"
+			},
+			"preload": "neopixels"
+		},
+		"pico": {
+			"include": "$(MODULES)/drivers/neopixel/manifest.json",
+			"modules": {
+				"*": "./neopixels"
+			},
+			"preload": "neopixels"
+		}
+	}
+}

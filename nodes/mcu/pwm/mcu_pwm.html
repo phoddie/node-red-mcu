@@ -1,0 +1,50 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_pwm_out',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?", validate: RED.validators.number() },
+			hz: { value:"" },
+		},
+		inputs:1,
+		outputs:0,
+		icon: "mcu.png",
+		paletteLabel: 'PWM out',
+		label: function() {
+			return this.name || "PWM out " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.PWM(div, "io", {});
+			mcuHelper.restoreProperties.PWM(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.PWM(this, "io");
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_pwm_out">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="PWM out">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation" target="_blank">ECMA-419 specification</a>.
+		</div>
+	</div>
+</script>
+<script type="text/html" data-help-name="mcu_pwm_out">
+	<p>MCU node to set an ECMA-419 PWM Output.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>a floating point value from 0 to 1.0</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>The <code>payload</code> value is multiplied by the PWM's <code>resolution</code> to calculate the output value. </p>
+</script>

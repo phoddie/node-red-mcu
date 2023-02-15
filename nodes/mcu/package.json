@@ -1,0 +1,19 @@
+{
+	"name": "@moddable-node-red/mcu",
+	"version": "1.0.0",
+	"description": "A set of MCU nodes for Node-RED",
+	"license": "UNLICENSED",
+	"node-red" : {
+		"nodes": {
+			"mcu_helper": "mcu_helper.js",
+			"mcu_clock": "clock/mcu_clock.js",
+			"mcu_digital": "digital/mcu_digital.js",
+			"mcu_i2c": "i2c/mcu_i2c.js",
+			"mcu_neopixels": "neopixels/mcu_neopixels.js",
+			"mcu_pulsecount": "pulsecount/mcu_pulsecount.js",
+			"mcu_pulsewidth": "pulsewidth/mcu_pulsewidth.js",
+			"mcu_pwm": "pwm/mcu_pwm.js",
+			"mcu_sensor": "sensor/mcu_sensor.js"
+		}
+	}
+}

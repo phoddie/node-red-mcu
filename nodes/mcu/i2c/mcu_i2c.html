@@ -1,0 +1,191 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_i2c_in',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			options: { value:{ bus:"default" } },
+			command: { },
+			bytes: { value:1 },
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'I²C in',
+		label: function() {
+			return this.name || "I²C in";
+		},
+		oneditprepare: function() {
+			const io = { type:"I2C" };
+			$(`#button-group-io-bus`).on("click", function() {
+				mcuHelper.toggleIO(false, "io", io);
+			})			
+			$(`#button-group-io-pins`).on("click", function() {
+				mcuHelper.toggleIO(true, "io", io);
+			})			
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.I2C(div, "io", io);
+			mcuHelper.toggleIO(false, "io", io);
+			mcuHelper.restoreProperties.I2C(this.options, "io", io);
+		},
+		oneditsave: function() {
+ 			const options = {};
+			mcuHelper.saveProperties.I2C(options, "io");
+			this.options = options;
+		},
+	});
+	RED.nodes.registerType('mcu_i2c_out',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			options: { value:{ bus:"default" } },
+			command: { },
+			bytes: { value:1 },
+            payload: { value:"payload", validate: RED.validators.typedInput("payloadType") },
+            payloadType: { value:"msg" },
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+        align: "right",
+		paletteLabel: 'I²C out',
+		label: function() {
+			return this.name || "I²C out";
+		},
+		oneditprepare: function() {
+			const io = { type:"I2C" };
+			$(`#button-group-io-bus`).on("click", function() {
+				mcuHelper.toggleIO(false, "io", io);
+			})			
+			$(`#button-group-io-pins`).on("click", function() {
+				mcuHelper.toggleIO(true, "io", io);
+			})			
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.I2C(div, "io", io);
+			mcuHelper.toggleIO(false, "io", io);
+			mcuHelper.restoreProperties.I2C(this.options, "io", io);
+			
+			let input = $('#node-input-payload');
+            input.typedInput({
+                default: 'msg',
+                typeField: $("#node-input-payloadType"),
+                types:['msg','flow','global','str','num','bool','json','bin']
+            });
+//             $("#node-input-payload").typedInput('type',this.payloadType);
+//             $("#node-input-payloadType").val(this.payloadType);
+            if ((input.typedInput('type') === 'msg') && (input.typedInput('value') === '')) {
+                input.typedInput('value','payload');
+            }
+            input.on('change',function() {
+            	if ((input.typedInput('type') === 'msg') && (input.typedInput('value') === '')) {
+                    input.typedInput('value','payload');
+                }
+            });
+		},
+		oneditsave: function() {
+ 			const options = {};
+			mcuHelper.saveProperties.I2C(options, "io");
+			this.options = options;
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_i2c_in">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="I²C in">
+	</div>
+	<div class="form-row">
+		<label>Options</label>
+		<span class="button-group">
+			<button type="button" class="red-ui-button toggle selected" id="button-group-io-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-io-pins">Pins</button>
+		</span>
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">ECMA-419 specification</a>.
+		</div>
+   </div>
+	<div class="form-row">
+		<hr/>
+		<label for="node-input-command">Command</label>
+		<input type="number" id="node-input-command" min="0" max="255" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-bytes">Bytes</label>
+		<input type="number" id="node-input-bytes" min="0" max="31" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+</script>
+<script type="text/html" data-help-name="mcu_i2c_in">
+	<p>MCU node to read from an ECMA-419 I2C instance.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">buffer</span></dt>
+		<dd>the bytes read from the I2C input</dd>
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>the I2C address read from</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
+		<dt>command <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>If the I2C read fails, no output message is sent.</p>
+	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Input Node</a>.</p>
+</script>
+
+<script type="text/html" data-template-name="mcu_i2c_out">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="I²C out">
+	</div>
+	<div class="form-row">
+		<label>Options</label>
+		<span class="button-group">
+			<button type="button" class="red-ui-button toggle selected" id="button-group-io-bus">Bus</button><button type="button" class="red-ui-button toggle" id="button-group-io-pins">Pins</button>
+		</span>
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-ic" target="_blank">ECMA-419 specification</a>.
+		</div>
+		<hr/>
+	</div>
+	<div class="form-row">
+		<label for="node-input-command">Command</label>
+		<input type="number" id="node-input-command" min="0" max="255" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+	<div class="form-row">
+		<label for="node-input-bytes">Bytes</label>
+		<input type="number" id="node-input-bytes" min="0" max="31" style="display:inline-block; width:70%; vertical-align:middle;">
+	</div>
+    <div class="form-row">
+        <label for="node-input-payload">Payload</label>
+        <input type="text" id="node-input-payload" style="width:70%">
+        <input type="hidden" id="node-input-payloadType">
+    </div>
+</script>
+<script type="text/html" data-help-name="mcu_i2c_out">
+	<p>MCU node to write to an ECMA-419 I2C instance.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">buffer, array, string, number</span></dt>
+		<dd>the data to write to the I2C instance</dd>
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
+		<dt>command <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>The input message is sent unchanged, unless the I2C write fails, in which case no output message is sent. This allows chaining of I2C Output nodes.</p>
+	<p>If the input <code>payload</code> is a number the <code>Bytes</code> value in the configuration determines the size of the integer output. The value is always writtein in little-endian order.</p>
+	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Output Node</a>.</p>
+</script>

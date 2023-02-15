@@ -5,7 +5,7 @@
 	"license": "LGPLv3",
 	"node-red" : {
 		"nodes": {
-			"audioout": "audioout.js"
+			"mcu_audioout": "mcu_audioout.js"
 		}
 	}
 }

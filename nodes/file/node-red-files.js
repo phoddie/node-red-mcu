@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2023  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -23,6 +23,64 @@ import {File, Directory} from "file";
 import Base64 from "base64";
 import Hex from "hex";
 import Timer from "timer";
+
+// ShareFile emulates File to allows one instance of a file to be shared across several File Read & Write nodes.
+// This avoids issues with file system implementation caching across instances.
+
+let cache;
+
+class SharedFile {
+	#filename;
+	position = 0;
+
+	constructor(filename /*, write */) {		// always open in write
+		this.#filename = filename;
+		this.file;				// try to open file immediately, to throw from constructor if error
+	}
+	close() {
+		if (undefined === this.#filename)
+			return;
+
+		cache.get(this.#filename)?.close();
+		cache.delete(this.#filename);
+		if (!cache.size)
+			cache = undefined;
+		this.#filename = undefined;
+	}
+	read(...args) {
+		const file = this.file;
+		file.position = this.position;
+		const result = file.read(...args);
+		this.position = file.position;
+		return result;
+	}
+	write(...args) {
+		const file = this.file;
+		file.position = this.position;
+		const result = file.write(...args);
+		this.position = file.position;
+		return result;
+	}
+	get length() {
+		return this.file.length;
+	}
+	get file() {
+		cache ??= new Map;
+		let file = cache.get(this.#filename);
+		if (file)
+			return file;
+
+		file = new File(this.#filename, true);
+		cache.set(this.#filename, file);
+		return file;
+	}
+
+	static delete(filename) {
+		cache?.get(filename)?.close();
+		cache?.delete(filename);
+		File.delete(filename);
+	}
+}
 
 class FileWrite extends Node {
 	#state = {}; 
@@ -48,7 +106,7 @@ class FileWrite extends Node {
 		let payload = msg.payload, state = this.#state
 
 		if ("delete" === state.overwriteFile) {
-			File.delete(state.filename ?? msg.filename);
+			SharedFile.delete(state.filename ?? msg.filename);
 			return msg;
 		}
 
@@ -99,9 +157,9 @@ class FileWrite extends Node {
 				}
 
 				if ("true" === state.overwriteFile)
-					File.delete(filename);
+					SharedFile.delete(filename);
 
-				file = new File(filename, true);
+				file = new SharedFile(filename, true);
 				file.position = file.length;
 			}
 
@@ -147,7 +205,7 @@ class FileRead extends Node {
 		const filename = state.filename ?? msg.filename;
 		let file;
 		try {
-			file = new File(filename);
+			file = new SharedFile(filename);
 			if ("" === state.format) {
 				msg.payload = file.read(ArrayBuffer);
 			}

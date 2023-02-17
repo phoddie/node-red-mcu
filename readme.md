@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 25, 2023<br>
+Updated February 16, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -673,7 +673,8 @@ The split implementation has some obscure differences in how it triggers Complet
 The Template node uses the [mustache.js](https://github.com/janl/mustache.js) module.
 
 ### File Write
-- [X] Filename from node or message
+- [X] Filename from node or msg.payload
+- [ ] Filename from msg.* and flow.*
 - [X] Encoding from node or message
 - [X] Encodings: auto, UTF-8, binary, hex, Base64
 - [X] Actions: append to file, overwrite file, delete file
@@ -683,7 +684,8 @@ The Template node uses the [mustache.js](https://github.com/janl/mustache.js) mo
 The File Write node is implemented using the Moddable SDK of integration LittleFS.
 
 ### File Read
-- [X] Filename from node or message
+- [X] Filename from node or msg.payload
+- [ ] Filename from msg.* and flow.*
 - [X] Encodings: UTF-8, binary, hex, Base64
 - [X] Read full file
 - [X] Stream one line or buffer at a time

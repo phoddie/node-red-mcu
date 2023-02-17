@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated February 16, 2023<br>
+Updated February 17, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -234,6 +234,8 @@ The first is exporting the project from Node-RED.
 1. Select Clipboard (not Local)
 1. Select JSON (not Export nodes)
 1. Select "Copy to Clipboard"
+
+> **Warning**: Experienced Node-RED users select "selected nodes" or "current flow" on the Export tab in Step 3 above. Often this does work. However, in some cases it the flow fails to operate correctly because Node-RED will not export all required global confirmation nodes. For example, using "selected nodes" does not export MQTT Broker nodes used by the selected nodes and exporting "current flow" does not export the global dashboard configuration node required by UI nodes.
 
 The JSON version of the flows is now on the clipboard. The second step is adding this JSON to the Moddable SDK project:
 

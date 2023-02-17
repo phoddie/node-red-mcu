@@ -1,7 +1,7 @@
 module.exports = function(RED) {
-    RED.nodes.registerType("mcu_analog", AnalogNode);
-    function PulseCountNode(config) {
+     function AnalogNode(config) {
         RED.nodes.createNode(this, config);
 		console.log(config)
     }
+   RED.nodes.registerType("mcu_analog", AnalogNode);
 }

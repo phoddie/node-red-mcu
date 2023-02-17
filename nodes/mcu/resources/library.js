@@ -1,7 +1,7 @@
-<script type="text/javascript">
-	let mcuDatabase;
+if (globalThis.mcuHelper === undefined) {
+
 	$.getJSON("resources/@moddable-node-red/mcu/database.json", function(data) {
-		mcuDatabase = data
+		globalThis.mcuDatabase = data
 		const categories = {
 			AmbientLight: "Ambient Light",
 			CarbonDioxideGasSensor: "Carbon Dioxide Gas",
@@ -23,7 +23,8 @@
 			sensors[moduleKey].category = category;
 		}
 	});
-	const mcuHelper = {
+
+	globalThis.mcuHelper = {
 		category: 'MCU',
 		color: '#a2aaff',
 		appendIOs(platformKey, moduleKey, entryKey, options) {
@@ -167,7 +168,7 @@
 			Analog(div, name) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 			},
-			
+		
 			Digital(div, name, io) {
 				this.appendProperty(div, name, "pin", "Pin", "num", "?");
 				if (io.mode == "Input") {
@@ -200,7 +201,7 @@
 				this.appendProperty(div, name, "data", "Data", "num", "?");
 				this.appendProperty(div, name, "clock", "Clock", "num", "?");
 				this.appendProperty(div, name, "hz", "Speed", "", "", "default", "Hz");
-				
+			
 				let address = io.address || ",*";
 				let addresses = address.split(",");
 				let string;
@@ -222,8 +223,8 @@
 					`);
 				const input = $(`#node-input-${name}-address`);
 				input.val(addresses[0]);
-// 				if (addresses.length == 1)
-// 					input.prop('disabled', true)
+	// 				if (addresses.length == 1)
+	// 					input.prop('disabled', true)
 			},
 			PulseCount(div, name, io) {
 				this.appendProperty(div, name, "signal", "Signal Pin", "num", "?");
@@ -249,7 +250,7 @@
 			Serial(div, name, io) {
 				this.appendProperty(div, name, "receive", "Receive Pin", "num", "?");
 				this.appendProperty(div, name, "transmit", "Transmit Pin", "num", "?");
-				
+			
 				let baud = io.baud || ",*";
 				let bauds = baud.split(",");
 				let string;
@@ -271,14 +272,14 @@
 					`);
 				const input = $(`#node-input-${name}-baud`);
 				input.val(bauds[0]);
-				
+			
 				this.appendProperty(div, name, "port", "Port Identifier", "str", "");
 			},
 			SMBus(div, name, io) {
 				this.I2C(div, name, io);
 			},
 		},
-		
+	
 		restoreIO(options, name, io) {
 			if (name in options) {
 				if (io.optional) {
@@ -334,7 +335,7 @@
 				this.I2C(option, name, io);
 			},
 		},
-		
+	
 		saveIO(options, name, io) {
 			if (io.optional) {
 				if (!$(`#node-input-${name}-optional`).prop('checked'))
@@ -396,7 +397,7 @@
 				this.I2C(option, name, io);
 			},
 		},
-		
+	
 		toggleIO(show, name, io) {
 			this.toggleProperties[io.type](show, name);
 		},
@@ -434,7 +435,7 @@
 				this.I2C(show, name);
 			},
 		},
-		
+	
 		validateOptions(options) {
 			const validator = RED.validators.number();
 			let result = true;
@@ -476,4 +477,4 @@
 			},
 		},
 	}
-</script>
+}

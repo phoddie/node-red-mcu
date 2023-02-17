@@ -5,7 +5,7 @@
 	"license": "UNLICENSED",
 	"node-red" : {
 		"nodes": {
-			"mcu_helper": "mcu_helper.js",
+			"mcu_analog": "analog/mcu_analog.js",
 			"mcu_clock": "clock/mcu_clock.js",
 			"mcu_digital": "digital/mcu_digital.js",
 			"mcu_i2c": "i2c/mcu_i2c.js",

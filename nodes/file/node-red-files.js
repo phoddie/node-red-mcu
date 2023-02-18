@@ -33,7 +33,10 @@ class SharedFile {
 	#filename;
 	position = 0;
 
-	constructor(filename /*, write */) {		// always open in write
+	constructor(filename, write) {
+		if (!write && !File.exists(filename))
+			throw new Error("file not found: " + filename);
+
 		this.#filename = filename;
 		this.file;				// try to open file immediately, to throw from constructor if error
 	}
@@ -142,41 +145,35 @@ class FileWrite extends Node {
 				throw new Error(`unsupported encoding ${state.encoding}`);
 		}
 
-		let file = state.file;
+		let file;
 		try {
-			if (!file) {
-				const filename = state.filename ?? msg.filename;
+			const filename = state.filename ?? msg.filename;
 
-				if (state.createDir) {
-					const parts = filename.split("/");
-					for (let i = 1; i <= parts.length - 1; i++) {
-						const partial = parts.slice(0, i).join("/");
-						if (!File.exists(partial))
-							Directory.create(partial);
-					}
+			if (state.createDir) {
+				const parts = filename.split("/");
+				for (let i = 1; i <= parts.length - 1; i++) {
+					const partial = parts.slice(0, i).join("/");
+					if (!File.exists(partial))
+						Directory.create(partial);
 				}
-
-				if ("true" === state.overwriteFile)
-					SharedFile.delete(filename);
-
-				file = new SharedFile(filename, true);
-				file.position = file.length;
 			}
+
+			if ("true" === state.overwriteFile)
+				SharedFile.delete(filename);
+
+			file = new SharedFile(filename, true);
+			file.position = file.length;
 
 			file.write(payload);
 			if (state.appendNewline)
 				file.write("\n");
+			file.close();
+			return msg;
 		}
 		catch (e) {
-			this.error(e);
+			file?.close();
+			this.error(e, {_msgid: msg._msgid, filename: state.filename});
 		}
-
-		if (!state.filename)
-			file.close();
-		else
-			state.file = file;
-
-		return msg;
 	}
 
 	static type = "file";
@@ -289,7 +286,7 @@ class FileRead extends Node {
 		}
 		catch (e) {
 			file?.close();
-			this.error(e);
+			this.error(e, {_msgid: msg._msgid, filename: state.filename});
 			return;
 		}
 		

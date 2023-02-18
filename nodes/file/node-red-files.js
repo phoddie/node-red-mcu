@@ -107,9 +107,10 @@ class FileWrite extends Node {
 	}
 	onMessage(msg) {
 		let payload = msg.payload, state = this.#state
+		const filename = state.filename ?? msg.filename;
 
 		if ("delete" === state.overwriteFile) {
-			SharedFile.delete(state.filename ?? msg.filename);
+			SharedFile.delete(filename);
 			return msg;
 		}
 
@@ -147,8 +148,6 @@ class FileWrite extends Node {
 
 		let file;
 		try {
-			const filename = state.filename ?? msg.filename;
-
 			if (state.createDir) {
 				const parts = filename.split("/");
 				for (let i = 1; i <= parts.length - 1; i++) {
@@ -172,7 +171,7 @@ class FileWrite extends Node {
 		}
 		catch (e) {
 			file?.close();
-			this.error(e, {_msgid: msg._msgid, filename: state.filename});
+			this.error(e, {_msgid: msg._msgid, filename});
 		}
 	}
 
@@ -286,7 +285,7 @@ class FileRead extends Node {
 		}
 		catch (e) {
 			file?.close();
-			this.error(e, {_msgid: msg._msgid, filename: state.filename});
+			this.error(e, {_msgid: msg._msgid, filename});
 			return;
 		}
 		

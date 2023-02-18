@@ -203,7 +203,7 @@ class FileRead extends Node {
 		try {
 			file = new SharedFile(filename);
 			if ("" === state.format) {
-				msg.payload = file.read(ArrayBuffer);
+				msg.payload = new Uint8Array(file.read(ArrayBuffer));
 			}
 			else if ("stream" === state.format) {
 				msg.parts = {
@@ -216,7 +216,7 @@ class FileRead extends Node {
 				msg.parts.count = Math.idiv(file.length + 511, 512);
 
 				Timer.repeat(id => {
-					msg.payload = file.read(ArrayBuffer, Math.min(file.length - file.position, 512));
+					msg.payload = new Uint8Array(file.read(ArrayBuffer, Math.min(file.length - file.position, 512)));
 					this.send(msg);
 					msg.parts.index += 1;
 					if (file.length <= file.position) {

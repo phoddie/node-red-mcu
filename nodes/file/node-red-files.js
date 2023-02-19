@@ -201,6 +201,9 @@ class FileRead extends Node {
 		const filename = state.filename ?? msg.filename;
 		let file;
 		try {
+			if (!File.exists(filename))
+				return void this.error("file not found: " + filename, {_msgid: msg._msgid, filename});
+
 			file = new SharedFile(filename);
 			if ("" === state.format) {
 				msg.payload = new Uint8Array(file.read(ArrayBuffer));

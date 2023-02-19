@@ -1307,7 +1307,7 @@ class CompatibiltyNode extends Node {
 		this.#events[event].push(handler);
 
 		if ("input" === event)
-			this.#send ??= msg => super.send(msg);
+			this.#send ??= msg => {if (msg) return super.send(msg);};
 
 		return this;
 	}
@@ -1335,6 +1335,10 @@ class CompatibiltyNode extends Node {
 		});
 
 		return true;
+	}
+	send(msg) {		// Node-RED alllows calling send with null message
+		if (msg)
+			return super.send(msg);
 	}
 
 	static type = "Node-RED Compatibility";

@@ -196,13 +196,17 @@ class FileRead extends Node {
 		if ("none" !== config.encoding)
 			state.encoding = config.encoding;
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		let state = this.#state;
 		const filename = state.filename ?? msg.filename;
 		let file;
 		try {
+			if (!filename)
+				return void done();
+
+			msg.filename = filename;
 			if (!File.exists(filename))
-				return void this.error("file not found: " + filename, {_msgid: msg._msgid, filename});
+				return void this.error("file not found: " + filename, msg);
 
 			file = new SharedFile(filename);
 			if ("" === state.format) {
@@ -225,6 +229,7 @@ class FileRead extends Node {
 					if (file.length <= file.position) {
 						Timer.clear(id);
 						file.close();
+						done();
 					}
 				}, 1);
 				return;
@@ -261,6 +266,7 @@ class FileRead extends Node {
 					if (file.length <= file.position) {
 						Timer.clear(id);
 						file.close();
+						done();
 					}
 				}, 1);
 				return;
@@ -283,6 +289,7 @@ class FileRead extends Node {
 					default:
 						throw new Error("encoding unsupported: " + state.encoding)
 				}
+				done();
 			}
 			file?.close();
 		}

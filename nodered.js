@@ -372,7 +372,7 @@ export class Node {
 							id: source.id,
 							type: source.constructor.type,
 							name: source.name ?? "",
-							count: 0		//@@ recursion counter	
+							count: 1		//@@ recursion counter	
 						}
 					}
 				}
@@ -481,7 +481,7 @@ class DebugNode extends Node {
 			value = this.#property ? {[this.#property]: value} : msg;
 			value = {
 				...value,
-				source: {
+				source: {		//@@ not sure about this.... for example... overwrites the source of status & catch nodes.
 					id: this.id,
 					type: this.constructor.type,
 					name: this.name

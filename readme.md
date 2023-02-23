@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated February 17, 2023<br>
+Updated February 21, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -264,6 +264,8 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 	- [X] Global
 	- [X] Flow
 	- [X] Node
+	- [X] in-memory context
+	- [X] file context
 - [X] Outputs
 	- [X] Single node output
 	- [X] Output connects to multiple inputs
@@ -790,7 +792,7 @@ Possible future work on built-in nodes:
 - **Parser**. XML may be possible. HTML, YAML are likely impractical. 
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 
-The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, a Preferences node, Display node, etc.
+The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, Display node, etc.
 
 ### Challenging Dependencies
 Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. (Note: I now have JSONata building and running some simple test cases. The code size and memory footprint are large. Further exploration is needed to evaluate if JSONata is a viable option to enable, but at least it looks possible)
@@ -798,6 +800,26 @@ Several nodes use [JSONata](https://jsonata.org), a query language for JSON. Thi
 The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
 
 ## Implementation Notes
+
+### Contexts
+Node-RED uses [contexts](https://nodered.org/docs/user-guide/context) to "to store information that can be shared between different nodes without using the messages that pass through a flow." Contexts are stored in memory by default, but may also be persisted to a file.
+
+Node-RED memory-based contexts are stored in-memory using a JavaScript `Map`.  This gives a consistent behavior with full Node-RED. Memory-based contexts use memory and are not persisted across runs. Memory-based contexts the default in Node-RED. File-based contexts are an alternative that maybe enabled in the Node-RED settings file. Both Node-RED file-based contexts and memory-based contexts may be used in a single project. Node-RED MCU Edition supports only memory and file-based contexts; use of any other generates an error.
+
+Node-RED file contexts are stored using the Preference module of the Moddable SDK. This provides reliable, persistent storage across a variety of MCU families. Data is stored in non-volatile flash memory. Most implementations guarantee that if power is lost while updating the preferences, they will not be corrupted. Because of the resource constraints of microcontrollers, there are come constraints to be aware of:
+
+- Total storage space for file-based context data is limited. The size varies by device and is sometimes configurable. The ESP8266 has just 4 KB of space for context data.
+- The size of each individual context data item is also limited by the implementation. Earlier versions of ESP-IDF, for example limited each item to no more than 64-bytes.
+- Context data is not reset when changing flows. With limited storage space, this can eventually lead to out-of-storage errors. Erasing the device's flash is the most reliable way to full reset preferences.
+- Global context data is stored using the same domain for all flows. This is convenient if several different projects want to share the same context data.
+- Currently supported data types for storing in file-based context data are: number, string, boolean, Buffer, and JSON. Because of the size limits noted above, use of JSON is generally discouraged. 
+- Setting a context value to `undefined` or `null` deletes the value. This behavior is consistent with full Node-RED.
+- File-based context data is stored in flash memory which has a limited number of write cycles. Updating file-based context data too frequently (e.g. once a second) will eventually wear-out your flash memory. Experiencing this problem is rare but real.
+- The values of file-based context data use no memory except when in use.
+
+Despite these warnings, file-based context data works well when used within their constraints: limit the number of piece of context data stored, keep each as small as practical, and update them infrequently.
+
+An alternative to using file-based contexts is to use a File In and File Out nodes to store state. This is more effort and foregoes the convenience of the file-based context's integration with the Change and Inject nodes, and the context APIs provided by the Function node.
 
 ### Complete and Catch Nodes
 The Complete and Catch nodes receive messages from one or more nodes referenced by their `scope` property. This organization reflects the UI of the Node-RED Editor, where the user configures the scope of Complete and Catch nodes by selecting the nodes they reference. From a runtime perspective, this organization is inefficient as it requires each node receiving a message to check if the node is in-scope for any Complete or Catch nodes.

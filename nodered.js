@@ -25,11 +25,13 @@ import Base64 from "base64";
 import Hex from "hex";
 import Modules from "modules";
 import config from "mc/config";
+import Preference from "preference";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
 let msgQueue;
 export const configFlowID = "__config";
+const globalContextID = "__global";
 
 function generateId() @ "xs_nodered_util_generateId";
 
@@ -146,7 +148,7 @@ class RED {
 		if (config.noderedmcu?.editor)
 			trace.left('{"state": "building"}', "NR_EDITOR");
 
-		globalThis.globalContext = new Context;
+		globalThis.globalContext = new Context(globalContextID);
 
 		if (this.#compatibility.length) {
 			compatibilityClasses = new Map;
@@ -186,7 +188,87 @@ class RED {
 }
 
 class Context extends Map {
-	keys() {
+	#id;
+
+	constructor(id) {
+		super();
+		this.#id = id;
+	}
+	get(name, store) {
+		if ("file" === store) {
+			let value = Preference.get(this.#id, name);
+			if (value instanceof ArrayBuffer) {
+				let view = new DataView(value);
+				switch (view.getUint8(0)) {
+					case 1:		// Number
+						value = view.getFloat64(1);
+						break;
+
+					case 2:		// JSON
+						view.setUint8(0, 32);
+						value = String.fromArrayBuffer(view.buffer);
+						view = undefined;
+						value = JSON.parse(value);
+						break;
+					
+					case 3:		// Buffer
+						value = new Uint8Array(view.buffer, 1);
+						break;
+
+					default:
+						throw new Error("unexpected buffer type");
+				}
+			}
+			return value;
+		}
+
+		return super.get(name); 
+	}
+	set(name, store, value) {
+		if ((undefined !== value) && ("file" === store)) {
+			switch (typeof value) {
+				case "number":
+					if (value !== (value | 0)) {
+						const buffer = new DataView(new ArrayBuffer(8 + 1))
+						buffer.setUint8(0, 1);
+						buffer.setFloat64(1, value);
+						value = buffer.buffer;
+					}
+					break;
+
+				case "object":
+					if (value instanceof Uint8Array) {		// Buffer
+						const buffer = new Uint8Array(value.length + 1);
+						buffer[0] = 3;
+						buffer.set(value, 1);
+						value = buffer.buffer;
+					}
+					else {		// JSON
+						value = "\u0002" + JSON.stringify(value);
+						value = ArrayBuffer.fromString(value);
+					}
+					break;
+
+				case "null":
+				case "undefined":		// delete when value missing
+					Preference.delete(this.#id, name);
+					return;
+			}
+			Preference.set(this.#id, name, value);
+		}
+		else
+			return super.set(name, value ?? store);
+	}
+	delete(name, store) {
+		if ("file" === store)
+			Preference.delete(this.#id, name);
+		else
+			super.delete(name);
+	}
+	keys(store) {
+		if ("file" === store)
+			return Preference.keys(this.#id);
+		
 		return [...super.keys()];
 	}
 }
@@ -199,7 +281,7 @@ class Flow extends Map {
 		super();
 		const properties = {
 			id: {value: id},
-			context: {value: new Context}
+			context: {value: new Context(id)}
 		};
 		if (name)
 			properties.name = {value: name};
@@ -576,7 +658,7 @@ class FunctionNode extends Node {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 		Object.defineProperties(this, {
-			context: {value: new Context}
+			context: {value: new Context(id)}
 		});
 		Object.defineProperties(this.context, {
 			global: {value: globalContext},

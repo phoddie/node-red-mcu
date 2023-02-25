@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated February 21, 2023<br>
+Updated February 25, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -245,6 +245,8 @@ The JSON version of the flows is now on the clipboard. The second step is adding
 Build and run the Moddable SDK project as usual for the target device. The flows.json file is transformed by `nodered2mcu` as part of the build. If an error is detected, such as an unsupported feature, an error message is output and the build stops.
 
 This process is quick and easy for early exploration. Of course, there are many ways it could be streamlined to improve the developer experience.  
+
+> **Note**: When building for Moddable Two, the recommended build target is `esp32/moddable_two_io`, not `esp32/moddable_two`. The `esp32/moddable_two_io` target uses the ECMA-419 compatible FocalTouch touch screen driver which avoids I²C conflicts with sensors.
 
 ## Structure
 The Node-RED runtime executes the nodes and flows. This runtime architecture determines how nodes interact with each other. It also is a key factor in how efficiently the execution uses the limited RAM and CPU power available. 

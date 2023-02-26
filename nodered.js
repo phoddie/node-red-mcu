@@ -192,6 +192,11 @@ class Context extends Map {
 
 	constructor(id) {
 		super();
+		if (id.length > 15) {
+			// convert 16 character Node-RED ID to no more than 15 characters so it works with ESP-IDF NVS (15 character domain key name limit)
+			// eventually this might want to be platform dependent to accomodate the different constraints of each platfornm
+			id = parseInt(id.substring(0, 8), 16).toString(36) + "-" + parseInt(id.substring(8, 16), 16).toString(36) 
+		}
 		this.#id = id;
 	}
 	get(name, store) {

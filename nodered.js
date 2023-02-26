@@ -227,8 +227,8 @@ class Context extends Map {
 
 		return super.get(name); 
 	}
-	set(name, store, value) {
-		if ((undefined !== value) && ("file" === store)) {
+	set(name, value, store) {
+		if ("file" === store) {
 			switch (typeof value) {
 				case "number":
 					if (value !== (value | 0)) {
@@ -260,7 +260,7 @@ class Context extends Map {
 			Preference.set(this.id, name, value);
 		}
 		else
-			return super.set(name, value ?? store);
+			return super.set(name, value);
 	}
 	delete(name, store) {
 		if ("file" === store)

@@ -188,8 +188,6 @@ class RED {
 }
 
 class Context extends Map {
-	#id;
-
 	constructor(id) {
 		super();
 		if (id.length > 15) {
@@ -197,11 +195,11 @@ class Context extends Map {
 			// eventually this might want to be platform dependent to accomodate the different constraints of each platfornm
 			id = parseInt(id.substring(0, 8), 16).toString(36) + "-" + parseInt(id.substring(8, 16), 16).toString(36) 
 		}
-		this.#id = id;
+		Object.defineProperty(this, "id", {value: id});
 	}
 	get(name, store) {
 		if ("file" === store) {
-			let value = Preference.get(this.#id, name);
+			let value = Preference.get(this.id, name);
 			if (value instanceof ArrayBuffer) {
 				let view = new DataView(value);
 				switch (view.getUint8(0)) {
@@ -256,23 +254,23 @@ class Context extends Map {
 
 				case "null":
 				case "undefined":		// delete when value missing
-					Preference.delete(this.#id, name);
+					Preference.delete(this.id, name);
 					return;
 			}
-			Preference.set(this.#id, name, value);
+			Preference.set(this.id, name, value);
 		}
 		else
 			return super.set(name, value ?? store);
 	}
 	delete(name, store) {
 		if ("file" === store)
-			Preference.delete(this.#id, name);
+			Preference.delete(this.id, name);
 		else
 			super.delete(name);
 	}
 	keys(store) {
 		if ("file" === store)
-			return Preference.keys(this.#id);
+			return Preference.keys(this.id);
 		
 		return [...super.keys()];
 	}

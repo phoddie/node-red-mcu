@@ -34,6 +34,7 @@ export const configFlowID = "__config";
 const globalContextID = "__global";
 
 function generateId() @ "xs_nodered_util_generateId";
+function debugging() @ "xs_nodered_util_debugging";
 
 class RED {
 	static #compatibility = [];
@@ -104,6 +105,7 @@ class RED {
 		}
 	}
 	static mcu = class {
+		static debugging = debugging;
 		static getNodeConstructor(type) {
 			const Class = nodeClasses.get(type);
 			if (!Class) {	

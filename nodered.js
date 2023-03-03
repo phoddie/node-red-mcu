@@ -1294,7 +1294,8 @@ class MQTTBrokerNode extends Node {
 		this.#status.push(node);
 	}
 	status(msg) {
-		this.#status.forEach(node => node.status(msg));
+		for (let i = 0, nodes = this.#status; i < nodes.length; i++)
+			nodes[i].status(msg);
 	}
 
 	static type = "mqtt-broker";
@@ -1384,7 +1385,11 @@ class CompatibiltyNode extends Node {
 		});
 	}
 	onMessage(msg, done) {
-		this.#events.input?.forEach(input => input.call(this, msg, this.#send, done));
+		const input = this.#events.input;
+		if (input) {
+			for (let i = 0; i < input.length; i++)
+				input[i].call(this, msg, this.#send, done);
+		}
 	}
 	on(event, handler) {
 		if (!CompatibilityEvents.includes(event))
@@ -1417,9 +1422,8 @@ class CompatibiltyNode extends Node {
 		if (!events)
 			return false;
 
-		events.forEach(() => {
+		for (let i = 0; i < events.length; i++)
 			RED.mcu.enqueue(msg, this);
-		});
 
 		return true;
 	}

@@ -372,7 +372,7 @@ Junction nodes are optimized out by `nodered2mcu` by replacing each junction wit
 
 Implemented with ECMA-419 Digital class.
 
-If the "rpi-gpio in" node is used in flows, it is translated to a Digital In node.
+If the "rpi-gpio in" node from node-red-node-pi-gpio is used in flows, it is translated to a Digital In node.
 
 ### MCU Digital Out
 - [X] Select pin
@@ -382,7 +382,7 @@ If the "rpi-gpio in" node is used in flows, it is translated to a Digital In nod
 
 Implemented with ECMA-419 Digital class.
 
-If the "rpi-gpio out" node is used in digital output mode in flows, it is translated to a Digital Out node.
+If the "rpi-gpio out" node from node-red-node-pi-gpio is used in digital output mode in flows, it is translated to a Digital Out node.
 
 ### MCU PWM Out
 - [X] Select pin
@@ -393,7 +393,7 @@ If the "rpi-gpio out" node is used in digital output mode in flows, it is transl
 
 Implemented with ECMA-419 PWM Out class.
 
-If the "rpi-gpio out" node is used in PWM mode in flows, it is translated to a PWM Out node.
+If the "rpi-gpio out" node from node-red-node-pi-gpio is used in PWM mode in flows, it is translated to a PWM Out node.
 
 ### DS18B20
 - [X] Multiple temperature sensors
@@ -402,7 +402,7 @@ If the "rpi-gpio out" node is used in PWM mode in flows, it is translated to a P
 - [ ] Use `topic` to select single sensor
 - [ ] `id` property in output matches Node-RED
 
-Implemented using "rpi-ds18b20" node with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
+Implemented using "rpi-ds18b20" node from node-red-contrib-ds18b20-sensor, with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
 
 ### MCU Neopixels
 - [X] Set number of LEDs in string

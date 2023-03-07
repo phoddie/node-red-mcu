@@ -1,7 +1,7 @@
 {
 	"build": {
-		"UINODES": "./nodes/ui",
-		"UIASSETS": "./nodes/ui/assets"
+		"UINODES": "./nodes/dashboard",
+		"UIASSETS": "./nodes/dashboard/assets"
 	},
 	"include": [
 		"$(MODDABLE)/examples/manifest_piu.json",

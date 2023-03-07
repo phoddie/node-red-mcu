@@ -1,0 +1,146 @@
+<script type="text/javascript">
+	RED.nodes.registerType('mcu_digital_in',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?", validate: RED.validators.number() },
+			mode: { value:"Input" },
+			edge: { value:"3" },
+			debounce: { value:0 },
+			initial: { value:false },
+			invert: { value:false },
+		},
+		inputs:0,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'digital in',
+		label: function() {
+			return this.name || "digital in " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.Digital(div, "io", { mode:"Input" });
+			mcuHelper.restoreProperties.Digital(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.Digital(this, "io");
+		},
+	});
+	RED.nodes.registerType('mcu_digital_out',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			pin: { value:"?", validate: RED.validators.number() },
+			mode: { value:"Output" },
+			initial: { value:"undefined" },
+			invert: { value:false },
+		},
+		inputs:1,
+		outputs:0,
+		icon: "mcu.png",
+		paletteLabel: 'digital out',
+		label: function() {
+			return this.name || "digital out " + this.pin;
+		},
+		oneditprepare: function() {
+			const div = $("#node-mcu-rows");
+			mcuHelper.appendProperties.Digital(div, "io", { mode:"Output" });
+			mcuHelper.restoreProperties.Digital(this, "io");
+		},
+		oneditsave: function() {
+			mcuHelper.saveProperties.Digital(this, "io");
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="mcu_digital_in">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="digital in">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<label for="node-input-edge">Edge</label>
+		<select type="text" id="node-input-edge" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="1">Rising</option>
+			<option value="2">Falling</option>
+			<option value="3">Rising & Falling</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">ECMA-419 specification</a>.
+		</div>
+		<hr/>
+   </div>
+	<div class="form-row"">
+		<label for="node-input-debounce">Debounce</label>
+		<input type="text" id="node-input-debounce" style="display:inline-block; width:70%; vertical-align:baseline;">
+		<span>ms</span>
+	</div>
+	<div class="form-row">
+		<label></label>
+		<input type="checkbox" id="node-input-initial" style="display:inline-block; width:16px; margin-bottom:8px">
+		<label for="node-input-initial" style="width:70%;">Read initial state of pin on restart?</label>
+	</div>
+	<div class="form-row">
+		<label></label>
+		<input type="checkbox" id="node-input-invert" style="display:inline-block; width:16px; margin-bottom:8px">
+		<label for="node-input-invert" style="width:70%;">Invert</label>
+	</div>
+</script>
+<script type="text/html" data-help-name="mcu_digital_in">
+	<p>MCU node to monitor an ECMA-419 Digital Input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>0 or 1</dd>
+		<dt>topic <span class="property-type">string</span></dt>
+		<dd>a string of the form <code>gpio/{the pin number}</code> (for compatibilty with the "rpi-gpio in" node)</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.</p>
+</script>
+
+<script type="text/html" data-template-name="mcu_digital_out">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="digital out">
+	</div>
+	<div id="node-mcu-rows">
+	</div>
+	<div class="form-row">
+		<div class="red-ui-help">
+			See the <a class="" href="https://419.ecma-international.org/#-10-io-classes-digital" target="_blank">ECMA-419 specification</a>.
+		</div>
+		<hr/>
+	</div>
+	<div class="form-row">
+		<label for="node-input-initial">Initial State</label>
+		<select type="text" id="node-input-initial" style="display:inline-block; width:70%; vertical-align:baseline;">
+			<option value="undefined">As-Is</option>
+			<option value="0">Low (0)</option>
+			<option value="1">High (1)</option>
+		</select>
+	</div>
+	<div class="form-row">
+		<label></label>
+		<input type="checkbox" id="node-input-invert" style="display:inline-block; width:16px; margin-bottom:8px">
+		<label for="node-input-invert" style="width:70%;">Invert</label>
+	</div>
+</script>
+
+<script type="text/html" data-help-name="mcu_digital_out">
+	<p>MCU node to set an ECMA-419 Digital Output.</p>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+	</dl>
+	<h3>Details</h3>
+	<p>The input <code>payload</code> is treated as a number, with 0 setting the output to 0 and any other value setting it to 1. </p>
+</script>
+
+<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js">

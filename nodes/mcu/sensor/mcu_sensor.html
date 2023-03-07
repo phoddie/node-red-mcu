@@ -1,0 +1,156 @@
+<script type="text/javascript">	
+	RED.nodes.registerType('sensor',{
+		category: mcuHelper.category,
+		color: mcuHelper.color,
+		defaults: {
+			name: { value:"" },
+			platform: { value:"" },
+			module: { value:"embedded:sensor/Touch/FT6x06" },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate:mcuHelper.validateOptions },
+			configuration: {
+				value: "{}",
+				validate: function(v) {
+					try {
+						if ("" !== v)
+							JSON.parse(v);
+					}
+					catch {
+						return false;
+					}
+					return true;
+				}
+			}
+		},
+		inputs:1,
+		outputs:1,
+		icon: "mcu.png",
+		paletteLabel: 'sensor',
+		label: function() {
+			return this.name||"sensor";
+		},
+		oneditprepare: function() {
+			const menu = $("#node-input-selection");
+			const options = this.options;
+			const modules = mcuDatabase.sensor;
+			const platforms = mcuDatabase.platform;
+			let former = null;
+			for (let moduleKey in modules) {
+				const module = modules[moduleKey];
+				const key = "#" + moduleKey;
+				const category = module.category;
+				if (former != category) {
+					if (former != null)
+						menu.append(`</optgroup>`);
+					menu.append(`<optgroup label="${category}">`);
+					former = category;
+				}
+				if (module.manufacturer)
+					menu.append(`<option value="${key}">${module.manufacturer} ${module.model}</option>`);
+				else
+					menu.append(`<option value="${key}">${module.model}</option>`);
+			}
+			if (former != null)
+				menu.append(`</optgroup>`);
+			for (let platformKey in platforms) {
+				const platform = platforms[platformKey];
+				menu.append(`<hr/>`);
+				const modules = platform.sensor;
+				if (modules) {
+					for (let moduleKey in modules) {
+						const key = platformKey + "#" + moduleKey;
+						const parts = moduleKey.split("/");
+						menu.append(`<option value="${key}">${platform.name} - ${parts[1]}</option>`);
+					}	
+				}	
+			}
+			menu.on("change", function() {
+				const selection = $("#node-input-selection").val();
+				const parts = selection.split("#");
+				mcuHelper.appendIOs(parts[0], parts[1], "sensor", null);
+			})
+			menu.val(this.platform + "#" + this.module);
+			mcuHelper.appendIOs(this.platform, this.module, "sensor", this.options);
+			$("#node-input-configuration").typedInput({
+				type:"json",
+				types:["json"]
+			});
+		},
+        oneditsave: function() {
+            const selection = $("#node-input-selection").val();
+            const parts = selection.split("#");
+            const platformKey = parts[0];
+            const moduleKey = parts[1];
+ 			const options = {};
+			delete this.include;
+         	if (platformKey === "") {
+				const sensor = mcuDatabase.sensor[moduleKey];
+				const ios = sensor.io;
+				for (let key in ios) {
+					const io = ios[key];
+					mcuHelper.saveIO(options, key, io);
+				}
+				const driver = sensor.driver;
+				if (driver) {
+					this.include = [driver];
+				}
+			}
+			else {
+				options.reference = mcuDatabase.platform[platformKey].sensor[moduleKey].reference;
+			}
+			this.platform = platformKey;
+			this.module = moduleKey;
+			this.options = options;
+		},
+	});
+</script>
+
+<script type="text/html" data-template-name="sensor">
+	<div class="form-row">
+		<label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+		<input type="text" id="node-input-name" placeholder="sensor">
+	</div>
+
+	<div class="form-row">
+		<label for="node-input-selection"><i class="fa fa-puzzle-piece"></i> Sensor</label>
+		<div style="display:inline-block; width:70%;">
+			<div style="color:#aaaaaa;" id="node-mcu-category"></div>
+			<select style="display:block; width:100%;" type="text" id="node-input-selection" style=""></select>
+		</div>
+	</div>
+
+	<div id="node-mcu-rows-0">
+	</div>
+
+	<div id="node-mcu-rows-1">
+	</div>
+
+	<div id="node-mcu-rows-2">
+	</div>
+	
+	<div class="form-row">
+		<hr/>
+		<label for="node-input-configuration"><i class="fa fa-cog"></i> Configure</label>
+		<input type="text" id="node-input-configuration" style="display:inline-block; width:70%; vertical-align:baseline;">
+	</div>
+	
+	<div id="node-mcu-infos">
+	</div>
+</script>
+
+<script type="text/html" data-help-name="sensor">
+	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">ECMA-419 sensor class</a> implementations</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">object</span></dt>
+		<dd>The object returned by the driver's <code>sample()</code> method. If a sample is unavailable, no message is output.</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>configuration <span class="property-type">object</span></dt>
+		<dd>Optional. If present, it is passed to the driver's <code>configure()</code> method and no sample is taken</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>When running in full Node-RED the node generates simulated sensor values. This is useful for debugging flows before deploying them to the MCU.</p>
+</script>
+
+<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js">

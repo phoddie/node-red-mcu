@@ -34,7 +34,7 @@ And to install:
 
 ```
 cd ~/.node-red
-npm install [PATH TO node-red-mcu]/nodes/sensor
+npm install [PATH TO node-red-mcu]/nodes/mcu
 ```
 
 The nodes appears in the "MCU" section of the editor.

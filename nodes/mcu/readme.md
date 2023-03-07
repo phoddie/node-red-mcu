@@ -1,10 +1,12 @@
-# MCU Sensor Node
+# MCU Nodes
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 25, 2023<br>
+Updated February 7, 2023<br>
 
 ## Overview
-The sensor node integrates sensor classes that conform the Ecma-419 [Sensor Class Pattern](https://419.ecma-international.org/#-13-sensor-class-pattern) into Node-RED. These include:
+The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. 
+
+This document focuses on the MCU Sensor node which integrates sensor classes that conform the Ecma-419 [Sensor Class Pattern](https://419.ecma-international.org/#-13-sensor-class-pattern) into Node-RED. These include:
 
 - [Accelerometer](https://419.ecma-international.org/#-14-sensor-classes-accelerometer)
 - [Ambient light](https://419.ecma-international.org/#-14-sensor-classes-ambient-light)
@@ -19,14 +21,23 @@ Many [additional kinds of sensors](https://github.com/EcmaTC53/spec/blob/master/
 This is the second major iteration of the Sensor Node. It simplifies configuration of I/O while also provide many more I/O options. It is now driven by a sensor database that allows many configuration options to be set automatically.
 
 ## Installation
-The Sensor node must be installed into Node-RED to be used in the Node-RED Editor. This is done in the usual way:
+The MCU nodes must be installed into Node-RED to be used in the Node-RED Editor. This is done in the usual way:
+
+> **Note**: If you previously installed the MCU Sensor node (an early version of the MCU suit), uninstall it first:
+
+```
+cd ~/.node-red
+npm uninstall @moddable-node-red/sensor@1.0.0
+```
+
+And to install:
 
 ```
 cd ~/.node-red
 npm install [PATH TO node-red-mcu]/nodes/sensor
 ```
 
-The sensor node appears in the "MCU" section of the editor.
+The nodes appears in the "MCU" section of the editor.
 
 ## Using a Sensor Driver
 A growing [suite](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors) of compatible sensor class implementations is available in the Moddable SDK. To use one or more of these drivers in your project, do the following steps.
@@ -78,7 +89,7 @@ A simple test flow using the Sensor node has an inject node to periodically trig
     },
     {
         "id": "81b44f35bce77331",
-        "type": "mcu_sensor",
+        "type": "sensor",
         "z": "430f6d9e27cbee39",
         "name": "Temperature",
         "platform": "",

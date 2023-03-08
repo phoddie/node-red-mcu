@@ -24,7 +24,6 @@ import Timer from "timer";
 let cache;		// support multiple nodes sharing the same pin, like the RPi implementation
 
 class DigitalInNode extends Node {
-	#debounce;
 	#timer;
 
 	onStart(config) {
@@ -34,7 +33,11 @@ class DigitalInNode extends Node {
 		if (!Digital)
 			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 
-		this.#debounce = config.debounce;
+		if (config.debounce)
+			Object.defineProperty(this, "debouce", {value: config.debounce}); 
+		if (config.invert)
+			Object.defineProperty(this, "invert", {value: 1}); 
+
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 		if (io) {
@@ -53,12 +56,12 @@ class DigitalInNode extends Node {
 							reader.#timer = undefined;
 
 							const msg = {
-								payload: this.read(),
+								payload: this.read() ^ (reader.invert ?? 0),
 								topic: "gpio/" + this.pin
 							};
 							reader.send(msg)
 							reader.status({fill: "green", shape: "dot", text: msg.payload.toString()});
-						}, reader.#debounce);
+						}, reader.debounce ?? 0);
 					});
 				}
 			});
@@ -70,7 +73,7 @@ class DigitalInNode extends Node {
 		}
 
 		if (config.initial) {
-			const payload = io.read();
+			const payload = io.read() ^ (this.invert ?? 0);
 			this.send({
 				payload,
 				topic: "gpio/" + config.pin
@@ -94,6 +97,9 @@ class DigitalOutNode extends Node {
 		if (!globalThis.device?.io?.Digital)
 			return;
 
+		if (config.invert)
+			Object.defineProperty(this, "invert", {value: 1}); 
+
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 
@@ -111,13 +117,12 @@ class DigitalOutNode extends Node {
 
 				if (undefined !== config.initial) {
 					if (0 == config.initial)
-						io.write(0);
+						io.write(0 ^ (this.invert ?? 0));
 					else if (1 == config.initial)
-						io.write(1);
+						io.write(1 ^ (this.invert ?? 0));
 				}
 				io.mode = config.mode;
 				cache.set(config.pin, io);
-				
 			}
 			catch {
 				this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
@@ -126,8 +131,9 @@ class DigitalOutNode extends Node {
 	}
 	onMessage(msg, done) {
 		if (this.#io) {
-			this.#io.write(msg.payload);
-			this.status({fill:"green", shape:"dot", text: msg.payload.toString()});
+			const value = msg.payload ^ (this.invert ?? 0);
+			this.#io.write(value);
+			this.status({fill:"green", shape:"dot", text: value.toString()});
 		}
 		done();
 	}

@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated February 25, 2023<br>
+Updated March 7, 2023<br>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -369,6 +369,7 @@ Junction nodes are optimized out by `nodered2mcu` by replacing each junction wit
 - [X] Read initial state of pin on start
 - [X] Debounce
 - [X] Status
+- [X] Invert
 
 Implemented with ECMA-419 Digital class.
 
@@ -379,6 +380,7 @@ If the "rpi-gpio in" node from node-red-node-pi-gpio is used in flows, it is tra
 - [X] Initialize initial pin state option
 - [X] Multiple nodes can share a single pin
 - [X] Status & Done
+- [X] Invert
 
 Implemented with ECMA-419 Digital class.
 

@@ -34,14 +34,18 @@ class DigitalInNode extends Node {
 			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 
 		if (config.debounce)
-			Object.defineProperty(this, "debouce", {value: config.debounce}); 
-		if (config.invert)
-			Object.defineProperty(this, "invert", {value: 1}); 
+			Object.defineProperty(this, "debouce", {value: config.debounce});
+
+		let edge = config.edge;
+		if (config.invert) {
+			Object.defineProperty(this, "invert", {value: 1});
+			edge ^= 0b11; 
+		}
 
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 		if (io) {
-			if ((io.mode !== config.mode) || (io.edge !== config.edge))
+			if ((io.mode !== config.mode) || (io.edge !== edge))
 				return void this.status({fill: "red", shape: "dot", text: "mismatch"});
 			io.readers.push(this);
 		}
@@ -49,7 +53,7 @@ class DigitalInNode extends Node {
 			io = new Digital({
 				pin: config.pin,
 				mode: Digital[config.mode],
-				edge: ((config.edge & 1) ? Digital.Rising : 0) + ((config.edge & 2) ? Digital.Falling : 0),
+				edge: ((edge & 1) ? Digital.Rising : 0) + ((edge & 2) ? Digital.Falling : 0),
 				onReadable() {
 					this.readers.forEach(reader => {
 						reader.#timer ??= Timer.set(() => {
@@ -66,7 +70,7 @@ class DigitalInNode extends Node {
 				}
 			});
 			io.mode = config.mode;
-			io.edge = config.edge;
+			io.edge = edge;
 			io.pin = config.pin;
 			io.readers = [this];
 			cache.set(config.pin, io);

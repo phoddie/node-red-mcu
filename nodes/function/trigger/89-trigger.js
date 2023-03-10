@@ -76,7 +76,7 @@ function TriggerNode(n) {
 		this.duration = 250;
 	}
 	if (this.duration < 0) {
-		this.loop = true;"p"
+		this.loop = true;
 		this.duration = this.duration * -1;
 		this.extend = false;
 	}

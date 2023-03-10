@@ -96,7 +96,7 @@ class I2CInNode extends Node {
 				return void done();
 
 			const command = this.#command ?? msg.command;
-			if (undefined !== command) {
+			if (undefined != command) {		// null or undefined
 				i2c.write(Uint8Array.of(command), false);
 				msg.command = command;
 			}
@@ -162,7 +162,7 @@ class I2COutNode extends Node {
 				return void done();
 
 			const command = this.#command ?? msg.command;
-			if (undefined !== command)
+			if (undefined != command)		// null or undefined
 				i2c.write(Uint8Array.of(command), false);
 
 			let payload = this.#getter(msg);

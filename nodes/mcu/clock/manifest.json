@@ -2,5 +2,5 @@
 	"modules": {
 		"mcu_clock": "./clock"
 	},
-	"preload": "clock"
+	"preload": "mcu_clock"
 }

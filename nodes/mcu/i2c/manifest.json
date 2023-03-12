@@ -1,6 +1,6 @@
 {
 	"modules": {
-		"*": "./i2c"
+		"mcu_i2c": "./i2c"
 	},
-	"preload": "i2c"
+	"preload": "mcu_i2c"
 }

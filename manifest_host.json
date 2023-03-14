@@ -11,7 +11,7 @@
 	"platforms": {
 		"esp": {
 			"creation": {
-				"static": 38912,
+				"static": 37888,
 				"stack": 384
 			}
 		},

@@ -304,8 +304,8 @@ Unfortunately, this means that credentials are not available to Node-RED MCU Edi
 {
 	"credentials": {
 		"8b6e5226cefdb00e": {
-            "user": "rw",
-            "password": "readwrite"
+			"user": "rw",
+			"password": "readwrite"
 		}
 	}
 }

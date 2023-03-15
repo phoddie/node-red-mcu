@@ -1,7 +1,9 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated March 7, 2023<br>
+Updated March 15, 2023<br>
+
+<img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -292,6 +294,24 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 - [X] Groups
 	- [X] Groups with no environment variables eliminated at build-time
 	- [X] Environment variables
+
+### Credentials
+Some nodes contain credentials such as a user name and password. Node-RED stores [credentials](https://nodered.org/docs/creating-nodes/credentials) separately from the flows in a file named `flows_cred.json`. The credentials files is encrypted with a key stored locally. In addition, Node-RED does not include credentials when exporting flows. All of this is done to prevent accidental sharing of credentials.
+
+Unfortunately, this means that credentials are not available to Node-RED MCU Edition when flows are exported. The `nodered2mcu` tool provides a solution. If a `flows_cred_mcu.json` file is in the same directory as the `flows.json` file processed by `nodered2mcu`, the credentials are merged back into the flows. In the following, the object on the `"8b6e5226cefdb00e"` property is merged into the node with ID `8b6e5226cefdb00e` in `flows.json`.
+
+```json
+{
+	"credentials": {
+		"8b6e5226cefdb00e": {
+            "user": "rw",
+            "password": "readwrite"
+		}
+	}
+}
+```
+
+This solution does not provide protection against unintentional sharing. This is an area for further work.
 
 ## Nodes
 This section lists the supported nodes. The implemented features are checked.

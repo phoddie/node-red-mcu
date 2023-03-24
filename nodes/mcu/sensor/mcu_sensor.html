@@ -19,7 +19,8 @@
 					}
 					return true;
 				}
-			}
+			},
+			moddable_manifest: {value: {}}
 		},
 		inputs:1,
 		outputs:1,
@@ -81,7 +82,7 @@
             const platformKey = parts[0];
             const moduleKey = parts[1];
  			const options = {};
-			delete this.include;
+			delete this.moddable_manifest;
          	if (platformKey === "") {
 				const sensor = mcuDatabase.sensor[moduleKey];
 				const ios = sensor.io;
@@ -91,7 +92,7 @@
 				}
 				const driver = sensor.driver;
 				if (driver) {
-					this.include = [driver];
+					this.moddable_manifest = {include: [driver]};
 				}
 			}
 			else {

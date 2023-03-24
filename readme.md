@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated March 15, 2023<br>
+Updated March 24, 2023<br>
 
 <img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
@@ -825,6 +825,24 @@ The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/20
 
 ## Implementation Notes
 
+### Nodes Providing Manifests
+A node may include a `moddable_manifest` property at the root of its exported JSON configuration. The `nodered2mcu` tool processes the contents of the property as a Moddable SDK manifest. This allows nodes to automatically include  modules, data, and configurations. The MCU sensor and clock nodes use this capability, for example, to include the required driver.
+
+```json
+{
+    "id": "39f01371482a60fb",
+    "type": "sensor",
+    "z": "fd7d965ef27a87e2",
+    "moddable_manifest": {
+        "include": [
+            "$(MODDABLE)/modules/drivers/sensors/tmp117/manifest.json"
+        ]
+    },
+    ...
+```
+
+> **Note**: Nodes providing manifests should not use relative paths because the root for the relative path is the location of the flows.json file, which is not consistent.
+ 
 ### Contexts
 Node-RED uses [contexts](https://nodered.org/docs/user-guide/context) to "to store information that can be shared between different nodes without using the messages that pass through a flow." Contexts are stored in memory by default, but may also be persisted to a file.
 

@@ -1,7 +1,7 @@
 # MCU Nodes
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated February 7, 2023<br>
+Updated March 24, 2023<br>
 
 ## Overview
 The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. 
@@ -38,19 +38,6 @@ npm install [PATH TO node-red-mcu]/nodes/mcu
 ```
 
 The nodes appears in the "MCU" section of the editor.
-
-## Using a Sensor Driver
-A growing [suite](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors) of compatible sensor class implementations is available in the Moddable SDK. To use one or more of these drivers in your project, do the following steps.
-
-Add the sensor driver manifest to your project. For example, to use the [TMP102 sensor](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors/tmp102), include the sensor driver manifest in `node-red-mcu/manifest.json`:
-
-```
-{
-	"include": [
-		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json".
-		"$(MODDABLE)/examples/manifest_base.json",
-		...
-```
 
 ## Creating a Flow
 A simple test flow using the Sensor node has an inject node to periodically trigger a sensor reading, a Sensor node to take the reading, and a debug node to log the sample reading to the console.
@@ -148,15 +135,6 @@ Some hosts have built-in sensors that are automatically configured by the host p
 
 <img src="./assets/edit-sensor-node-host-provider.png" width=500/>
 
-### Adding Sensor Driver to the Project Manifest
-To use the sensor, the sensor driver must be installed in your project's manifest. The path of the sensor driver is shown at the bottom of the configuration dialog with the label "Driver" , if available.
-
-```json
-	"modules": {
-		"embedded:sensor/Temperature/TMP102": "$(MODDABLE)/modules/drivers/sensors/tmp102/tmp102"
-	},
-```
-
 ## Building a Project
 It is common to connect sensors to default I²C bus of the target device. Therefore, it is important to specify the correct platform target when building your project. For example, to build for Moddable Two:
 
@@ -165,6 +143,22 @@ mcconfig -d -m -p esp32/moddable_two
 ```
 
 The default I²C bus comes from the [host provider instance](https://419.ecma-international.org/#-16-host-provider-instance). Not all device ports have a host provider instance. Those that do include Moddable One (`esp/moddable_one`), Moddable Two (`esp32/moddable_two`), Node-MCU for ESP8266 (`esp/nodemcu`), and Node-MCU for ESP32 (`esp32/nodemcu`). If your device port does not have a host provider instance, it is usually straightforward to add a basic one by following the pattern of an [existing port](https://github.com/Moddable-OpenSource/moddable/blob/public/build/devices/esp32/targets/nodemcu/host/provider.js). You may also configure the sensor to use specific pin numbers instead of a named bus.
+
+## Using a Sensor Driver
+A growing [suite](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors) of compatible sensor class implementations is available in the Moddable SDK. The sensor driver must be included in your build. The MCU Sensor Node will automatically include the driver in your project, if it knows the location of the driver. If the MCU Sensor Node knows the driver location, it is displayed in its Node-RED editor configuration screen. 
+
+If the location of the driver is not known by the MCU Sensor Node, you can include the driver manually yourself. For example, to use the [TMP102 sensor](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors/tmp102), include the sensor driver manifest in `node-red-mcu/manifest.json`:
+
+```
+{
+	"include": [
+		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json".
+		"$(MODDABLE)/examples/manifest_base.json",
+		...
+```
+
+> **Note**: The MCU Clock node supports drivers in the same way as the MCU Sensor Node: it automatically includes the driver, when the location is known, and otherwise you may add it yourself.
+
 
 ## Running in Full Node-RED
 When run in full Node-RED the sensor node generates simulated values. It determines the type of the sensor from the module specifier (`embedded:sensor/Temperature/TMP102` or `embedded:sensor/AtmosphericPressure-Temperature/BMP180`). The simulated sensor classes are: Accelerometer, AmbientLight, Barometer, Gyroscope, Proximity Temperature, and Touch. The simulated values are naive random numbers, but can be useful for testing flows. More work could be done to provide more realistic simulations and support for more sensor types.

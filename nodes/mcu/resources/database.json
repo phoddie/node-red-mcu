@@ -315,7 +315,8 @@
 			"driver": "$(MODDABLE)/modules/drivers/sensors/hc-sr04/manifest.json",
 			"io": {
 				"sensor": {
-					"type": "PulseWidth"
+					"type": "PulseWidth",
+					"callback": "onAlert"
 				},
 				"trigger": {
 					"type": "Digital",

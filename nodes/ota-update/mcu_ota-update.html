@@ -1,0 +1,114 @@
+
+<script type="text/javascript">
+    RED.nodes.registerType('ota-update',{
+        category: 'MCU',
+        color: '#a2aaff',
+        defaults: {
+            name: {value:""},
+			path: {
+				value: "/ota"
+			},
+			moddable_manifest: {
+				value: {
+					include: "$(NODEREDMCU)/nodes/ota-update/manifest.json"
+				}
+			}
+        },
+        inputs:1,
+        outputs:1,
+        icon: "font-awesome/fa-cloud-download",
+        label() {
+            return this.name||"ota update";
+        }
+    });
+</script>
+
+<!-- stolen from MQTT -->
+<style>
+
+    .audioout-form-row-cols2 > input.audioout-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+    .audioout-form-row-cols2 > select.audioout-form-row-col1 {
+        width: calc(35% - 75px);
+    }
+
+    .audioout-form-row-cols2 > label.audioout-form-row-col2 {
+        width: 100px;
+        margin-left: 42px;
+        display: inline-block;
+    }
+    .audioout-form-row-cols2 > input.audioout-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .audioout-form-row-cols2 > select.audioout-form-row-col2 {
+        width: calc(35% - 75px);
+        display: inline-block;
+    }
+    .form-row.audioout5-out > label {
+        width: 130px;
+    }
+    .form-row.audioout-flags-row > label {
+        vertical-align: top;
+    }
+    .form-row.audioout-flags-row > .audioout-flags {
+        display: inline-block;
+        width: 70%
+    }
+
+    .form-row.audioout-flags-row > .audioout-flags > .audioout-flag > label {
+        display: block;
+        width: 100%;
+    }
+    .form-row.audioout-flags-row > .audioout-flags > .audioout-flag > label > input {
+        position: relative;
+        vertical-align: bottom;
+        top: -2px;
+        width: 15px;
+        height: 15px;
+    }
+    .form-row-audioout5 {
+        display: none;
+    }
+    .form-row-audioout5.form-row-audioout5-active:not(.form-row-audioout-static-disabled) {
+        display: block
+    }
+    .form-row-audioout-static-disabled {
+        display: none;
+        /* opacity: 0.3;
+        pointer-events: none; */
+    }
+
+</style>
+
+<script type="text/html" data-template-name="ota-update">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+
+    <div class="form-row">
+        <label for="node-input-path"><i class="fa fa-tasks"></i> URL</label>
+        <input type="string" id="node-input-path" placeholder="/ota">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="ota-update">
+    <p>Firmware updates by HTTP GET from device or HTTP PUT to device.</p>
+    <h3>Inputs</h3>
+    <dl class="message-properties">
+        <dt>url <span class="property-type">string</span></dt>
+        <dd>URL of firmware image to download and install.</dd>
+    </dl>
+    <h3>Outputs</h3>
+    <dl class="message-properties">
+        <dt>payload <span class="property-type">string</span></dt>
+        <dd>On successful completion of OTA update, payload is set to "ota upload" (for uploads received by http server endpoint) and "ota download" (for downloads from msg.url).</dd>
+    </dl>
+    <h3>Details</h3>
+    <p>The URL property in the Node-RED Editor is the endpoint to upload OTA updates to the MCU. If the URL property is empty, OTA updates cannot be uploaded (they may still be downloaded).</p>
+    <p>When an OTA update has successfully been installed, Complete nodes are triggered.</p>
+    <p>If an OTA update fails, Error nodes are triggered.</p>
+    <p>Status nodes are triggered during the insalllation of an OTA update to monitor progress.</p>
+</script>

@@ -1,0 +1,12 @@
+{
+	"name": "@moddable-node-red/ota-update",
+	"version": "1.0.0",
+	"description": "example",
+	"license": "LGPLv3",
+	"node-red" : {
+		"nodes": {
+			"mcu_ota-update": "mcu_ota-update.js"
+		}
+	}
+}
+ 

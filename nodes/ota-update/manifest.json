@@ -1,7 +1,4 @@
 {
-	"include": [
-		"$(MODDABLE)/examples/io/tcp/httpclient/manifest_httpclient.json"
-	],
 	"modules": {
 		"*": "./ota-update"
 	},

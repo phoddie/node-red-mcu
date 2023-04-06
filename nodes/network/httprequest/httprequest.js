@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2023  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -104,6 +104,10 @@ class HTTPRequestNode extends Node {
 		})
 		.then(payload => {
 			msg.payload = payload;
+			this.send(msg);
+		})
+		.catch(e => {
+			msg.payload = "";		// Node-RED sends empty string on JSON parse error
 			this.send(msg);
 		});
 	}

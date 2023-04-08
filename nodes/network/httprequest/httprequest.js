@@ -94,20 +94,24 @@ class HTTPRequestNode extends Node {
 			msg.headers = {/* ["x-node-red-request-node"]: this.id */};		//@@ what is this?
 			response.headers.forEach((value, key) => {msg.headers[key] = value;});
 
-			if ("txt" === this.#format)
+			if (("txt" === this.#format) || ("obj" === this.#format))
 				return response.text();
-			if ("obj" === this.#format)
-				return response.json();
 			if ("bin" === this.#format)
 				return response.arrayBuffer();
 			throw new Error("unexpected http request format");
 		})
 		.then(payload => {
 			msg.payload = payload;
+			if ("obj" === this.#format) {
+				try {
+					msg.payload = JSON.parse(payload);
+				}
+				catch {		// if parse fails, node sends unparsed text
+				}
+			}
 			this.send(msg);
 		})
 		.catch(e => {
-			msg.payload = "";		// Node-RED sends empty string on JSON parse error
 			this.send(msg);
 		});
 	}

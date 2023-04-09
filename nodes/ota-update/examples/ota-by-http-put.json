@@ -1,0 +1,103 @@
+[
+    {
+        "id": "c5fcfc5d2cb51ebf",
+        "type": "tab",
+        "label": "",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b0a1deea7bf0c600",
+        "type": "ota-update",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA",
+        "path": "/ota/firmware",
+        "moddable_manifest": {
+            "include": "$(NODEREDMCU)/nodes/ota-update/manifest.json"
+        },
+        "x": 290,
+        "y": 200,
+        "wires": [
+            [
+                "492672252c86057c"
+            ]
+        ]
+    },
+    {
+        "id": "a0a3b6d772cd9e42",
+        "type": "comment",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA Push to HTTP endpoint /firmware/ota",
+        "info": "",
+        "x": 240,
+        "y": 120,
+        "wires": []
+    },
+    {
+        "id": "d62ad0abfa4b375f",
+        "type": "status",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA status",
+        "scope": [
+            "b0a1deea7bf0c600"
+        ],
+        "x": 280,
+        "y": 280,
+        "wires": [
+            [
+                "ed4ebb72a7791f8d"
+            ]
+        ]
+    },
+    {
+        "id": "ed4ebb72a7791f8d",
+        "type": "debug",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA log",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 440,
+        "y": 320,
+        "wires": []
+    },
+    {
+        "id": "94fbfd5bd65acf0a",
+        "type": "catch",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA Error",
+        "scope": [
+            "b0a1deea7bf0c600"
+        ],
+        "uncaught": false,
+        "x": 280,
+        "y": 360,
+        "wires": [
+            [
+                "ed4ebb72a7791f8d"
+            ]
+        ]
+    },
+    {
+        "id": "492672252c86057c",
+        "type": "mcu_restart",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "Restart",
+        "moddable_manifest": {
+            "include": [
+                {
+                    "git": "https://github.com/phoddie/mcu_restart.git"
+                }
+            ]
+        },
+        "x": 440,
+        "y": 200,
+        "wires": []
+    }
+]

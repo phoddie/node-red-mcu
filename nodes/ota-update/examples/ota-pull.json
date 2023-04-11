@@ -2,7 +2,7 @@
     {
         "id": "c5fcfc5d2cb51ebf",
         "type": "tab",
-        "label": "",
+        "label": "OTA Pull",
         "disabled": false,
         "info": "",
         "env": []
@@ -53,7 +53,7 @@
         "id": "a0a3b6d772cd9e42",
         "type": "comment",
         "z": "c5fcfc5d2cb51ebf",
-        "name": "Download OTA from  URL",
+        "name": "OTA Pull - Download from URL",
         "info": "",
         "x": 170,
         "y": 140,

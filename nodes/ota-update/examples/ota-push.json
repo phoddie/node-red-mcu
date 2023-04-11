@@ -2,7 +2,7 @@
     {
         "id": "c5fcfc5d2cb51ebf",
         "type": "tab",
-        "label": "",
+        "label": "OTA Push",
         "disabled": false,
         "info": "",
         "env": []
@@ -28,7 +28,7 @@
         "id": "a0a3b6d772cd9e42",
         "type": "comment",
         "z": "c5fcfc5d2cb51ebf",
-        "name": "OTA Push to HTTP endpoint /firmware/ota",
+        "name": "OTA Push - Upload to HTTP endpoint /firmware/ota",
         "info": "",
         "x": 240,
         "y": 120,

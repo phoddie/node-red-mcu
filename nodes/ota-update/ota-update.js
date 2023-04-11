@@ -67,7 +67,7 @@ class OTAUpdateNode extends Node {
 			},
 			onDone(error) {
 				if (this.node.end(error, done)) {
-					msg.payload = "ota download";
+					msg.payload = "ota pull";
 					this.node.send(msg);
 				}
 			}
@@ -151,7 +151,7 @@ const route = Object.freeze({
 		this.respond(response);
 
 		if (success)
-			this.node.send({payload: "ota upload"});
+			this.node.send({payload: "ota push"});
 	},
 	onError(e) {
 		this.node.end(e ?? new Error("OTA failed"));

@@ -1131,13 +1131,28 @@ class MQTTBrokerNode extends Node {
 			...device.network.mqtt,
 			...this.#options,
 			onReadable: (count, options) => {
-				if (options.more)
-					throw new Error("fragmented receive unimplemented!");
+				let payload = this.#mqtt.read(count);
+				let fragment = this.#options.fragment; 
+				const msg = fragment ?? {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
 
-				const payload = this.#mqtt.read(count);
-				const msg = {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
+				if (options.more || fragment) {
+					if (!fragment) {
+						fragment = this.#options.fragment = msg;
+						msg.payload = new Uint8Array(new ArrayBuffer(options.byteLength));
+						msg.payload.position = 0;
+					}
 
-				const topic = options.topic.split("/");
+					msg.payload.set(new Uint8Array(payload), fragment.payload.position);
+					fragment.payload.position += payload.byteLength; 
+					if (options.more)
+						return;
+					
+					delete this.#options.fragment;
+					payload = msg.payload.buffer;
+					delete msg.payload;
+				}
+
+				const topic = msg.topic.split("/");
 			subscriptions:
 				for (let subscriptions = this.#subscriptions, i = 0, length = subscriptions.length; i < length; i++) {
 					let p = payload;				

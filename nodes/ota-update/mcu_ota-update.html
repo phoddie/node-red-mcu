@@ -149,7 +149,7 @@ If an OTA update fails, `Error` nodes are triggered.
 The `curl` command line tool may be used to push an OTA update to the microcontroller. Here's an example:
 
 ```
-curl http://192.0.1.45/firmware/ota/firmware -X PUT -H "Content-Type: application/octet-stream" --data-binary '@xs_esp32.bin'
+curl http://192.0.1.45/ota/firmware -X PUT -H "Content-Type: application/octet-stream" --data-binary '@xs_esp32.bin'
 ```
 
 Note that this example assumes the current directory contains the firmware image in a file named `xs_esp32.bin`, that the microcontroller is reachable at IP address `192.0.1.45`, and that the OTA Node is configured with a Push Endpoint of `ota/firmware`. You will need to adjust these for your configuration.

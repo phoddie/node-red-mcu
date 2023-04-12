@@ -2,7 +2,7 @@
 	"name": "@moddable-node-red/restart",
 	"version": "1.0.0",
 	"description": "example",
-	"license": "LGPLv3",
+	"license": "LGPL-3.0-or-later",
 	"node-red" : {
 		"version": ">=3.0.0",
 		"nodes": {

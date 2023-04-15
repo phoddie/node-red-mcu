@@ -5,8 +5,15 @@
 		defaults: {
 			name: { value:"" },
 			platform: { value:"" },
-			module: { value:"embedded:sensor/Touch/FT6x06" },
-			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate:mcuHelper.validateOptions },
+			module: { value:"" },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate(value) {
+				const selection = $("#node-input-selection").val();
+				const parts = selection.split("#");
+				const platformKey = parts[0];
+				if (platformKey === "")
+					return mcuHelper.validateOptions(value);
+				return true;
+			}},
 			configuration: {
 				value: "{}",
 				validate: function(v) {
@@ -20,14 +27,24 @@
 					return true;
 				}
 			},
-			moddable_manifest: {value: {}}
+			moddable_manifest: {value: {}},
+			asyncSample: {value: undefined}
 		},
 		inputs:1,
 		outputs:1,
 		icon: "mcu.png",
 		paletteLabel: 'sensor',
 		label: function() {
-			return this.name||"sensor";
+			if (this.name)
+				return this.name;
+
+			if (this.module) {
+				const parts = this.module.split("/");
+				if (parts.length > 1)
+					return parts[parts.length - 1];
+			}
+
+			return "sensor";
 		},
 		oneditprepare: function() {
 			const menu = $("#node-input-selection");
@@ -83,8 +100,9 @@
             const moduleKey = parts[1];
  			const options = {};
 			delete this.moddable_manifest;
+			let sensor;
          	if (platformKey === "") {
-				const sensor = mcuDatabase.sensor[moduleKey];
+				sensor = mcuDatabase.sensor[moduleKey];
 				const ios = sensor.io;
 				for (let key in ios) {
 					const io = ios[key];
@@ -96,11 +114,16 @@
 				}
 			}
 			else {
-				options.reference = mcuDatabase.platform[platformKey].sensor[moduleKey].reference;
+				sensor = mcuDatabase.platform[platformKey].sensor[moduleKey];
+				options.reference = sensor.reference;
 			}
 			this.platform = platformKey;
 			this.module = moduleKey;
 			this.options = options;
+			if (sensor.asyncSample)
+				this.asyncSample = true;
+			else
+				delete this.asyncSample; 
 		},
 	});
 </script>

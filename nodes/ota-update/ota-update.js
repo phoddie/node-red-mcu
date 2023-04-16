@@ -117,13 +117,20 @@ class OTAUpdateNode extends Node {
 		else if (error) {
 			error = error.toString();
 			this.#ota.cancel();
-			this.status({fill: "red", shape: "ring", text: error});
+			this.status({fill: "red", shape: "ring", text: error.toString()});
 			done?.(error);
 		}
 		else {
-			this.#ota.complete();
-			this.status({fill: "green", shape: "dot", text: "success"});
-			done?.();
+			try {
+				this.#ota.complete();
+				this.status({fill: "green", shape: "dot", text: "success"});
+			}
+			catch (e) {
+				error = e;
+				this.status({fill: "red", shape: "ring", text: error.toString()});
+				success = false;
+			}
+			done?.(error);
 		}
 		this.#client?.close();
 		this.#client = this.#ota = undefined;

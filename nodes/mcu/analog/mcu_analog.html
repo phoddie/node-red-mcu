@@ -6,6 +6,7 @@
 			name: { value:"" },
 			pin: { value:"?", validate: RED.validators.number() },
 			resolution: { value:"" },
+			moddable_manifest: {value: {include: "$(NODEREDMCU)/nodes/mcu/analog/manifest.json"}},
 		},
 		inputs:1,
 		outputs:1,

@@ -99,7 +99,7 @@
             const platformKey = parts[0];
             const moduleKey = parts[1];
  			const options = {};
-			delete this.moddable_manifest;
+			this.moddable_manifest = {include: ["$(NODEREDMCU)/nodes/mcu/sensor/manifest.json"]};
 			let sensor;
          	if (platformKey === "") {
 				sensor = mcuDatabase.sensor[moduleKey];
@@ -110,7 +110,7 @@
 				}
 				const driver = sensor.driver;
 				if (driver) {
-					this.moddable_manifest = {include: [driver]};
+					this.moddable_manifest.include.push(driver);
 				}
 			}
 			else {

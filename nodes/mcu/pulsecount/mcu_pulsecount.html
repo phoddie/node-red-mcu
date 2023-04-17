@@ -6,6 +6,7 @@
 			name: { value:"" },
 			signal: { value:"?", validate: RED.validators.number() },
 			control: { value:"?", validate: RED.validators.number() },
+			moddable_manifest: {value: {include: "$(NODEREDMCU)/nodes/mcu/pulsecount/manifest.json"}},
 		},
 		inputs:0,
 		outputs:1,

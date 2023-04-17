@@ -7,6 +7,7 @@
 			pin: { value:"?", validate: RED.validators.number() },
 			mode: { value:"Input" },
 			edges: { value:"RisingToFalling" },
+			moddable_manifest: {value: {include: "$(NODEREDMCU)/nodes/mcu/pulsewidth/manifest.json"}},
 		},
 		inputs:0,
 		outputs:1,

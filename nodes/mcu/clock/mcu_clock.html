@@ -68,7 +68,7 @@
 			const platformKey = parts[0];
 			const moduleKey = parts[1];
 			const options = {};
-			delete this.moddable_manifest;
+			this.moddable_manifest = {include: ["$(NODEREDMCU)/nodes/mcu/clock/manifest.json"]};
 			if (platformKey === "") {
 				const clock = mcuDatabase.clock[moduleKey]; 
 				const ios = clock.io;
@@ -78,7 +78,7 @@
 				}
 				const driver = clock.driver;
 				if (driver) {
-					this.moddable_manifest = {include: [driver]};
+					this.moddable_manifest.include.push(driver);
 				}
 			}
 			else {

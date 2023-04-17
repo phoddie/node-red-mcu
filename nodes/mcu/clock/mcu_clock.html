@@ -6,7 +6,14 @@
 			name: { value:"" },
 			platform: { value:"" },
 			module: { value:"embedded:RTC/DS1307" },
-			options: { value:{ clock:{ io:"SMBus", bus:"default", address:"0x68" } } },
+			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x68" } }, validate(value) {
+				const selection = $("#node-input-selection").val();
+				const parts = selection?.split("#");
+				const platformKey = parts?.[0];
+				if ((platformKey === undefined) ||  (platformKey === ""))
+					return mcuHelper.validateOptions(value);
+				return true;
+			}},
 			configuration: {
 				value: "{}",
 				validate: function(v) {

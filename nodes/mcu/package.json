@@ -1,9 +1,42 @@
 {
 	"name": "@moddable-node-red/mcu",
 	"version": "1.0.0",
-	"description": "A set of MCU nodes for Node-RED",
-	"license": "UNLICENSED",
-	"node-red" : {
+	"description": "A suite of IO nodes for Node-RED MCU Edition",
+	"scripts": {
+		"test": "echo \"Error: no tests\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/phoddie/node-red-mcu.git"
+	},
+	"keywords": [
+		"mcu",
+		"node-red",
+		"node-red-mcu",
+		"ECMA-419",
+		"IO",
+		"Abalog",
+		"Digital",
+		"I2C",
+		"NeoPixels",
+		"PulseCount",
+		"PulseWidth",
+		"PWM",
+		"RTC",
+		"Clock",
+		"Sensor"
+	],
+	"author": "Peter Hoddie, Patrick Soquet",
+	"license": "LGPL-3.0-or-later",
+	"bugs": {
+		"url": "https://github.com/phoddie/node-red-mcu/issues"
+	},
+	"homepage": "https://github.com/phoddie/node-red-mcu/nodes/mcu/readme.me",
+	"engines": {
+		"node": ">=14.0.0"
+	},
+	"node-red": {
+		"version": ">=3.0.0",
 		"nodes": {
 			"mcu_analog": "analog/mcu_analog.js",
 			"mcu_clock": "clock/mcu_clock.js",

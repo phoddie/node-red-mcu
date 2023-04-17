@@ -1,7 +1,7 @@
 # MCU Nodes
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated March 24, 2023<br>
+Updated April 16, 2023<br>
 
 ## Overview
 The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. 
@@ -23,7 +23,7 @@ This is the second major iteration of the Sensor Node. It simplifies configurati
 ## Installation
 The MCU nodes must be installed into Node-RED to be used in the Node-RED Editor. This is done in the usual way:
 
-> **Note**: If you previously installed the MCU Sensor node (an early version of the MCU suit), uninstall it first:
+> **Note**: If you previously installed the MCU Sensor node (an early version of the MCU suite), uninstall it first:
 
 ```
 cd ~/.node-red
@@ -31,6 +31,13 @@ npm uninstall @moddable-node-red/sensor@1.0.0
 ```
 
 And to install:
+
+```
+cd ~/.node-red
+npm install @moddable-node-red/mcu
+```
+
+or
 
 ```
 cd ~/.node-red

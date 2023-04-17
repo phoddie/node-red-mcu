@@ -1,6 +1,6 @@
 {
 	"name": "@moddable-node-red/mcu",
-	"version": "1.0.0",
+	"version": "1.0.1",
 	"description": "A suite of IO nodes for Node-RED MCU Edition",
 	"scripts": {
 		"test": "echo \"Error: no tests\" && exit 1"
@@ -15,7 +15,7 @@
 		"node-red-mcu",
 		"ECMA-419",
 		"IO",
-		"Abalog",
+		"Analog",
 		"Digital",
 		"I2C",
 		"NeoPixels",

@@ -39,7 +39,7 @@ class DigitalInNode extends Node {
 		let edge = config.edge;
 		if (config.invert) {
 			Object.defineProperty(this, "invert", {value: 1});
-			edge ^= 0b11; 
+			edge = ((edge & 1) << 1) | ((edge & 2) >> 1);
 		}
 
 		cache ??= new Map;

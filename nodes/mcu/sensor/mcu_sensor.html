@@ -8,9 +8,9 @@
 			module: { value:"" },
 			options: { value:{ sensor:{ io:"SMBus", bus:"default", address:"0x48" } }, validate(value) {
 				const selection = $("#node-input-selection").val();
-				const parts = selection.split("#");
-				const platformKey = parts[0];
-				if (platformKey === "")
+				const parts = selection?.split("#");
+				const platformKey = parts?.[0];
+				if ((platformKey === undefined) ||  (platformKey === ""))
 					return mcuHelper.validateOptions(value);
 				return true;
 			}},

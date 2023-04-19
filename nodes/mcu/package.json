@@ -1,13 +1,14 @@
 {
 	"name": "@moddable-node-red/mcu",
-	"version": "1.0.1",
+	"version": "1.0.2",
 	"description": "A suite of IO nodes for Node-RED MCU Edition",
 	"scripts": {
 		"test": "echo \"Error: no tests\" && exit 1"
 	},
 	"repository": {
 		"type": "git",
-		"url": "git+https://github.com/phoddie/node-red-mcu.git"
+		"url": "git+https://github.com/phoddie/node-red-mcu.git",
+		"directory": "nodes/mcu"
 	},
 	"keywords": [
 		"mcu",
@@ -31,7 +32,7 @@
 	"bugs": {
 		"url": "https://github.com/phoddie/node-red-mcu/issues"
 	},
-	"homepage": "https://github.com/phoddie/node-red-mcu/nodes/mcu/readme.me",
+	"homepage": "https://github.com/phoddie/node-red-mcu/nodes/mcu/readme.md",
 	"engines": {
 		"node": ">=14.0.0"
 	},

@@ -94,14 +94,16 @@
 			});
 		},
         oneditsave: function() {
-            const selection = $("#node-input-selection").val();
-            const parts = selection.split("#");
-            const platformKey = parts[0];
-            const moduleKey = parts[1];
+			const selection = $("#node-input-selection").val();
+			if (!selection)
+				return;
+			const parts = selection.split("#");
+			const platformKey = parts[0];
+			const moduleKey = parts[1];
  			const options = {};
 			this.moddable_manifest = {include: ["$(NODEREDMCU)/nodes/mcu/sensor/manifest.json"]};
 			let sensor;
-         	if (platformKey === "") {
+			if (platformKey === "") {
 				sensor = mcuDatabase.sensor[moduleKey];
 				const ios = sensor.io;
 				for (let key in ios) {

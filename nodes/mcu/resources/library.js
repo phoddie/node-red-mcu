@@ -33,20 +33,22 @@ if (globalThis.mcuHelper === undefined) {
 			let div;
 			if (platformKey === "") {
 				entry = mcuDatabase[entryKey][moduleKey];
-				if (entry.category) {
-					div = $(`#node-mcu-category`);
-					div.empty();
-					div.append(`${entry.category}`);
-				}
-				const ios = entry.io;
-				for (let key in ios) {
-					const io = ios[key];
-					div = $(`#node-mcu-rows-${index}`);
-					mcuHelper.appendIO(div, key, io);
-					div.show();
-					if (options)
-						mcuHelper.restoreIO(options, key, io);
-					index++;
+				if (entry) {
+					if (entry.category) {
+						div = $(`#node-mcu-category`);
+						div.empty();
+						div.append(`${entry.category}`);
+					}
+					const ios = entry.io;
+					for (let key in ios) {
+						const io = ios[key];
+						div = $(`#node-mcu-rows-${index}`);
+						mcuHelper.appendIO(div, key, io);
+						div.show();
+						if (options)
+							mcuHelper.restoreIO(options, key, io);
+						index++;
+					}
 				}
 			}
 			else {
@@ -73,7 +75,7 @@ if (globalThis.mcuHelper === undefined) {
 			}
 			div = $(`#node-mcu-infos`);
 			div.empty();
-			if (entry.url) {
+			if (entry && entry.url) {
 				div.append(`
 					<div class="red-ui-help">
 						See the <a class="" href="${entry.url}#configuration" target="_blank">ECMA-419 class</a> for configuration details.
@@ -87,7 +89,7 @@ if (globalThis.mcuHelper === undefined) {
 					<div style="display:inline-block; width:70%; vertical-align:top;">${moduleKey}</div>
 				</div>
 			`);
-			if (entry.driver) {
+			if (entry && entry.driver) {
 				const url = entry.driver.replace("$(MODDABLE)", "https://github.com/Moddable-OpenSource/moddable/blob/public");
 				div.append(`
 					<div class="form-row">

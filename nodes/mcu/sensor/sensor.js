@@ -29,18 +29,40 @@ class Sensor extends Node {
 		try {
 			this.#sensor = config.initialize.call(this);
 			this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
+
+			if (config.asyncSample) {
+				this.#sensor.callback = (error, sample) => {
+					const sensor = this.#sensor;
+					const pending = sensor.pending.shift(); 
+					if (!sensor.pending.length)
+						delete sensor.pending;
+
+					if (error) {
+						sensor.close();
+						this.#sensor = undefined;
+						this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
+						pending.done(error);
+					}
+					else if (sample) {
+						pending.msg.payload = sample;
+						this.send(pending.msg);
+						pending.done();
+					}
+				}
+			}
 		}
 		catch {
 			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
 		}
 	}
 	onMessage(msg, done) {
-		if (!this.#sensor)
+		const sensor = this.#sensor;
+		if (!sensor)
 			return;
 
 		if (msg.configuration) {
 			try {
-				this.#sensor.configure(msg.configuration);
+				sensor.configure(msg.configuration);
 				done?.();
 			}
 			catch (e) {
@@ -50,7 +72,14 @@ class Sensor extends Node {
 		}
 		
 		try {
-			const payload = this.#sensor.sample();
+			if (sensor.callback) {
+				sensor.sample(sensor.callback);
+				sensor.pending ??= [];
+				sensor.pending.push({done, msg});
+				return;
+			}
+
+			const payload = sensor.sample();
 			if (payload)
 				msg.payload = payload;
 			else
@@ -58,7 +87,7 @@ class Sensor extends Node {
 		}
 		catch {
 			this.status({fill: "red", shape: "ring", text: "node-red:common.status.disconnected"});
-			this.#sensor.close();
+			sensor.close();
 			this.#sensor = undefined;
 			msg = undefined;
 		}

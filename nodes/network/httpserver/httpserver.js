@@ -178,6 +178,7 @@ class Server {
 										continue routes;
 								}
 								
+								this.node = route.node;
 								this.route = route.route;
 								return;
 							}

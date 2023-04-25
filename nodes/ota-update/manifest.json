@@ -1,0 +1,16 @@
+{
+	"modules": {
+		"*": "./ota-update"
+	},
+	"preload": [
+		"ota-update"
+	],
+	"platforms": {
+		"esp32": {
+			"include": "$(MODDABLE)/build/devices/esp32/modules/ota/manifest.json"
+		},
+		"...": {
+			"warning": "OTA not supported"
+		}
+	}
+}

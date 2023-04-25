@@ -1,0 +1,34 @@
+{
+	"name": "@moddable-node-red/ota-update",
+	"version": "0.8.4",
+	"description": "Install OTA firmware updates in Node-RED MCU Edition",
+	"scripts": {
+		"test": "echo \"Error: no tests\" && exit 1"
+	},
+	"repository": {
+		"type": "git",
+		"url": "git+https://github.com/phoddie/node-red-mcu.git",
+		"directory": "nodes/ota-update"
+	},
+	"keywords": [
+		"mcu",
+		"node-red",
+		"node-red-mcu",
+		"ota"
+	],
+	"author": "Peter Hoddie",
+	"license": "LGPL-3.0-or-later",
+	"bugs": {
+		"url": "https://github.com/phoddie/node-red-mcu/issues"
+	},
+	"homepage": "https://github.com/phoddie/node-red-mcu/nodes/ota-update/readme.md",
+	"engines": {
+		"node": ">=14.0.0"
+	},
+	"node-red": {
+		"version": ">=3.0.0",
+		"nodes": {
+			"mcu_ota-update": "mcu_ota-update.js"
+		}
+	}
+}

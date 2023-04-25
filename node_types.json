@@ -72,6 +72,7 @@
 	"csv": "./nodes/parser/csv/manifest.json",
 
 	"rpi-ds18b20": "./nodes/rpi/rpi-ds18b20/manifest.json",
+	"rpi-gpio in": "./nodes/rpi/rpi-gpio/manifest.json",
 	"rpi-gpio out": "./nodes/rpi/rpi-gpio/manifest.json",
 	"rpi-neopixels": "./nodes/rpi/rpi-neopixels/manifest.json",
 
@@ -80,6 +81,7 @@
 	"sort": "./nodes/sequence/sort/manifest.json",
 	"split": "./nodes/sequence/split/manifest.json",
 
+	"file": "./nodes/storage/file/manifest.json",
 	"file in": "./nodes/storage/file/manifest.json",
 
 	"openweathermap": "./nodes/weather/openweathermap/manifest.json",

@@ -1,4 +1,7 @@
 {
+	"build": {
+		"NODEREDMCU": "./"
+	},
 	"include": [
 		"./manifest_core.json",
 
@@ -9,8 +12,7 @@
 
 		"./nodes/mcu/clock/manifest.json",
 		"./nodes/mcu/sensor/manifest.json",
-		
-		
+
 		"./nodes/rpi/rpi-ds18b20/manifest.json",
 
 		"./nodes/network/tcp/manifest.json",

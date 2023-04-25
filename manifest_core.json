@@ -7,7 +7,8 @@
 		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/modules/data/hex/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json",
-		"$(MODDABLE)/modules/io/manifest.json"
+		"$(MODDABLE)/modules/io/manifest.json",
+		"$(MODDABLE)/modules/files/preference/manifest.json"
  	],
 	"modules": {
 		"*": [
@@ -38,24 +39,30 @@
 				"~": [
 					"$(BUILD)/devices/esp/setup/network"
 				],
-				"setup/network": "./setupwifi"
-			}
+				"setup/network": "./setupwifi",
+				"setup/timezone": "./setuptimezone"
+			},
+			"preload": "setup/timezone"
 		},
 		"esp32": {
 			"modules": {
 				"~": [
 					"$(BUILD)/devices/esp32/setup/network"
 				],
-				"setup/network": "./setupwifi"
-			}
+				"setup/network": "./setupwifi",
+				"setup/timezone": "./setuptimezone"
+			},
+			"preload": "setup/timezone"
 		},
 		"pico": {
 			"modules": {
 				"~": [
 					"$(BUILD)/devices/pico/setup/network"
 				],
-				"setup/network": "./setupwifi"
-			}
+				"setup/network": "./setupwifi",
+				"setup/timezone": "./setuptimezone"
+			},
+			"preload": "setup/timezone"
 		}
 	}	
 }

@@ -25,13 +25,16 @@ import Base64 from "base64";
 import Hex from "hex";
 import Modules from "modules";
 import config from "mc/config";
+import Preference from "preference";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
 let msgQueue;
 export const configFlowID = "__config";
+const globalContextID = "__global";
 
 function generateId() @ "xs_nodered_util_generateId";
+function debugging() @ "xs_nodered_util_debugging";
 
 class RED {
 	static #compatibility = [];
@@ -102,6 +105,7 @@ class RED {
 		}
 	}
 	static mcu = class {
+		static debugging = debugging;
 		static getNodeConstructor(type) {
 			const Class = nodeClasses.get(type);
 			if (!Class) {	
@@ -146,7 +150,7 @@ class RED {
 		if (config.noderedmcu?.editor)
 			trace.left('{"state": "building"}', "NR_EDITOR");
 
-		globalThis.globalContext = new Context;
+		globalThis.globalContext = new Context(globalContextID);
 
 		if (this.#compatibility.length) {
 			compatibilityClasses = new Map;
@@ -186,7 +190,90 @@ class RED {
 }
 
 class Context extends Map {
-	keys() {
+	constructor(id) {
+		super();
+		if (id.length > 15) {
+			// convert 16 character Node-RED ID to no more than 15 characters so it works with ESP-IDF NVS (15 character domain key name limit)
+			// eventually this might want to be platform dependent to accomodate the different constraints of each platfornm
+			id = parseInt(id.substring(0, 8), 16).toString(36) + "-" + parseInt(id.substring(8, 16), 16).toString(36) 
+		}
+		Object.defineProperty(this, "id", {value: id});
+	}
+	get(name, store) {
+		if ("file" === store) {
+			let value = Preference.get(this.id, name);
+			if (value instanceof ArrayBuffer) {
+				let view = new DataView(value);
+				switch (view.getUint8(0)) {
+					case 1:		// Number
+						value = view.getFloat64(1);
+						break;
+
+					case 2:		// JSON
+						view.setUint8(0, 32);
+						value = String.fromArrayBuffer(view.buffer);
+						view = undefined;
+						value = JSON.parse(value);
+						break;
+					
+					case 3:		// Buffer
+						value = new Uint8Array(view.buffer, 1);
+						break;
+
+					default:
+						throw new Error("unexpected buffer type");
+				}
+			}
+			return value;
+		}
+
+		return super.get(name); 
+	}
+	set(name, value, store) {
+		if ("file" === store) {
+			switch (typeof value) {
+				case "number":
+					if (value !== (value | 0)) {
+						const buffer = new DataView(new ArrayBuffer(8 + 1))
+						buffer.setUint8(0, 1);
+						buffer.setFloat64(1, value);
+						value = buffer.buffer;
+					}
+					break;
+
+				case "object":
+					if (value instanceof Uint8Array) {		// Buffer
+						const buffer = new Uint8Array(value.length + 1);
+						buffer[0] = 3;
+						buffer.set(value, 1);
+						value = buffer.buffer;
+					}
+					else {		// JSON
+						value = "\u0002" + JSON.stringify(value);
+						value = ArrayBuffer.fromString(value);
+					}
+					break;
+
+				case "null":
+				case "undefined":		// delete when value missing
+					Preference.delete(this.id, name);
+					return;
+			}
+			Preference.set(this.id, name, value);
+		}
+		else
+			return super.set(name, value);
+	}
+	delete(name, store) {
+		if ("file" === store)
+			Preference.delete(this.id, name);
+		else
+			super.delete(name);
+	}
+	keys(store) {
+		if ("file" === store)
+			return Preference.keys(this.id);
+		
 		return [...super.keys()];
 	}
 }
@@ -199,7 +286,7 @@ class Flow extends Map {
 		super();
 		const properties = {
 			id: {value: id},
-			context: {value: new Context}
+			context: {value: new Context(id)}
 		};
 		if (name)
 			properties.name = {value: name};
@@ -372,7 +459,7 @@ export class Node {
 							id: source.id,
 							type: source.constructor.type,
 							name: source.name ?? "",
-							count: 0		//@@ recursion counter	
+							count: 1		//@@ recursion counter	
 						}
 					}
 				}
@@ -481,7 +568,7 @@ class DebugNode extends Node {
 			value = this.#property ? {[this.#property]: value} : msg;
 			value = {
 				...value,
-				source: {
+				source: {		//@@ not sure about this.... for example... overwrites the source of status & catch nodes.
 					id: this.id,
 					type: this.constructor.type,
 					name: this.name
@@ -576,7 +663,7 @@ class FunctionNode extends Node {
 	constructor(id, flow, name) {
 		super(id, flow, name);
 		Object.defineProperties(this, {
-			context: {value: new Context}
+			context: {value: new Context(id)}
 		});
 		Object.defineProperties(this.context, {
 			global: {value: globalContext},
@@ -1044,13 +1131,28 @@ class MQTTBrokerNode extends Node {
 			...device.network.mqtt,
 			...this.#options,
 			onReadable: (count, options) => {
-				if (options.more)
-					throw new Error("fragmented receive unimplemented!");
+				let payload = this.#mqtt.read(count);
+				let fragment = this.#options.fragment; 
+				const msg = fragment ?? {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
 
-				const payload = this.#mqtt.read(count);
-				const msg = {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
+				if (options.more || fragment) {
+					if (!fragment) {
+						fragment = this.#options.fragment = msg;
+						msg.payload = new Uint8Array(new ArrayBuffer(options.byteLength));
+						msg.payload.position = 0;
+					}
 
-				const topic = options.topic.split("/");
+					msg.payload.set(new Uint8Array(payload), fragment.payload.position);
+					fragment.payload.position += payload.byteLength; 
+					if (options.more)
+						return;
+					
+					delete this.#options.fragment;
+					payload = msg.payload.buffer;
+					delete msg.payload;
+				}
+
+				const topic = msg.topic.split("/");
 			subscriptions:
 				for (let subscriptions = this.#subscriptions, i = 0, length = subscriptions.length; i < length; i++) {
 					let p = payload;				
@@ -1207,7 +1309,8 @@ class MQTTBrokerNode extends Node {
 		this.#status.push(node);
 	}
 	status(msg) {
-		this.#status.forEach(node => node.status(msg));
+		for (let i = 0, nodes = this.#status; i < nodes.length; i++)
+			nodes[i].status(msg);
 	}
 
 	static type = "mqtt-broker";
@@ -1297,7 +1400,11 @@ class CompatibiltyNode extends Node {
 		});
 	}
 	onMessage(msg, done) {
-		this.#events.input?.forEach(input => input.call(this, msg, this.#send, done));
+		const input = this.#events.input;
+		if (input) {
+			for (let i = 0; i < input.length; i++)
+				input[i].call(this, msg, this.#send, done);
+		}
 	}
 	on(event, handler) {
 		if (!CompatibilityEvents.includes(event))
@@ -1307,7 +1414,7 @@ class CompatibiltyNode extends Node {
 		this.#events[event].push(handler);
 
 		if ("input" === event)
-			this.#send ??= msg => super.send(msg);
+			this.#send ??= msg => {if (msg) return super.send(msg);};
 
 		return this;
 	}
@@ -1330,11 +1437,14 @@ class CompatibiltyNode extends Node {
 		if (!events)
 			return false;
 
-		events.forEach(() => {
+		for (let i = 0; i < events.length; i++)
 			RED.mcu.enqueue(msg, this);
-		});
 
 		return true;
+	}
+	send(msg) {		// Node-RED alllows calling send with null message
+		if (msg)
+			return super.send(msg);
 	}
 
 	static type = "Node-RED Compatibility";

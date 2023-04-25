@@ -1,7 +1,9 @@
 # Node-RED MCU Edition
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated January 25, 2023<br>
+Updated March 24, 2023<br>
+
+<img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
 ## Introduction
 This document introduces an implementation of the Node-RED runtime that runs on resource-constrained microcontrollers (MCUs). [Node-RED](https://nodered.org/) is a popular visual environment that describes itself as "a programming tool for wiring together hardware devices, APIs and online services in new and interesting ways."
@@ -235,6 +237,8 @@ The first is exporting the project from Node-RED.
 1. Select JSON (not Export nodes)
 1. Select "Copy to Clipboard"
 
+> **Warning**: Experienced Node-RED users may choose "selected nodes" or "current flow" on the Export tab in Step 3. Often this does work. However, in some cases the flow fails to operate correctly because Node-RED will not export all required global confirmation nodes. For example, "selected nodes" does not export MQTT Broker nodes required by MQTT In and MQTT Out nodes and exporting "current flow" does not export the global dashboard configuration node required by UI nodes.
+
 The JSON version of the flows is now on the clipboard. The second step is adding this JSON to the Moddable SDK project:
 
 1. Open the `flows.json` file in the Node-RED MCU Edition project
@@ -243,6 +247,8 @@ The JSON version of the flows is now on the clipboard. The second step is adding
 Build and run the Moddable SDK project as usual for the target device. The flows.json file is transformed by `nodered2mcu` as part of the build. If an error is detected, such as an unsupported feature, an error message is output and the build stops.
 
 This process is quick and easy for early exploration. Of course, there are many ways it could be streamlined to improve the developer experience.  
+
+> **Note**: When building for Moddable Two, the recommended build target is `esp32/moddable_two_io`, not `esp32/moddable_two`. The `esp32/moddable_two_io` target uses the ECMA-419 compatible FocalTouch touch screen driver which avoids I²C conflicts with sensors.
 
 ## Structure
 The Node-RED runtime executes the nodes and flows. This runtime architecture determines how nodes interact with each other. It also is a key factor in how efficiently the execution uses the limited RAM and CPU power available. 
@@ -262,6 +268,8 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 	- [X] Global
 	- [X] Flow
 	- [X] Node
+	- [X] in-memory context
+	- [X] file context
 - [X] Outputs
 	- [X] Single node output
 	- [X] Output connects to multiple inputs
@@ -286,6 +294,24 @@ This is a summary of what is implemented in the Node-RED for MCUs runtime:
 - [X] Groups
 	- [X] Groups with no environment variables eliminated at build-time
 	- [X] Environment variables
+
+### Credentials
+Some nodes contain credentials such as a user name and password. Node-RED stores [credentials](https://nodered.org/docs/creating-nodes/credentials) separately from the flows in a file named `flows_cred.json`. The credentials files is encrypted with a key stored locally. In addition, Node-RED does not include credentials when exporting flows. All of this is done to prevent accidental sharing of credentials.
+
+Unfortunately, this means that credentials are not available to Node-RED MCU Edition when flows are exported. The `nodered2mcu` tool provides a solution. If a `flows_cred_mcu.json` file is in the same directory as the `flows.json` file processed by `nodered2mcu`, the credentials are merged back into the flows. In the following, the object on the `"8b6e5226cefdb00e"` property is merged into the node with ID `8b6e5226cefdb00e` in `flows.json`.
+
+```json
+{
+	"credentials": {
+		"8b6e5226cefdb00e": {
+			"user": "rw",
+			"password": "readwrite"
+		}
+	}
+}
+```
+
+This solution does not provide protection against unintentional sharing. This is an area for further work.
 
 ## Nodes
 This section lists the supported nodes. The implemented features are checked.
@@ -363,20 +389,22 @@ Junction nodes are optimized out by `nodered2mcu` by replacing each junction wit
 - [X] Read initial state of pin on start
 - [X] Debounce
 - [X] Status
+- [X] Invert
 
 Implemented with ECMA-419 Digital class.
 
-If the "rpi-gpio in" node is used in flows, it is translated to a Digital In node.
+If the "rpi-gpio in" node from node-red-node-pi-gpio is used in flows, it is translated to a Digital In node.
 
 ### MCU Digital Out
 - [X] Select pin
 - [X] Initialize initial pin state option
 - [X] Multiple nodes can share a single pin
 - [X] Status & Done
+- [X] Invert
 
 Implemented with ECMA-419 Digital class.
 
-If the "rpi-gpio out" node is used in digital output mode in flows, it is translated to a Digital Out node.
+If the "rpi-gpio out" node from node-red-node-pi-gpio is used in digital output mode in flows, it is translated to a Digital Out node.
 
 ### MCU PWM Out
 - [X] Select pin
@@ -387,7 +415,7 @@ If the "rpi-gpio out" node is used in digital output mode in flows, it is transl
 
 Implemented with ECMA-419 PWM Out class.
 
-If the "rpi-gpio out" node is used in PWM mode in flows, it is translated to a PWM Out node.
+If the "rpi-gpio out" node from node-red-node-pi-gpio is used in PWM mode in flows, it is translated to a PWM Out node.
 
 ### DS18B20
 - [X] Multiple temperature sensors
@@ -396,7 +424,7 @@ If the "rpi-gpio out" node is used in PWM mode in flows, it is translated to a P
 - [ ] Use `topic` to select single sensor
 - [ ] `id` property in output matches Node-RED
 
-Implemented using "rpi-ds18b20" node with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
+Implemented using "rpi-ds18b20" node from node-red-contrib-ds18b20-sensor, with OneWire bus module and DS18X20 temperature sensor module. Uses simulated temperature sensors on platforms without OneWire support.
 
 ### MCU Neopixels
 - [X] Set number of LEDs in string
@@ -673,7 +701,8 @@ The split implementation has some obscure differences in how it triggers Complet
 The Template node uses the [mustache.js](https://github.com/janl/mustache.js) module.
 
 ### File Write
-- [X] Filename from node or message
+- [X] Filename from node or msg.payload
+- [ ] Filename from msg.* and flow.*
 - [X] Encoding from node or message
 - [X] Encodings: auto, UTF-8, binary, hex, Base64
 - [X] Actions: append to file, overwrite file, delete file
@@ -683,7 +712,8 @@ The Template node uses the [mustache.js](https://github.com/janl/mustache.js) mo
 The File Write node is implemented using the Moddable SDK of integration LittleFS.
 
 ### File Read
-- [X] Filename from node or message
+- [X] Filename from node or msg.payload
+- [ ] Filename from msg.* and flow.*
 - [X] Encodings: UTF-8, binary, hex, Base64
 - [X] Read full file
 - [X] Stream one line or buffer at a time
@@ -786,7 +816,7 @@ Possible future work on built-in nodes:
 - **Parser**. XML may be possible. HTML, YAML are likely impractical. 
 - **Storage** Watch file may not be useful, since there are no other processes modifying files. At best, it could monitor for changes made by other nodes.
 
-The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, a Preferences node, Display node, etc.
+The built-in nodes are useful for compatibility with the standard Node-RED behaviors. Additional nodes should be added to support embedded features. For example, Display node, etc.
 
 ### Challenging Dependencies
 Several nodes use [JSONata](https://jsonata.org), a query language for JSON. This looks like a substantial effort to support and is perhaps impractical on a constrained embedded device. (Note: I now have JSONata building and running some simple test cases. The code size and memory footprint are large. Further exploration is needed to evaluate if JSONata is a viable option to enable, but at least it looks possible)
@@ -794,6 +824,44 @@ Several nodes use [JSONata](https://jsonata.org), a query language for JSON. Thi
 The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/2020-12/json-schema-validation.html) for validation.
 
 ## Implementation Notes
+
+### Nodes Providing Manifests
+A node may include a `moddable_manifest` property at the root of its exported JSON configuration. The `nodered2mcu` tool processes the contents of the property as a Moddable SDK manifest. This allows nodes to automatically include  modules, data, and configurations. The MCU sensor and clock nodes use this capability, for example, to include the required driver.
+
+```json
+{
+    "id": "39f01371482a60fb",
+    "type": "sensor",
+    "z": "fd7d965ef27a87e2",
+    "moddable_manifest": {
+        "include": [
+            "$(MODDABLE)/modules/drivers/sensors/tmp117/manifest.json"
+        ]
+    },
+    ...
+```
+
+> **Note**: Nodes providing manifests should not use relative paths because the root for the relative path is the location of the flows.json file, which is not consistent.
+ 
+### Contexts
+Node-RED uses [contexts](https://nodered.org/docs/user-guide/context) to "to store information that can be shared between different nodes without using the messages that pass through a flow." Contexts are stored in memory by default, but may also be persisted to a file.
+
+Node-RED memory-based contexts are stored in-memory using a JavaScript `Map`.  This gives a consistent behavior with full Node-RED. Memory-based contexts use memory and are not persisted across runs. Memory-based contexts the default in Node-RED. File-based contexts are an alternative that maybe enabled in the Node-RED settings file. Both Node-RED file-based contexts and memory-based contexts may be used in a single project. Node-RED MCU Edition supports only memory and file-based contexts; use of any other generates an error.
+
+Node-RED file contexts are stored using the Preference module of the Moddable SDK. This provides reliable, persistent storage across a variety of MCU families. Data is stored in non-volatile flash memory. Most implementations guarantee that if power is lost while updating the preferences, they will not be corrupted. Because of the resource constraints of microcontrollers, there are come constraints to be aware of:
+
+- Total storage space for file-based context data is limited. The size varies by device and is sometimes configurable. The ESP8266 has just 4 KB of space for context data.
+- The size of each individual context data item is also limited by the implementation. Earlier versions of ESP-IDF, for example limited each item to no more than 64-bytes.
+- Context data is not reset when changing flows. With limited storage space, this can eventually lead to out-of-storage errors. Erasing the device's flash is the most reliable way to full reset preferences.
+- Global context data is stored using the same domain for all flows. This is convenient if several different projects want to share the same context data.
+- Currently supported data types for storing in file-based context data are: number, string, boolean, Buffer, and JSON. Because of the size limits noted above, use of JSON is generally discouraged. 
+- Setting a context value to `undefined` or `null` deletes the value. This behavior is consistent with full Node-RED.
+- File-based context data is stored in flash memory which has a limited number of write cycles. Updating file-based context data too frequently (e.g. once a second) will eventually wear-out your flash memory. Experiencing this problem is rare but real.
+- The values of file-based context data use no memory except when in use.
+
+Despite these warnings, file-based context data works well when used within their constraints: limit the number of piece of context data stored, keep each as small as practical, and update them infrequently.
+
+An alternative to using file-based contexts is to use a File In and File Out nodes to store state. This is more effort and foregoes the convenience of the file-based context's integration with the Change and Inject nodes, and the context APIs provided by the Function node.
 
 ### Complete and Catch Nodes
 The Complete and Catch nodes receive messages from one or more nodes referenced by their `scope` property. This organization reflects the UI of the Node-RED Editor, where the user configures the scope of Complete and Catch nodes by selecting the nodes they reference. From a runtime perspective, this organization is inefficient as it requires each node receiving a message to check if the node is in-scope for any Complete or Catch nodes.

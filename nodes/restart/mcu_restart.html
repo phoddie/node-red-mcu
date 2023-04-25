@@ -1,0 +1,35 @@
+<script type="text/javascript">
+    RED.nodes.registerType('mcu_restart',{
+        category: 'MCU',
+        color: '#a2aaff',
+        defaults: {
+            name: {value:""},
+			moddable_manifest: {
+				value: {
+					include: "$(NODEREDMCU)/nodes/restart/manifest.json"
+				}
+			}
+        },
+        inputs:1,
+        outputs:0,
+        icon: "font-awesome/fa-rotate-left",
+        label() {
+            return this.name||"restart";
+        },
+		paletteLabel: 'restart',
+    });
+</script>
+
+<script type="text/html" data-template-name="mcu_restart">
+    <div class="form-row">
+        <label for="node-input-name"><i class="fa fa-tag"></i> Name</label>
+        <input type="text" id="node-input-name" placeholder="Name">
+    </div>
+</script>
+
+<script type="text/html" data-help-name="mcu_restart">
+    <p>Restart MCU.</p>
+    <h3>Details</h3>
+    <p>Restarts the MCU when a message is received.</p>
+    <p>There are no inputs or outputs.</p>
+</script>

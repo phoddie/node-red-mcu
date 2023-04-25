@@ -24,7 +24,6 @@ import Timer from "timer";
 let cache;		// support multiple nodes sharing the same pin, like the RPi implementation
 
 class DigitalInNode extends Node {
-	#debounce;
 	#timer;
 
 	onStart(config) {
@@ -34,11 +33,19 @@ class DigitalInNode extends Node {
 		if (!Digital)
 			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 
-		this.#debounce = config.debounce;
+		if (config.debounce)
+			Object.defineProperty(this, "debouce", {value: config.debounce});
+
+		let edge = config.edge;
+		if (config.invert) {
+			Object.defineProperty(this, "invert", {value: 1});
+			edge = ((edge & 1) << 1) | ((edge & 2) >> 1);
+		}
+
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 		if (io) {
-			if ((io.mode !== config.mode) || (io.edge !== config.edge))
+			if ((io.mode !== config.mode) || (io.edge !== edge))
 				return void this.status({fill: "red", shape: "dot", text: "mismatch"});
 			io.readers.push(this);
 		}
@@ -46,31 +53,31 @@ class DigitalInNode extends Node {
 			io = new Digital({
 				pin: config.pin,
 				mode: Digital[config.mode],
-				edge: ((config.edge & 1) ? Digital.Rising : 0) + ((config.edge & 2) ? Digital.Falling : 0),
+				edge: ((edge & 1) ? Digital.Rising : 0) + ((edge & 2) ? Digital.Falling : 0),
 				onReadable() {
 					this.readers.forEach(reader => {
 						reader.#timer ??= Timer.set(() => {
 							reader.#timer = undefined;
 
 							const msg = {
-								payload: this.read(),
+								payload: this.read() ^ (reader.invert ?? 0),
 								topic: "gpio/" + this.pin
 							};
 							reader.send(msg)
 							reader.status({fill: "green", shape: "dot", text: msg.payload.toString()});
-						}, reader.#debounce);
+						}, reader.debounce ?? 0);
 					});
 				}
 			});
 			io.mode = config.mode;
-			io.edge = config.edge;
+			io.edge = edge;
 			io.pin = config.pin;
 			io.readers = [this];
 			cache.set(config.pin, io);
 		}
 
 		if (config.initial) {
-			const payload = io.read();
+			const payload = io.read() ^ (this.invert ?? 0);
 			this.send({
 				payload,
 				topic: "gpio/" + config.pin
@@ -94,6 +101,9 @@ class DigitalOutNode extends Node {
 		if (!globalThis.device?.io?.Digital)
 			return;
 
+		if (config.invert)
+			Object.defineProperty(this, "invert", {value: 1}); 
+
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 
@@ -111,13 +121,12 @@ class DigitalOutNode extends Node {
 
 				if (undefined !== config.initial) {
 					if (0 == config.initial)
-						io.write(0);
+						io.write(0 ^ (this.invert ?? 0));
 					else if (1 == config.initial)
-						io.write(1);
+						io.write(1 ^ (this.invert ?? 0));
 				}
 				io.mode = config.mode;
 				cache.set(config.pin, io);
-				
 			}
 			catch {
 				this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
@@ -126,8 +135,9 @@ class DigitalOutNode extends Node {
 	}
 	onMessage(msg, done) {
 		if (this.#io) {
-			this.#io.write(msg.payload);
-			this.status({fill:"green", shape:"dot", text: msg.payload.toString()});
+			const value = msg.payload ^ (this.invert ?? 0);
+			this.#io.write(value);
+			this.status({fill:"green", shape:"dot", text: value.toString()});
 		}
 		done();
 	}

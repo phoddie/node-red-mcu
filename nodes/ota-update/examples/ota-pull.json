@@ -1,0 +1,128 @@
+[
+    {
+        "id": "c5fcfc5d2cb51ebf",
+        "type": "tab",
+        "label": "OTA Pull",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "b0a1deea7bf0c600",
+        "type": "ota-update",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA",
+        "path": "",
+        "moddable_manifest": {
+            "include": "$(NODEREDMCU)/nodes/ota-update/manifest.json"
+        },
+        "x": 370,
+        "y": 220,
+        "wires": [
+            [
+                "b62d22f76d13a47e"
+            ]
+        ]
+    },
+    {
+        "id": "26a90fa3bf80cfa1",
+        "type": "inject",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "Download URL",
+        "props": [
+            {
+                "p": "url",
+                "v": "http://10.0.0.24/xs_esp32.bin",
+                "vt": "str"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": 0.1,
+        "topic": "",
+        "x": 200,
+        "y": 220,
+        "wires": [
+            [
+                "b0a1deea7bf0c600"
+            ]
+        ]
+    },
+    {
+        "id": "a0a3b6d772cd9e42",
+        "type": "comment",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA Pull - Download from URL",
+        "info": "",
+        "x": 170,
+        "y": 140,
+        "wires": []
+    },
+    {
+        "id": "b62d22f76d13a47e",
+        "type": "mcu_restart",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "Restart",
+        "moddable_manifest": {
+            "include": [
+                {
+                    "git": "https://github.com/phoddie/mcu_restart.git"
+                }
+            ]
+        },
+        "x": 520,
+        "y": 220,
+        "wires": []
+    },
+    {
+        "id": "d62ad0abfa4b375f",
+        "type": "status",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA status",
+        "scope": [
+            "b0a1deea7bf0c600"
+        ],
+        "x": 260,
+        "y": 340,
+        "wires": [
+            [
+                "ed4ebb72a7791f8d"
+            ]
+        ]
+    },
+    {
+        "id": "ed4ebb72a7791f8d",
+        "type": "debug",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA log",
+        "active": true,
+        "tosidebar": true,
+        "console": true,
+        "tostatus": false,
+        "complete": "payload",
+        "targetType": "msg",
+        "statusVal": "",
+        "statusType": "auto",
+        "x": 420,
+        "y": 380,
+        "wires": []
+    },
+    {
+        "id": "94fbfd5bd65acf0a",
+        "type": "catch",
+        "z": "c5fcfc5d2cb51ebf",
+        "name": "OTA Error",
+        "scope": [
+            "b0a1deea7bf0c600"
+        ],
+        "uncaught": false,
+        "x": 260,
+        "y": 420,
+        "wires": [
+            [
+                "ed4ebb72a7791f8d"
+            ]
+        ]
+    }
+]

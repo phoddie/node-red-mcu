@@ -6,6 +6,7 @@
 			name: { value:"" },
 			pin: { value:"?", validate: RED.validators.number() },
 			hz: { value:"" },
+			moddable_manifest: {value: {include: "$(NODEREDMCU)/nodes/mcu/pwm/manifest.json"}},
 		},
 		inputs:1,
 		outputs:0,

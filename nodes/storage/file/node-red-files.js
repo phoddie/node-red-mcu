@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2023  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -24,6 +24,67 @@ import Base64 from "base64";
 import Hex from "hex";
 import Timer from "timer";
 
+// ShareFile emulates File to allows one instance of a file to be shared across several File Read & Write nodes.
+// This avoids issues with file system implementation caching across instances.
+
+let cache;
+
+class SharedFile {
+	#filename;
+	position = 0;
+
+	constructor(filename, write) {
+		if (!write && !File.exists(filename))
+			throw new Error("file not found: " + filename);
+
+		this.#filename = filename;
+		this.file;				// try to open file immediately, to throw from constructor if error
+	}
+	close() {
+		if (undefined === this.#filename)
+			return;
+
+		cache.get(this.#filename)?.close();
+		cache.delete(this.#filename);
+		if (!cache.size)
+			cache = undefined;
+		this.#filename = undefined;
+	}
+	read(...args) {
+		const file = this.file;
+		file.position = this.position;
+		const result = file.read(...args);
+		this.position = file.position;
+		return result;
+	}
+	write(...args) {
+		const file = this.file;
+		file.position = this.position;
+		const result = file.write(...args);
+		this.position = file.position;
+		return result;
+	}
+	get length() {
+		return this.file.length;
+	}
+	get file() {
+		cache ??= new Map;
+		let file = cache.get(this.#filename);
+		if (file)
+			return file;
+
+		file = new File(this.#filename, true);
+		cache.set(this.#filename, file);
+		return file;
+	}
+
+	static delete(filename) {
+		cache?.get(filename)?.close();
+		cache?.delete(filename);
+		File.delete(filename);
+	}
+}
+
 class FileWrite extends Node {
 	#state = {}; 
 
@@ -46,9 +107,10 @@ class FileWrite extends Node {
 	}
 	onMessage(msg) {
 		let payload = msg.payload, state = this.#state
+		const filename = state.filename ?? msg.filename;
 
 		if ("delete" === state.overwriteFile) {
-			File.delete(state.filename ?? msg.filename);
+			SharedFile.delete(filename);
 			return msg;
 		}
 
@@ -84,41 +146,33 @@ class FileWrite extends Node {
 				throw new Error(`unsupported encoding ${state.encoding}`);
 		}
 
-		let file = state.file;
+		let file;
 		try {
-			if (!file) {
-				const filename = state.filename ?? msg.filename;
-
-				if (state.createDir) {
-					const parts = filename.split("/");
-					for (let i = 1; i <= parts.length - 1; i++) {
-						const partial = parts.slice(0, i).join("/");
-						if (!File.exists(partial))
-							Directory.create(partial);
-					}
+			if (state.createDir) {
+				const parts = filename.split("/");
+				for (let i = 1; i <= parts.length - 1; i++) {
+					const partial = parts.slice(0, i).join("/");
+					if (!File.exists(partial))
+						Directory.create(partial);
 				}
-
-				if ("true" === state.overwriteFile)
-					File.delete(filename);
-
-				file = new File(filename, true);
-				file.position = file.length;
 			}
+
+			if ("true" === state.overwriteFile)
+				SharedFile.delete(filename);
+
+			file = new SharedFile(filename, true);
+			file.position = file.length;
 
 			file.write(payload);
 			if (state.appendNewline)
 				file.write("\n");
+			file.close();
+			return msg;
 		}
 		catch (e) {
-			this.error(e);
+			file?.close();
+			this.error(e, {_msgid: msg._msgid, filename});
 		}
-
-		if (!state.filename)
-			file.close();
-		else
-			state.file = file;
-
-		return msg;
 	}
 
 	static type = "file";
@@ -142,14 +196,21 @@ class FileRead extends Node {
 		if ("none" !== config.encoding)
 			state.encoding = config.encoding;
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		let state = this.#state;
 		const filename = state.filename ?? msg.filename;
 		let file;
 		try {
-			file = new File(filename);
+			if (!filename)
+				return void done();
+
+			msg.filename = filename;
+			if (!File.exists(filename))
+				return void this.error("file not found: " + filename, msg);
+
+			file = new SharedFile(filename);
 			if ("" === state.format) {
-				msg.payload = file.read(ArrayBuffer);
+				msg.payload = new Uint8Array(file.read(ArrayBuffer));
 			}
 			else if ("stream" === state.format) {
 				msg.parts = {
@@ -162,12 +223,13 @@ class FileRead extends Node {
 				msg.parts.count = Math.idiv(file.length + 511, 512);
 
 				Timer.repeat(id => {
-					msg.payload = file.read(ArrayBuffer, Math.min(file.length - file.position, 512));
+					msg.payload = new Uint8Array(file.read(ArrayBuffer, Math.min(file.length - file.position, 512)));
 					this.send(msg);
 					msg.parts.index += 1;
 					if (file.length <= file.position) {
 						Timer.clear(id);
 						file.close();
+						done();
 					}
 				}, 1);
 				return;
@@ -204,6 +266,7 @@ class FileRead extends Node {
 					if (file.length <= file.position) {
 						Timer.clear(id);
 						file.close();
+						done();
 					}
 				}, 1);
 				return;
@@ -226,12 +289,13 @@ class FileRead extends Node {
 					default:
 						throw new Error("encoding unsupported: " + state.encoding)
 				}
+				done();
 			}
 			file?.close();
 		}
 		catch (e) {
 			file?.close();
-			this.error(e);
+			this.error(e, {_msgid: msg._msgid, filename});
 			return;
 		}
 		

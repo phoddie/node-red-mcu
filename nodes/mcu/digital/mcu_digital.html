@@ -92,18 +92,6 @@
 		<label for="node-input-invert" style="width:70%;">Invert</label>
 	</div>
 </script>
-<script type="text/html" data-help-name="mcu_digital_in">
-	<p>MCU node to monitor an ECMA-419 Digital Input.</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>0 or 1</dd>
-		<dt>topic <span class="property-type">string</span></dt>
-		<dd>a string of the form <code>gpio/{the pin number}</code> (for compatibilty with the "rpi-gpio in" node)</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.</p>
-</script>
 
 <script type="text/html" data-template-name="mcu_digital_out">
 	<div class="form-row">
@@ -133,6 +121,21 @@
 	</div>
 </script>
 
+<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
+
+<script type="text/html" data-help-name="mcu_digital_in">
+	<p>MCU node to monitor an ECMA-419 Digital Input.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">number</span></dt>
+		<dd>0 or 1</dd>
+		<dt>topic <span class="property-type">string</span></dt>
+		<dd>a string of the form <code>gpio/{the pin number}</code> (for compatibilty with the "rpi-gpio in" node)</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.</p>
+</script>
+
 <script type="text/html" data-help-name="mcu_digital_out">
 	<p>MCU node to set an ECMA-419 Digital Output.</p>
 	<h3>Inputs</h3>
@@ -143,4 +146,3 @@
 	<p>The input <code>payload</code> is treated as a number, with 0 setting the output to 0 and any other value setting it to 1. </p>
 </script>
 
-<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js">

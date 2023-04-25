@@ -119,26 +119,6 @@
 		<input type="number" id="node-input-bytes" min="0" max="31" style="display:inline-block; width:70%; vertical-align:middle;">
 	</div>
 </script>
-<script type="text/html" data-help-name="mcu_i2c_in">
-	<p>MCU node to read from an ECMA-419 I2C instance.</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">buffer</span></dt>
-		<dd>the bytes read from the I2C input</dd>
-		<dt>address <span class="property-type">number</span></dt>
-		<dd>the I2C address read from</dd>
-	</dl>
-	<h3>Inputs</h3>
-	<dl class="message-properties">
-		<dt>address <span class="property-type">number</span></dt>
-		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
-		<dt>command <span class="property-type">number</span></dt>
-		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>If the I2C read fails, no output message is sent.</p>
-	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Input Node</a>.</p>
-</script>
 
 <script type="text/html" data-template-name="mcu_i2c_out">
 	<div class="form-row">
@@ -174,6 +154,29 @@
     </div>
 </script>
 
+<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
+
+<script type="text/html" data-help-name="mcu_i2c_in">
+	<p>MCU node to read from an ECMA-419 I2C instance.</p>
+	<h3>Outputs</h3>
+	<dl class="message-properties">
+		<dt>payload <span class="property-type">buffer</span></dt>
+		<dd>the bytes read from the I2C input</dd>
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>the I2C address read from</dd>
+	</dl>
+	<h3>Inputs</h3>
+	<dl class="message-properties">
+		<dt>address <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C address, if not set in the configuration</dd>
+		<dt>command <span class="property-type">number</span></dt>
+		<dd>Optional. Sets the I2C command, if not set in the configuration</dd>
+	</dl>
+	<h3>Details</h3>
+	<p>If the I2C read fails, no output message is sent.</p>
+	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Input Node</a>.</p>
+</script>
+
 <script type="text/html" data-help-name="mcu_i2c_out">
 	<p>MCU node to write to an ECMA-419 I2C instance.</p>
 	<h3>Inputs</h3>
@@ -190,5 +193,3 @@
 	<p>If the input <code>payload</code> is a number the <code>Bytes</code> value in the configuration determines the size of the integer output. The value is always writtein in little-endian order.</p>
 	<p>Based on the <a href="https://flows.nodered.org/node/node-red-contrib-i2c">Raspberry Pi I2C Output Node</a>.</p>
 </script>
-
-<script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js">

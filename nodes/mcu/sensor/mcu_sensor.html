@@ -165,18 +165,22 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="sensor">
-	<p>Read samples from <a href="https://419.ecma-international.org/#-14-sensor-classes">ECMA-419 sensor class</a> implementations</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">object</span></dt>
-		<dd>The object returned by the driver's <code>sample()</code> method. If a sample is unavailable, no message is output.</dd>
-	</dl>
-	<h3>Inputs</h3>
-	<dl class="message-properties">
-		<dt>configuration <span class="property-type">object</span></dt>
-		<dd>Optional. If present, it is passed to the driver's <code>configure()</code> method and no sample is taken</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>When running in full Node-RED the node generates simulated sensor values. This is useful for debugging flows before deploying them to the MCU.</p>
+<script type="text/markdown" data-help-name="sensor">
+Read samples from [ECMA-419 sensor class](https://419.ecma-international.org/#-14-sensor-classes) drivers.
+
+### Inputs
+: configuration (object) :  an optional property to pass to the driver's `configure()` method and no sample is taken
+
+### Outputs
+: payload (object) :  sample object returned by the driver's `sample()` method
+: callback (string) :  if sample triggered by callback, the name of the callback; otherwise, property is not present
+
+### Details
+Sensors output a sample when a message is received. An Inject node can be used to trigger a sample reading. A repeating Inject node is a convenient for periodic sampling. If the sensor is unable to to provide a sample, no message is output from the sensor node.
+
+The [format of the sample payload](https://419.ecma-international.org/#-14-sensor-classes) is defined by ECMA-419 based on the type of sensor.
+
+Some sensors report when a sensor reading is ready. How this works vary by sensor. For these sensors, no input trigger is required. Instead, the Sensor node outputs a message when a sensor reading is available. The message output also includes a `callback` property with the name of the callback as defined by the driver, for example `onAlert` or `onSample`.
+
+When running in full Node-RED the Sensor node generates simulated sensor values for common sensor types. This is useful for debugging flows before deploying them to the MCU.
 </script>

@@ -125,26 +125,34 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="mcu_digital_in">
-	<p>MCU node to monitor an ECMA-419 Digital Input.</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>0 or 1</dd>
-		<dt>topic <span class="property-type">string</span></dt>
-		<dd>a string of the form <code>gpio/{the pin number}</code> (for compatibilty with the "rpi-gpio in" node)</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.</p>
+<script type="text/markdown" data-help-name="mcu_digital_in">
+MCU node to monitor an [ECMA-419 Digital Input](https://419.ecma-international.org/#-10-io-classes-digital).
+
+### Outputs
+: payload (number) : 0 or 1
+: topic (string) : a string of the form `gpio/{pin number)` (for compatibilty with the "rpi-gpio in" node)
+
+### Details
+A message is sent when the input changes. If the "Edge" filter includes "rising" then messages are sent for transitions from 0 to 1; if it includes "falling", for transitions from 1 to 0.
+
+If "Invert" is checked in the property editor, the output is 1 for low and 0 for high.
+
+If "Read initial state of pin on restart?" is checked, a message is output at start-up with the current value of the digital input.
+
+If "Debounce" is set to a non-zero value, that number of milliseconds is waited after an input change is detected to report the reading. This can be useful in filtering out noise in transitions.
 </script>
 
-<script type="text/html" data-help-name="mcu_digital_out">
-	<p>MCU node to set an ECMA-419 Digital Output.</p>
-	<h3>Inputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-	</dl>
-	<h3>Details</h3>
-	<p>The input <code>payload</code> is treated as a number, with 0 setting the output to 0 and any other value setting it to 1. </p>
+<script type="text/markdown" data-help-name="mcu_digital_out">
+MCU node to set an [ECMA-419 Digital Output](https://419.ecma-international.org/#-10-io-classes-digital).
+
+### Input
+: payload (number) : value to set the digital output, 0 or 1
+
+### Details
+The input `payload` is treated as a number, with 0 setting the output to 0 and any other value setting it to 1.
+
+If "Invert" is checked in the property editor, an input of 1 sets the output low and 0 to high.
+
+The "Initial state" popup is used to set the initial state of the output to 0, 1, or to leave it as-is.
 </script>
 

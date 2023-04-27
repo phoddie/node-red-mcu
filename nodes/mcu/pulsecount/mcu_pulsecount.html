@@ -42,13 +42,12 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="mcu_pulse_count">
-	<p>MCU node to set an ECMA-419 Pulse Count input.</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>the current reading of the pulse count input (always an integer)</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>A message is sent with the current pulse count reading whenever a change to the pulse count is detected. </p>
+<script type="text/markdown" data-help-name="mcu_pulse_count">
+MCU node to set an [ECMA-419 Pulse Count input](https://419.ecma-international.org/#-10-io-classes-pulse-count).
+
+### Outputs
+: payload (number) : the current reading of the pulse count input (always an integer)
+
+### Details
+A message is sent with the current pulse count reading whenever a change to the pulse count is detected.
 </script>

@@ -42,13 +42,12 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="mcu_pwm_out">
-	<p>MCU node to set an ECMA-419 PWM Output.</p>
-	<h3>Inputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>a floating point value from 0 to 1.0</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>The <code>payload</code> value is multiplied by the PWM's <code>resolution</code> to calculate the output value. </p>
+<script type="text/markdown" data-help-name="mcu_pwm_out">
+MCU node to set an [ECMA-419 PWM Output](https://419.ecma-international.org/#-10-io-classes-pulse-width-modulation).
+
+### Inputs
+: payload (number) : value from 0.0 to 1.0
+
+### Details
+The `payload` value is multiplied by the PWM's `resolution` to calculate the output value. 
 </script>

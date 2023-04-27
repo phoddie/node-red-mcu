@@ -131,18 +131,20 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="mcu_clock">
-	<p>Read samples from <a href="https://github.com/EcmaTC53/spec/blob/master/docs/tc53.md#16-real-time-clock-class-pattern">ECMA-419 Real-Time Clock class</a> implementations</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>The current time of the Real-Time Clock as a JavaScript time value (number of milliseconds since 1 January 1970 00:00:00).</dd>
-	</dl>
-	<h3>Inputs</h3>
-	<dl class="message-properties">
-		<dt>configuration <span class="property-type">object</span></dt>
-		<dd>Optional. If present, passed to the driver's <code>configure()</code> method and no time reading is taken</dd>
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>Optional. If present, used as a JavaScript time value to set the Real-Time Clock and no time reading is taken</dd>
-	</dl>
+<script type="text/markdown" data-help-name="mcu_clock">
+MCU node to read time from [ECMA-419 Real-Time Clock class](https://github.com/EcmaTC53/spec/blob/master/docs/tc53.md#16-real-time-clock-class-pattern) implementations.
+
+### Outputs
+: payload (number) :  The current time of the Real-Time Clock as a JavaScript time value, milliseconds since the midnight at the beginning of January 1, 1970, UTC
+
+### Inputs
+: configuration (object) : Optional. If present, passed to the driver's <code>configure()</code> method and no time reading is taken<
+: payload (number) : Optional. If present, used as a JavaScript time value to set the Real-Time Clock and no time reading is taken
+
+### Details
+The Clock node performs one of three operations based on the input message:
+1. Read the current time from the RTC
+2. Set the current time of the RTC
+3. Configure the RTC
+
 </script>

@@ -47,15 +47,15 @@
 
 <script type="text/javascript" src="resources/@moddable-node-red/mcu/library.js"></script>
 
-<script type="text/html" data-help-name="mcu_analog">
-	<p>MCU node to Read an ECMA-419 Analog input.</p>
-	<h3>Outputs</h3>
-	<dl class="message-properties">
-		<dt>payload <span class="property-type">number</span></dt>
-		<dd>floating point value from 0 to 1</dd>
-		<dt>resolution <span class="property-type">number</span></dt>
-		<dd>number of bits of resolution provided by the input</dd>
-	</dl>
-	<h3>Details</h3>
-	<p>When a message is received, a message is sent with the current reading.</p>
+<script type="text/markdown" data-help-name="mcu_analog">
+MCU node to read from an [ECMA-419 Analog](https://419.ecma-international.org/#-10-io-classes-analog-input) input.
+
+### Outputs
+: payload (number) : analog reading from 0.0 to 1.0
+: resolution (number) : number of bits of resolution provided by the input
+
+### Details
+When a message is received, a message is output with the current reading.
+
+The requested resolution of the analog input may be set in the property editor. This is only a request and is constrained by the capabilities of the underlying hardware. The actual number of bits is reported in the `resolution` property of the message.
 </script>

@@ -1,171 +1,32 @@
 # MCU Nodes
 Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated April 16, 2023<br>
+Updated April 30, 2023<br>
 
-## Overview
-The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. 
+The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. Each node includes built-in documentation describing their inputs, outputs, and configuration options.
 
-This document focuses on the MCU Sensor node which integrates sensor classes that conform the Ecma-419 [Sensor Class Pattern](https://419.ecma-international.org/#-13-sensor-class-pattern) into Node-RED. These include:
+The following nodes are included in the MCU Node suite:
 
-- [Accelerometer](https://419.ecma-international.org/#-14-sensor-classes-accelerometer)
-- [Ambient light](https://419.ecma-international.org/#-14-sensor-classes-ambient-light)
-- [Atmospheric pressure](https://419.ecma-international.org/#-14-sensor-classes-atmospheric-pressure)
-- [Humidity](https://419.ecma-international.org/#-14-sensor-classes-humidity)
-- [Proximity](https://419.ecma-international.org/#-14-sensor-classes-proximity)
-- [Temperature](https://419.ecma-international.org/#-14-sensor-classes-temperature)
-- [Touch](https://419.ecma-international.org/#-14-sensor-classes-touch)
+- Analog
+- Digital Input
+- Digital Output
+- Real-time Clock
+- I²C Read
+- I²C Write
+- Neopixels
+- Pulse Count
+- Pulse Width Input
+- PWM Output
+- Sensor
 
-Many [additional kinds of sensors](https://github.com/EcmaTC53/spec/blob/master/docs/proposals/Sensor%20Classes%202022.md) will be supported with ECMA-419 2nd edition.
+The MCU Nodes appear in the MCU section of the Node-RED Editor's palette.
 
-This is the second major iteration of the Sensor Node. It simplifies configuration of I/O while also provide many more I/O options. It is now driven by a sensor database that allows many configuration options to be set automatically.
+<img src="./assets/palette.png" width=150/>
 
-## Installation
-The MCU nodes must be installed into Node-RED to be used in the Node-RED Editor. This is done in the usual way:
+Here's a flow using Sensor node to log periodic readings from a temperature sensor to the debug console.
 
-> **Note**: If you previously installed the MCU Sensor node (an early version of the MCU suite), uninstall it first:
+<img src="./assets/flow.png"/>
 
-```
-cd ~/.node-red
-npm uninstall @moddable-node-red/sensor@1.0.0
-```
+Nearly all the MCU nodes are implemented using the [ECMA-419 standard](https://419.ecma-international.org), the ECMAScript embedded systems API specification. This provides a rich set of features that run on a variety of microcontrollers. No knowledge of ECMA-419 is required to use the MCU nodes.
 
-And to install:
-
-```
-cd ~/.node-red
-npm install @moddable-node-red/mcu
-```
-
-or
-
-```
-cd ~/.node-red
-npm install [PATH TO node-red-mcu]/nodes/mcu
-```
-
-The nodes appears in the "MCU" section of the editor.
-
-## Creating a Flow
-A simple test flow using the Sensor node has an inject node to periodically trigger a sensor reading, a Sensor node to take the reading, and a debug node to log the sample reading to the console.
-
-<img src="./assets/flow.png" width=550/>
-
-<details>
-<summary>Example flow using TMP102</summary>
-
-```json
-[
-    {
-        "id": "430f6d9e27cbee39",
-        "type": "tab",
-        "label": "Flow 2",
-        "disabled": false,
-        "info": "",
-        "env": [],
-    },
-    {
-        "id": "0a926ca45efae24e",
-        "type": "debug",
-        "z": "430f6d9e27cbee39",
-        "name": "console log",
-        "active": true,
-        "tosidebar": true,
-        "console": false,
-        "tostatus": false,
-        "complete": "true",
-        "targetType": "full",
-        "statusVal": "",
-        "statusType": "auto",
-        "x": 590,
-        "y": 180,
-        "wires": []
-    },
-    {
-        "id": "81b44f35bce77331",
-        "type": "sensor",
-        "z": "430f6d9e27cbee39",
-        "name": "Temperature",
-        "platform": "",
-        "module": "embedded:sensor/Temperature/TMP102",
-        "options": {
-            "sensor": {
-                "io": "I2C",
-                "bus": "default",
-                "address": "0x48"
-            }
-        },
-        "configuration": "{\"conversionRate\":1,\"extendedRange\":true}",
-        "x": 430,
-        "y": 180,
-        "wires": [
-            [
-                "0a926ca45efae24e"
-            ]
-        ]
-    },
-    {
-        "id": "6650a3a2c1f19ca5",
-        "type": "inject",
-        "z": "430f6d9e27cbee39",
-        "name": "",
-        "props": [],
-        "repeat": "1",
-        "crontab": "",
-        "once": false,
-        "onceDelay": 0.1,
-        "topic": "",
-        "x": 290,
-        "y": 180,
-        "wires": [
-            [
-                "81b44f35bce77331"
-            ]
-        ]
-    }
-]
-```
-
-</details>
-
-The sensor node is configured in the editor.
-
-<img src="./assets/ediit=sensor-node.png" width=500/>
-
-The editor options are defined by a database of supported sensors. When you select the sensor to use, the I/O section of the property editor updates to show the settings for that sensor.
-
-The `Bus Name` field is usually set to `default` to select the default I²C or SMBus bus. This field is useful for devices with more than one bus (e.g. M5Atom-Matrix which has both `default` and `internal`).
-
-The `Configure` field is an optional JSON object that is passed to the `configure` method of the sensor driver before taking any readings. This can be useful for configuring advanced modes of the sensor. The configuration can be updated at any time by sending a message with a `configuration` property. (Note that a message containing a `configuration` will not also trigger a sample reading, so does not trigger output from the node.)
-
-Some hosts have built-in sensors that are automatically configured by the host provider. In these cases, there are no I/O options to configure. Here's an example with the `esp32/moddable_two_io` platform.
-
-<img src="./assets/edit-sensor-node-host-provider.png" width=500/>
-
-## Building a Project
-It is common to connect sensors to default I²C bus of the target device. Therefore, it is important to specify the correct platform target when building your project. For example, to build for Moddable Two:
-
-```
-mcconfig -d -m -p esp32/moddable_two
-```
-
-The default I²C bus comes from the [host provider instance](https://419.ecma-international.org/#-16-host-provider-instance). Not all device ports have a host provider instance. Those that do include Moddable One (`esp/moddable_one`), Moddable Two (`esp32/moddable_two`), Node-MCU for ESP8266 (`esp/nodemcu`), and Node-MCU for ESP32 (`esp32/nodemcu`). If your device port does not have a host provider instance, it is usually straightforward to add a basic one by following the pattern of an [existing port](https://github.com/Moddable-OpenSource/moddable/blob/public/build/devices/esp32/targets/nodemcu/host/provider.js). You may also configure the sensor to use specific pin numbers instead of a named bus.
-
-## Using a Sensor Driver
-A growing [suite](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors) of compatible sensor class implementations is available in the Moddable SDK. The sensor driver must be included in your build. The MCU Sensor Node will automatically include the driver in your project, if it knows the location of the driver. If the MCU Sensor Node knows the driver location, it is displayed in its Node-RED editor configuration screen. 
-
-If the location of the driver is not known by the MCU Sensor Node, you can include the driver manually yourself. For example, to use the [TMP102 sensor](https://github.com/Moddable-OpenSource/moddable/tree/public/modules/drivers/sensors/tmp102), include the sensor driver manifest in `node-red-mcu/manifest.json`:
-
-```
-{
-	"include": [
-		"$(MODDABLE)/modules/drivers/sensors/tmp102/manifest.json".
-		"$(MODDABLE)/examples/manifest_base.json",
-		...
-```
-
-> **Note**: The MCU Clock node supports drivers in the same way as the MCU Sensor Node: it automatically includes the driver, when the location is known, and otherwise you may add it yourself.
-
-
-## Running in Full Node-RED
-When run in full Node-RED the sensor node generates simulated values. It determines the type of the sensor from the module specifier (`embedded:sensor/Temperature/TMP102` or `embedded:sensor/AtmosphericPressure-Temperature/BMP180`). The simulated sensor classes are: Accelerometer, AmbientLight, Barometer, Gyroscope, Proximity Temperature, and Touch. The simulated values are naive random numbers, but can be useful for testing flows. More work could be done to provide more realistic simulations and support for more sensor types.
+> **Note**: Node-RED MCU Edition also provides limited support for some Raspberry Pi I/O modules, including rpi-gpio, rpi-neopixels, and rpi-i2c. These are provided for projects that need to run on both MCUs and Raspberry Pi. They are implemented using the MCU Nodes. For projects intended to be used only with Node-RED MCU Edition, the MCU Nodes are preferred.

@@ -167,6 +167,18 @@
 				}
 			}
 		},
+		"embedded:sensor/Barometer-Humidity-Temperature/BME68x": {
+			"model": "BME68x",
+			"manufacturer": "Bosch",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/AtmosphericPressure-Humidity-Temperature-Bosch-BME68x.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/bme68x/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x77,0x76"
+				}
+			}
+		},
 		"embedded:sensor/CarbonDioxideGasSensor-VOCSensor/CCS811": {
 			"model": "CCS811",
 			"manufacturer": "ScioSense",

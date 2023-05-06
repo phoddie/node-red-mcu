@@ -50,10 +50,13 @@ class OTAUpdateNode extends Node {
 		const url = new URL(msg.url);
 		if ("http:" !== url.protocol)
 			return void done("http only");
-		this.#client = new device.network.http.io({ 
+		const options = {
 			...device.network.http,
-			host: url.host
-		});
+			host: url.hostname
+		};
+		if (url.port)
+			options.port = parseInt(url.port); 
+		this.#client = new device.network.http.io(options); 
 		const request = this.#client.request({
 			path: url.pathname,
 			onHeaders(status, headers) {

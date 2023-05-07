@@ -299,6 +299,18 @@
 				}
 			}
 		},
+		"embedded:sensor/Oxygen/SEN0322": {
+			"model": "SEN0322",
+			"manufacturer": "DFRobot",
+			"url": "https://github.com/EcmaTC53/spec/blob/master/docs/Hardware%20Components/sensors/Oxygen-DFRobot-SEN0322.md",
+			"driver": "$(MODDABLE)/modules/drivers/sensors/sen0322/manifest.json",
+			"io": {
+				"sensor": {
+					"type": "I2C",
+					"address": "0x73,0x70,0x71,0x72"
+				}
+			}
+		},
 		"embedded:sensor/SoilMoistureSensor/Capacitive": {
 			"model": "Capacitive Moisture Sensor",
 			"manufacturer": "DFRobot",

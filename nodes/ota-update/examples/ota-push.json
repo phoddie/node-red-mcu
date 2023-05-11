@@ -28,7 +28,7 @@
         "id": "a0a3b6d772cd9e42",
         "type": "comment",
         "z": "c5fcfc5d2cb51ebf",
-        "name": "OTA Push - Upload to HTTP endpoint /firmware/ota",
+        "name": "OTA Push - Upload to HTTP endpoint /ota/firmware",
         "info": "",
         "x": 240,
         "y": 120,

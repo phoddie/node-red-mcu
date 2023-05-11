@@ -64,6 +64,9 @@ const httpRoute = Object.freeze({
 		this.query = query;
 		this.params = params;
 		this.headers = {};
+		if (!this.node)
+			return;		// unrouted response, so don't need headers or request body
+
 		for (const [name, value] of request.headers)
 			this.headers[name] = value;
 
@@ -74,6 +77,9 @@ const httpRoute = Object.freeze({
 		}
 	},
 	onReadable(count) {
+		if (!this.node)
+			return void this.read(count);		// no route for request. ignore request body data.
+
 		this.input ??= new Uint8Array(new ArrayBuffer(0, {maxByteLength: 0x10000000}));
 		if (this.input.buffer.resizable) {
 			const byteLength = this.input.buffer.byteLength;

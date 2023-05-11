@@ -47,6 +47,12 @@ class OTAUpdateNode extends Node {
 		if (!msg.url)
 			return void done();
 
+		if (this.#client) {		// OTA in progress: cancel and start new request
+			this.#ota?.cancel();
+			this.#client.close();
+			this.#ota = this.#client = undefined;
+		}
+
 		const url = new URL(msg.url);
 		if ("http:" !== url.protocol)
 			return void done("http only");
@@ -101,11 +107,21 @@ class OTAUpdateNode extends Node {
 		}
 	}
 	append(from, count) {
-		const data = from.read(count);
-		this.#ota?.write(data);
+		try {
+			const data = from.read(count);
+			this.#ota?.write(data);
+		}
+		catch (e) {		// probably invalid OTA data
+			this.#ota.cancel();
+			this.#ota = undefined;
+			this.status({fill: "red", shape: "ring", text: e.toString()});
+			return;
+		}
 
 		this.received += count;
-		if (undefined === this.total)
+		if (!this.#ota)
+			;
+		else if (undefined === this.total)
 			this.status({fill: "green", shape: "dot", text: this.received + " bytes"});
 		else {
 			const percent = Math.round((this.received / this.total) * 10000) / 100;

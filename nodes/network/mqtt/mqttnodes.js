@@ -18,7 +18,7 @@
  *
  */
 
-import {Node} from "nodered";
+import {Node, configFlowID} from "nodered";
 import Timer from "timer";
 import Base64 from "base64";
 

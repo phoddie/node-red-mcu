@@ -1,0 +1,51 @@
+[
+    {
+        "id": "585f999cf8ac5c84",
+        "type": "tab",
+        "label": "Flow 5",
+        "disabled": false,
+        "info": "",
+        "env": []
+    },
+    {
+        "id": "3bd56973f3fd25e4",
+        "type": "inject",
+        "z": "585f999cf8ac5c84",
+        "name": "",
+        "props": [
+            {
+                "p": "payload"
+            }
+        ],
+        "repeat": "",
+        "crontab": "",
+        "once": true,
+        "onceDelay": "5",
+        "topic": "",
+        "payload": "",
+        "payloadType": "date",
+        "x": 270,
+        "y": 380,
+        "wires": [
+            [
+                "cb14341d99104da1"
+            ]
+        ]
+    },
+    {
+        "id": "cb14341d99104da1",
+        "type": "mcu_restart",
+        "z": "585f999cf8ac5c84",
+        "name": "",
+        "moddable_manifest": {
+            "include": [
+                {
+                    "git": "https://github.com/phoddie/mcu_restart.git"
+                }
+            ]
+        },
+        "x": 450,
+        "y": 380,
+        "wires": []
+    }
+]

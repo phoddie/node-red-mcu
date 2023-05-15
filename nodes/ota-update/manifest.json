@@ -1,4 +1,7 @@
 {
+	"include": [
+		"$(MODDABLE)/modules/data/url/manifest.json"
+	],
 	"modules": {
 		"*": "./ota-update"
 	},

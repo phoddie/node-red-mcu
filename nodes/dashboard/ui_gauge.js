@@ -1,3 +1,4 @@
+import Mustache from "mustache";
 import { UIControlNode, registerConstructor } from "ui_nodes";
 
 class UIGaugeNode extends UIControlNode {
@@ -17,6 +18,7 @@ class UIGaugeNode extends UIControlNode {
 	onStart(config) {
 		super.onStart(config);
 		this.colors = config.colors;
+		this.format = config.format;
 		this.label = config.label;
 		const min = this.min = config.min;
 		const max = this.max = config.max;
@@ -71,7 +73,7 @@ class REDGaugeBehavior extends REDBehavior {
 	}
 	onUpdate(container) {
 		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
+		const { min, max, value, seg1, seg2, title, format } = data;
 		const fraction = (value - min) / (max - min);
 		const { width, height } = container;
 		const shape = container.first;
@@ -93,10 +95,11 @@ class REDGaugeBehavior extends REDBehavior {
 			shape.state = (value <= seg1) ? 0 : (value <= seg2) ? 1 : 2;
 		else
 			shape.state = fraction * 2;
-		label.string = value;
+		if (format)
+			label.string = Mustache.render(format, { value });
 	}
 };
-let REDGauge = Container.template($ => ({
+let REDGauge = Column.template($ => ({
 	left:$.left, width:$.width, top:$.top, height:$.height, clip:true,
 	contents: [
 		$.title ? Label($, { left:0, right:0, height:UNIT, style:REDTheme.styles.textName, string:$.title }) : null,
@@ -119,7 +122,7 @@ let REDGauge = Container.template($ => ({
 class REDGaugeCompassBehavior extends REDBehavior {
 	onUpdate(container) {
 		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
+		const { min, max, value, seg1, seg2, title, format } = data;
 		const fraction = (value - min) / (max - min);
 		const { width, height } = container;
 		const shape = container.first;
@@ -144,8 +147,8 @@ class REDGaugeCompassBehavior extends REDBehavior {
 		path.lineTo(x + (r * Math.cos(angle)), y + (r * Math.sin(angle)));
 		path.closePath();
 		shape.strokeOutline = Outline.fill(path);
-
-		label.string = value;
+		if (format)
+			label.string = Mustache.render(format, { value });
 	}
 };
 let REDGaugeCompass = Column.template($ => ({
@@ -171,7 +174,7 @@ let REDGaugeCompass = Column.template($ => ({
 class REDGaugeDonutBehavior extends REDGaugeBehavior {
 	onUpdate(container) {
 		const data = this.data;
-		const { min, max, value, seg1, seg2, title } = data;
+		const { min, max, value, seg1, seg2, title, format } = data;
 		const fraction = (value - min) / (max - min);
 		const { width, height } = container;
 		const shape = container.first;
@@ -193,7 +196,8 @@ class REDGaugeDonutBehavior extends REDGaugeBehavior {
 			shape.state = (value <= seg1) ? 0 : (value <= seg2) ? 1 : 2;
 		else
 			shape.state = fraction * 2;
-		label.string = value;
+		if (format)
+			label.string = Mustache.render(format, { value });
 	}
 };
 let REDGaugeDonut = Column.template($ => ({

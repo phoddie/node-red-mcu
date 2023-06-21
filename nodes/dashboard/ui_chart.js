@@ -209,7 +209,18 @@ class UIChartNode extends UIControlNode {
 					}
 				});
 			}
-			this.labels = [ this.formatTime(xmin), this.formatTime(xmax) ];
+			const limit = this.limit;
+			if (limit > 0) {
+				let x = when;
+				series.forEach(serie => {
+					let index = serie.samples.length - limit;
+					if (index > 0)
+						serie.samples.splice(0, index);
+					x = Math.min(x, serie.samples[0].x);
+				});
+				this.xmin = x;
+			}
+			this.labels = [ this.formatTime(this.xmin), this.formatTime(this.xmax) ];
 			if (this.adjustMin) {
 				if ((ymin == undefined) || (ymin > payload))
 					this.ymin = payload;
@@ -254,7 +265,8 @@ class UIChartNode extends UIControlNode {
 	onStart(config) {
 		super.onStart(config);
 		this.colors = config.colors;
-		this.duration = Number(config.removeOlderUnit) * 1000;
+		this.duration = Number(config.removeOlder) * Number(config.removeOlderUnit) * 1000;
+		this.limit = config.removeOlderPoints ? Number(config.removeOlderPoints) : 0;
 		this.nodata = config.nodata;
 		this.title = config.label;
 		

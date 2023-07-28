@@ -62,6 +62,7 @@
 	"mqtt out": "$(NODEREDMCU)/nodes/network/mqtt/manifest.json",
 	"tcp in": "$(NODEREDMCU)/nodes/network/tcp/manifest.json",
 	"tcp out": "$(NODEREDMCU)/nodes/network/tcp/manifest.json",
+	"tls-config": "$(NODEREDMCU)/nodes/network/tls-config/manifest.json",
 	"udp in": "$(NODEREDMCU)/nodes/network/udp/manifest.json",
 	"udp out": "$(NODEREDMCU)/nodes/network/udp/manifest.json",
 	"websocket-client": "$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json",

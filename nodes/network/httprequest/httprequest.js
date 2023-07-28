@@ -23,6 +23,7 @@ import fetch from "fetch";
 import {Headers} from "fetch";
 import {URLSearchParams} from "url";
 import Mustache from "mustache";
+import CertificateManager from "ssl/cert";
 
 class HTTPRequestNode extends Node {
 	#options;
@@ -33,7 +34,7 @@ class HTTPRequestNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 
-		if (config.tls || config.proxy || config.authType /* || config.senderr */)
+		if (config.proxy || config.authType /* || config.senderr */)
 			throw new Error("unimplemented");
 
 		this.#format = config.ret;
@@ -43,6 +44,11 @@ class HTTPRequestNode extends Node {
 			method: config.method,
 			url: config.url
 		};
+		if (config.tls) {
+			this.#options.tls = RED.nodes.getNode(config.tls)?.options;
+			if (this.#options.tls.ca)
+				CertificateManager.register(this.#options.tls.ca);
+		}
 	}
 	onMessage(msg) {
 		const headers = new Headers([
@@ -82,12 +88,8 @@ class HTTPRequestNode extends Node {
 			options.body = body;
 		}
 
-		if (url.startsWith("http:"))
-			;
-		else if (url.startsWith("https:"))
-			throw new Error("HTTPS not yet implemented");
-		else
-			url = "http://" + url;
+		if (!url.startsWith("http:") && !url.startsWith("https:"))
+			url = (this.#options.tls ? "https://" : "http://") + url;
 		fetch(url, options)
 		.then(response => {
 			msg.statusCode = response.status;

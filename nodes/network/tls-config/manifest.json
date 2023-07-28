@@ -1,0 +1,6 @@
+{
+	"modules": {
+		"*": "./tls-config"
+	},
+	"preload": "tls-config"
+}

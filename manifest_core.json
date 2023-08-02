@@ -11,11 +11,9 @@
 	"modules": {
 		"*": [
 			"./nodered"
-		],
-		"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
+		]
 	},
 	"preload": [
-		"wifi/connection",
 		"nodered"
 	],
 	"defines": {
@@ -30,7 +28,7 @@
 	},
 	"platforms": {
 		"win": {
-			"error": "Node-RED MCU does not currently run on Windows"
+			"error": "Node-RED MCU does not currently run on Windows simulator. You can still build for device targets."
 		},
 		"esp": {
 			"modules": {
@@ -38,9 +36,13 @@
 					"$(BUILD)/devices/esp/setup/network"
 				],
 				"setup/network": "./setupwifi",
-				"setup/timezone": "./setuptimezone"
+				"setup/timezone": "./setuptimezone",
+				"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
 			},
-			"preload": "setup/timezone"
+			"preload": [
+				"setup/timezone",
+				"wifi/connection"
+			]
 		},
 		"esp32": {
 			"modules": {
@@ -48,9 +50,13 @@
 					"$(BUILD)/devices/esp32/setup/network"
 				],
 				"setup/network": "./setupwifi",
-				"setup/timezone": "./setuptimezone"
+				"setup/timezone": "./setuptimezone",
+				"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
 			},
-			"preload": "setup/timezone"
+			"preload": [
+				"setup/timezone",
+				"wifi/connection"
+			]
 		},
 		"pico": {
 			"modules": {
@@ -58,9 +64,13 @@
 					"$(BUILD)/devices/pico/setup/network"
 				],
 				"setup/network": "./setupwifi",
-				"setup/timezone": "./setuptimezone"
+				"setup/timezone": "./setuptimezone",
+				"wifi/connection": "$(MODDABLE)/examples/network/wifi/wificonnection/wificonnection"
 			},
-			"preload": "setup/timezone"
+			"preload": [
+				"setup/timezone",
+				"wifi/connection"
+			]
 		}
 	}	
 }

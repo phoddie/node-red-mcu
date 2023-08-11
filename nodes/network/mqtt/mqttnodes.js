@@ -38,9 +38,15 @@ class MQTTBrokerNode extends Node {
 		if (config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || !config.autoConnect || config.sessionExpiry)
 			throw new Error("unimplemented");
 
+		let port = config.port;
+		if (port)
+			port = parseInt(port);
+		if (!port)
+			port = config.tls ? 8883 : 1883;
+
 		this.#options = {
 			host: config.broker,
-			port: parseInt(config.port),
+			port,
 			id: config.clientid ? config.clientid : "node-red-" + this.id + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000),		//@@ revisit this
 			keepalive: (parseInt(config.keepalive) || 60) * 1000,
 			clean: true === config.cleansession

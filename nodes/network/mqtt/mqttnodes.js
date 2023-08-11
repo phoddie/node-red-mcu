@@ -78,13 +78,16 @@ class MQTTBrokerNode extends Node {
 				io: Modules.importNow("tlssocket"),
 				TCP: {
 					io: device.network.mqtt.socket.io
-				}
+				},
+				secure: {}
 			};
 			const ca = this.#tls?.options?.ca
-			if (ca) {
-				tls.socket.secure = {
-					certificate: ca
-				};
+			if (ca) tls.socket.secure.certificate = ca; 
+			const cert = this.#tls?.options?.cert
+			if (cert) {
+				tls.socket.secure.clientCertificates = [cert]; 
+				const key = this.#tls?.options?.key
+				if (key) tls.socket.secure.clientKey = key;
 			}
 		}
 

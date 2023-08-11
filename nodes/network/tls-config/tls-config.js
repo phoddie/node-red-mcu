@@ -27,6 +27,10 @@ class TLSConfig extends Node {
 
 		if (Resource.exists(this.id +"-ca.der"))
 			config.ca = new Resource(this.id +"-ca.der");
+		if (Resource.exists(this.id +"-cert.der"))
+			config.cert = new Resource(this.id +"-cert.der");
+		if (Resource.exists(this.id +"-key.der"))
+			config.key = new Resource(this.id +"-key.der");
 
 		Object.defineProperty(this, "options", {
 			value: Object.freeze(config, true),

@@ -44,11 +44,8 @@ class HTTPRequestNode extends Node {
 			method: config.method,
 			url: config.url
 		};
-		if (config.tls) {
-			this.#options.tls = RED.nodes.getNode(config.tls)?.options;
-			if (this.#options.tls.ca)
-				CertificateManager.register(this.#options.tls.ca);
-		}
+		if (config.tls)
+			this.#options.tls = RED.nodes.getNode(config.tls);
 	}
 	onMessage(msg) {
 		const headers = new Headers([
@@ -87,6 +84,10 @@ class HTTPRequestNode extends Node {
 
 			options.body = body;
 		}
+
+		const ca = this.#options.tls?.options?.ca;
+		if (ca)
+			CertificateManager.register(ca);
 
 		if (!url.startsWith("http:") && !url.startsWith("https:"))
 			url = (this.#options.tls ? "https://" : "http://") + url;

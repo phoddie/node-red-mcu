@@ -21,6 +21,7 @@
 import {Node, configFlowID} from "nodered";
 import Timer from "timer";
 import Base64 from "base64";
+import Modules from "modules";
 
 class MQTTBrokerNode extends Node {
 	#mqtt;
@@ -29,11 +30,12 @@ class MQTTBrokerNode extends Node {
 	#writable;
 	#queue;
 	#status = [];
+	#tls;
 
 	onStart(config) {
 		super.onStart(config);
 
-		if (config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || config.usetls || !config.autoConnect || config.sessionExpiry)
+		if (config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || !config.autoConnect || config.sessionExpiry)
 			throw new Error("unimplemented");
 
 		this.#options = {
@@ -47,6 +49,8 @@ class MQTTBrokerNode extends Node {
 			this.#options.user = config.credentials.user; 
 		if (config.credentials?.password)
 			this.#options.password = config.credentials.password; 
+		if (config.tls)
+			this.#tls = RED.nodes.getNode(config.tls);
 
 		if (config.birthTopic && config.birthPayload) {
 			this.#options.birthTopic = config.birthTopic;
@@ -62,9 +66,26 @@ class MQTTBrokerNode extends Node {
 	connect() {
 		this.status({fill: "yellow", shape: "ring", text: "node-red:common.status.connecting"});
 
+		const tls = {};
+		if (this.#tls) {
+			tls.socket = {
+				io: Modules.importNow("tlssocket"),
+				TCP: {
+					io: device.network.mqtt.socket.io
+				}
+			};
+			const ca = this.#tls?.options?.ca
+			if (ca) {
+				tls.socket.secure = {
+					certificate: ca
+				};
+			}
+		}
+
 		const MQTTClient = device.network.mqtt.io;
 		this.#mqtt = new device.network.mqtt.io({
 			...device.network.mqtt,
+			...tls,
 			...this.#options,
 			onReadable: (count, options) => {
 				let payload = this.#mqtt.read(count);

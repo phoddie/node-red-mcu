@@ -48,7 +48,7 @@ class MQTTBrokerNode extends Node {
 			host: config.broker,
 			port,
 			id: config.clientid ? config.clientid : "node-red-" + this.id + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000),		//@@ revisit this
-			keepalive: (parseInt(config.keepalive) || 60) * 1000,
+			keepalive: config.keepalive,
 			clean: true === config.cleansession
 		};
 		if (config.credentials?.user)

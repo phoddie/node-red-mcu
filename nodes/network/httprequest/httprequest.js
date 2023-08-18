@@ -85,12 +85,18 @@ class HTTPRequestNode extends Node {
 			options.body = body;
 		}
 
-		const ca = this.#options.tls?.options?.ca;
-		if (ca)
-			CertificateManager.register(ca);
-
 		if (!url.startsWith("http:") && !url.startsWith("https:"))
 			url = (this.#options.tls ? "https://" : "http://") + url;
+
+		if (url.startsWith("https://")) {
+			if (false === this.#options.tls?.options?.verifyservercert)
+				throw new Error("cannot skip server cert validation yet")
+	
+			const ca = this.#options.tls?.options?.ca;
+			if (ca)
+				CertificateManager.register(ca);
+		}
+
 		fetch(url, options)
 		.then(response => {
 			msg.statusCode = response.status;

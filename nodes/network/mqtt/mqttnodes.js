@@ -83,6 +83,8 @@ class MQTTBrokerNode extends Node {
 					verify: this.#tls.options?.verifyservercert ?? true
 				}
 			};
+			const servername = this.#tls.options?.servername;
+			if (servername) tls.socket.secure.serverName = servername; 
 			const ca = this.#tls.options?.ca;
 			if (ca) tls.socket.secure.certificate = ca; 
 			const cert = this.#tls.options?.cert;

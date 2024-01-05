@@ -30,8 +30,5 @@
 	},
 	"config": {
 		"startupSound": false
-	},
-	"x-resources": {
-		"*": "$(MODDABLE)/examples/assets/sounds/bflatmajor"
 	}
 }

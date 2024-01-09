@@ -2,7 +2,7 @@
 	"include": [
 		"$(MODDABLE)/modules/data/url/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/httpclient/manifest_httpclient.json",
-		"../network/httpserver/manifest.json"
+		"$(NODEREDMCU)/nodes/network/httpserver/manifest.json"
 	],
 	"modules": {
 		"*": "./ota-update"

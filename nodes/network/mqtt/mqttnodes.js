@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2024  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -75,7 +75,7 @@ class MQTTBrokerNode extends Node {
 		const tls = {};
 		if (this.#tls) {
 			tls.socket = {
-				io: Modules.importNow("tlssocket"),
+				io: Modules.importNow("embedded:io/socket/tcp/tls"),
 				TCP: {
 					io: device.network.mqtt.socket.io
 				},

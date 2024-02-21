@@ -86,5 +86,7 @@
 	"file in": "$(NODEREDMCU)/nodes/storage/file/manifest.json",
 
 	"openweathermap": "$(NODEREDMCU)/nodes/weather/openweathermap/manifest.json",
-	"openweathermap in": "$(NODEREDMCU)/nodes/weather/openweathermap/manifest.json"
+	"openweathermap in": "$(NODEREDMCU)/nodes/weather/openweathermap/manifest.json",
+	
+	"mcu_code": ""
 }

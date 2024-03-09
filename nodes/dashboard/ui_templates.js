@@ -36,7 +36,6 @@ function buildTheme(theme) {
 	const halfWidget = blendColors(0.5,group,widget);
 	//const FONT = RED.util.getSetting(node, 'DASHBOARD_FONT') ?? "Roboto";
 	const FONT = (config.DASHBOARD_FONT) ? config.DASHBOARD_FONT : "Roboto";
-	trace(FONT);
 	const result = {
 		colors: {
 			gauge: halfGray,

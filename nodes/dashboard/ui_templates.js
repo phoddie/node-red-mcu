@@ -1,4 +1,5 @@
 import {} from "piu/MC";
+import config from "mc/config";
 
 import { HorizontalScrollerBehavior, VerticalScrollerBehavior } from "ScrollerBehaviors";
 
@@ -33,7 +34,8 @@ function buildTheme(theme) {
 
 	const halfGray = blendColors(0.5,group,gray);
 	const halfWidget = blendColors(0.5,group,widget);
-	
+    //const FONT = RED.util.getSetting(node, 'DASHBOARD_FONT') ?? "Roboto";
+	const FONT = (config.DASHBOARD_FONT) ? config.DASHBOARD_FONT : "Roboto";
 	const result = {
 		colors: {
 			gauge: halfGray,
@@ -46,18 +48,18 @@ function buildTheme(theme) {
 		},
 		skins: {},
 		styles: {
-			chartNoData: new Style({ font:"18px Roboto", color:halfGray, horizontal:"center" }),
-			chartX: new Style({ font:"medium 12px Roboto", color:widgetText, horizontal:"center" }),
-			chartY: new Style({ font:"medium 12px Roboto", color:widgetText, horizontal:"right" }),
-			notification: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10, right:10, top:10, bottom:10 }),
-			keyboard: new Style({ font:"18px Roboto", color:BLACK }),
-			textName: new Style({ font:"18px Roboto", color:widgetText, left:5, right:5 }),
-			textValue: new Style({ font:"medium 18px Roboto", color:widgetText, left:5, right:5 }),
-			textNameLeft: new Style({ font:"18px Roboto", color:widgetText, horizontal:"left", left:10 }),
-			textValueLeft: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"left", left:10 }),
-			textNameRight: new Style({ font:"18px Roboto", color:widgetText, horizontal:"right", right:10 }),
-			textValueRight: new Style({ font:"medium 18px Roboto", color:widgetText, horizontal:"right", right:10 }),
-			textField: new Style({ font:"medium 18px Roboto", color:[TRANSPARENT,widgetText,widgetText,widget], horizontal:"left", left:10 }),
+			chartNoData: new Style({ font:`18px ${FONT}`, color:halfGray, horizontal:"center" }),
+			chartX: new Style({ font:`medium 12px ${FONT}`, color:widgetText, horizontal:"center" }),
+			chartY: new Style({ font:`medium 12px ${FONT}`, color:widgetText, horizontal:"right" }),
+			notification: new Style({ font:`18px ${FONT}`, color:widgetText, horizontal:"left", left:10, right:10, top:10, bottom:10 }),
+			keyboard: new Style({ font:`18px ${FONT}`, color:BLACK }),
+			textName: new Style({ font:`18px ${FONT}`, color:widgetText, left:5, right:5 }),
+			textValue: new Style({ font:`medium 18px ${FONT}`, color:widgetText, left:5, right:5 }),
+			textNameLeft: new Style({ font:`18px ${FONT}`, color:widgetText, horizontal:"left", left:10 }),
+			textValueLeft: new Style({ font:`medium 18px ${FONT}`, color:widgetText, horizontal:"left", left:10 }),
+			textNameRight: new Style({ font:`18px ${FONT}`, color:widgetText, horizontal:"right", right:10 }),
+			textValueRight: new Style({ font:`medium 18px ${FONT}`, color:widgetText, horizontal:"right", right:10 }),
+			textField: new Style({ font:`medium 18px ${FONT}`, color:[TRANSPARENT,widgetText,widgetText,widget], horizontal:"left", left:10 }),
 		},
 		textures: {
 		}
@@ -67,27 +69,27 @@ function buildTheme(theme) {
 	result.skins.tab = new Skin({ fill:page });
 	
 	result.skins.title = new Skin({ fill:[title,title,title,blendColors(0.25,title,WHITE)] });
-	result.styles.title = new Style({ font:"medium 18px Roboto", color:WHITE, horizontal:"left" });
+	result.styles.title = new Style({ font:`medium 18px ${FONT}`, color:WHITE, horizontal:"left" });
 	result.skins.titleIcon = new Skin({ texture:textures.glyphs, color:WHITE, x:0, y:0, width:40, height:40 });
 	result.skins.titleMenu = new Skin({ fill:sideBar, stroke:title, left:1, right:1, top:1, bottom:1 }),
 	result.skins.titleMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,title] });
-	result.styles.titleMenuItem = new Style({ font:"medium 18px Roboto", color:[halfGray,groupText,groupText,WHITE], horizontal:"left" });
+	result.styles.titleMenuItem = new Style({ font:`medium 18px ${FONT}`, color:[halfGray,groupText,groupText,WHITE], horizontal:"left" });
 	result.skins.titleMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,groupText,groupText,WHITE], x:200, y:0, width:40, height:40 });
 	
 	result.skins.group = new Skin({ fill:group, stroke:groupBorder, bottom:1 });
-	result.styles.group = new Style({ font:"medium 18px Roboto", color:[groupText,groupText,groupText,groupText], horizontal:"left" });
+	result.styles.group = new Style({ font:`medium 18px ${FONT}`, color:[groupText,groupText,groupText,groupText], horizontal:"left" });
 	result.skins.groupIcon = new Skin({ texture:textures.glyphs, color:[groupText,groupText,groupText,groupText], x:40, y:0, width:40, height:40, variants:40 });
 	
 	result.skins.button = new Skin({ texture:textures.button, color:[TRANSPARENT,widget,widget,blendColors(0.25,widget,WHITE)], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
-	result.styles.button = new Style({ font:"medium 18px Roboto", color:[halfGray,WHITE,WHITE,WHITE] });
+	result.styles.button = new Style({ font:`medium 18px ${FONT}`, color:[halfGray,WHITE,WHITE,WHITE] });
 	
 // 	result.skins.dropDown = new Skin({ texture:textures.popup, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
 	result.skins.dropDown = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], stroke:[TRANSPARENT,halfGray,halfGray,widget], left:1, right:1, top:1, bottom:1 }),
-	result.styles.dropDown = new Style({ font:"medium 18px Roboto", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.styles.dropDown = new Style({ font:`medium 18px ${FONT}`, color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
 	result.skins.dropDownIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:160, y:0, width:40, height:40 });
 	result.skins.dropDownMenu = new Skin({ fill:group, stroke:widget, left:1, right:1, top:1, bottom:1 }),
 	result.skins.dropDownMenuItem = new Skin({ fill:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget] });
-	result.styles.dropDownMenuItem = new Style({ font:"medium 18px Roboto", color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
+	result.styles.dropDownMenuItem = new Style({ font:`medium 18px ${FONT}`, color:[halfGray,widgetText,widgetText,WHITE], horizontal:"left", left:10 });
 	result.skins.dropDownMenuItemIcon = new Skin({ texture:textures.glyphs, color:[halfGray,widgetText,widgetText,WHITE], x:200, y:0, width:40, height:40 });
 	
 	result.skins.numericLeft = new Skin({ texture:textures.button, color:[TRANSPARENT,TRANSPARENT,TRANSPARENT,widget], x:0, y:0, width:60, height:60, left:20, right:20, top:20, bottom:20 });
@@ -200,7 +202,7 @@ class REDButtonBehavior extends REDBehavior {
 		super.onCreate(container, data);
 		let { bgcolor, color } = data;
 		if (color) {
-			container.first.style = new Style({ font:"medium 18px Roboto", color:[REDTheme.colors.halfGray,color,color,color] });
+			container.first.style = new Style({ font:`medium 18px ${FONT}`, color:[REDTheme.colors.halfGray,color,color,color] });
 		}
 		if (bgcolor || color) {
 			if (!bgcolor) bgcolor = REDTheme.colors.widget;

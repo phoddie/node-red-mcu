@@ -12,7 +12,11 @@ const textures = Object.freeze({
 }, true);
 const UNIT = 40;
 
-function buildTheme(theme) {
+function getFont(node) {
+	return config.DASHBOARD_FONT || RED.util.getSetting(node,'DASHBOARD_FONT') || "Roboto" ;
+}
+
+function buildTheme(theme, node) {
 	const gray = "#949494";
 	const BLACK = "black";
 	const TRANSPARENT = "transparent";
@@ -34,7 +38,7 @@ function buildTheme(theme) {
 
 	const halfGray = blendColors(0.5,group,gray);
 	const halfWidget = blendColors(0.5,group,widget);
-	const FONT = config.DASHBOARD_FONT ?? RED.util.getSetting(node,'DASHBOARD_FONT') ?? "Roboto" ;
+	const FONT = getFont(node);
 	const result = {
 		colors: {
 			gauge: halfGray,
@@ -201,7 +205,7 @@ class REDButtonBehavior extends REDBehavior {
 		super.onCreate(container, data);
 		let { bgcolor, color } = data;
 		if (color) {
-			container.first.style = new Style({ font:`medium 18px ${FONT}`, color:[REDTheme.colors.halfGray,color,color,color] });
+			container.first.style = new Style({ font:`medium 18px ${getFont(this)}`, color:[REDTheme.colors.halfGray,color,color,color] });
 		}
 		if (bgcolor || color) {
 			if (!bgcolor) bgcolor = REDTheme.colors.widget;

@@ -1,5 +1,7 @@
 {
 	"include": [
+		"$(MODDABLE)/examples/manifest_base.json",
+		"$(MODULES)/files/preference/manifest.json",
 		"../../../nodes/dashboard/manifest.json",
 		"../../../nodes/function/random/manifest.json",
 		"../../../nodes/function/trigger/manifest.json"

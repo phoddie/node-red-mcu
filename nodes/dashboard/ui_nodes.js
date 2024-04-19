@@ -82,7 +82,7 @@ class UIBaseNode extends Node {
 		super.onStart(config);
 		model.showTitleBar = config.site.hideToolbar == "false";
 		buildTheme(config.theme, this);
-		ThemeBuilders.forEach(ThemeBuilder => ThemeBuilder(config.theme));
+		ThemeBuilders.forEach(ThemeBuilder => ThemeBuilder(config.theme, this));
 	}
 }
 registerConstructor("ui_base", UIBaseNode);

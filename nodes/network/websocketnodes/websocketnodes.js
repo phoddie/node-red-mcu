@@ -55,7 +55,7 @@ class WebSocketClient extends Node {
 			keepalive: config.hb ? (1000 * parseInt(config.hb)) : 0,
 		};
 
-		this.status(disconnected);
+		this.status({...disconnected});
 
 		Timer.set(() => this.#connect());
 	}
@@ -103,7 +103,7 @@ class WebSocketClient extends Node {
 		this.#ws.addEventListener("open", () => {
 			Timer.clear(this.#reconnect);
 			this.#reconnect = undefined;
-			this.status(connected);
+			this.status({...connected});
 		});
 		this.#ws.addEventListener("message", event => {
 			let msg = event.data;
@@ -117,7 +117,7 @@ class WebSocketClient extends Node {
 		});
 		const close = () => {
 			this.#ws = undefined;
-			this.status(disconnected);
+			this.status({...disconnected});
 
 			this.#reconnect ??= Timer.repeat(() => {
 				if (this.#ws)

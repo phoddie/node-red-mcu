@@ -105,16 +105,18 @@ class WebSocketClient extends Node {
 			this.#reconnect = undefined;
 			this.status({...connected});
 		});
-		this.#ws.addEventListener("message", event => {
-			let msg = event.data;
-			if (this.#options.wholemsg)
-				msg = JSON.parse(msg);
-			else
-				msg = {payload: msg};
+		if (this.#nodes) {
+			this.#ws.addEventListener("message", event => {
+				let msg = event.data;
+				if (this.#options.wholemsg)
+					msg = JSON.parse(msg);
+				else
+					msg = {payload: msg};
 
-			for (let node of this.#nodes)
-				node.send(msg);
-		});
+				for (let node of this.#nodes)
+					node.send(msg);
+			});
+		}
 		const close = () => {
 			this.#ws = undefined;
 			this.status({...disconnected});

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2024  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -42,10 +42,11 @@ class WebSocketClient extends Node {
 	#reconnect;
 	#options;
 	#nodes;
+	#tls;
 
 	onStart(config) {
 		if (config.tls)
-			throw new Error("unimplemented");		
+			this.#tls = RED.nodes.getNode(config.tls);
 
 		this.#options = {
 			path: config.path,
@@ -55,7 +56,8 @@ class WebSocketClient extends Node {
 		};
 
 		this.status(disconnected);
-		this.#connect();
+
+		Timer.set(() => this.#connect());
 	}
 	onMessage(msg) {
 		if (1 !== this.#ws?.readyState)
@@ -67,7 +69,34 @@ class WebSocketClient extends Node {
 			this.#ws.send(msg.payload);
 	}
 	#connect() {
+		let wss;
+		if (this.#tls) {
+			wss = {
+				...device.network.ws,
+				socket: {
+					io: Modules.importNow("embedded:io/socket/tcp/tls"),
+					TCP: {
+						io: device.network.ws.socket.io
+					},
+					secure: {
+						verify: this.#tls.options?.verifyservercert ?? true
+					}
+				}
+			};
+			const servername = this.#tls.options?.servername;
+			if (servername) wss.socket.secure.serverName = servername; 
+			const ca = this.#tls.options?.ca;
+			if (ca) wss.socket.secure.certificate = ca; 
+			const cert = this.#tls.options?.cert;
+			if (cert) {
+				wss.socket.secure.clientCertificates = [cert]; 
+				const key = this.#tls.options?.key;
+				if (key) wss.socket.secure.clientKey = key;
+			}
+		}
+
 		const options = this.#options, o = {};
+		if (wss) o.wss = wss;
 		({path: o.url, subprotocol: o.subprotocol, keepalive: o.keepalive} = options); 
 		this.#ws = new WebSocket(o);
 		this.#ws.binaryType = "arraybuffer"; 

@@ -1,60 +1,31 @@
 {
+	"include": [
+		"$(MODULES)/drivers/onewire/manifest.json"
+	],
 	"modules": {
 		"*": [
-			"./rpi-ds18b20",
-			"$(MODULES)/drivers/onewire/*"
+			"./rpi-ds18b20"
 		]
 	},
 	"preload": [
-		"rpi-ds18b20",
-		"onewire",
-		"DS18X20"
+		"rpi-ds18b20"
 	],
 	"platforms": {
 		"esp": {
-			"include": [
-				"$(MODULES)/pins/digital/manifest.json"
-			],
-			"modules": {
-				"*": [
-					"$(MODULES)/drivers/onewire/esp/*"
-				]
-			},
 			"config": {
 				"onewire": {
 					"pin": 4
 				}
-			},
-			"defines": {
-				"onewire": {
-					"driver_gpio": "GPIO"
-				}
 			}
 		},
 		"esp32": {
-			"include": [
-				"$(MODULES)/pins/digital/manifest.json"
-			],
-			"modules": {
-				"*": "$(MODULES)/drivers/onewire/esp/*"
-			},
 			"config": {
 				"onewire": {
 					"pin": 13
 				}
-			},
-			"defines": {
-				"onewire": {
-					"driver_rmt": "RMT",
-					"rmt_rx_channel": "RMT_CHANNEL_2",
-					"rmt_tx_channel": "RMT_CHANNEL_3"
-				}
 			}
 		},
 		"...": {
-			"modules": {
-				"*": "$(MODULES)/drivers/onewire/sim/*"
-			},
 			"config": {
 				"onewire": {
 					"pin": "1"

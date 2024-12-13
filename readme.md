@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
-Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
+Copyright 2022-2024, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated March 24, 2023<br>
+Updated December 13, 2024<br>
 
 <img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
@@ -828,7 +828,7 @@ The JSON node has an option to use [JSON Schema](http://json-schema.org/draft/20
 ### Nodes Providing Manifests
 A node may include a `moddable_manifest` property at the root of its exported JSON configuration. The `nodered2mcu` tool processes the contents of the property as a Moddable SDK manifest. This allows nodes to automatically include  modules, data, and configurations. The MCU sensor and clock nodes use this capability, for example, to include the required driver.
 
-```json
+```jsonc
 {
     "id": "39f01371482a60fb",
     "type": "sensor",

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024  Moddable Tech, Inc.
+ * Copyright (c) 2022-2025  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -20,7 +20,6 @@
 
 import {Node, configFlowID} from "nodered";
 import Timer from "timer";
-import Base64 from "base64";
 import Modules from "modules";
 
 class MQTTBrokerNode extends Node {
@@ -34,9 +33,17 @@ class MQTTBrokerNode extends Node {
 
 	onStart(config) {
 		super.onStart(config);
-
-		if (config.closeTopic || config.willTopic || ("4" !== config.protocolVersion) || !config.autoConnect || config.sessionExpiry)
-			throw new Error("unimplemented");
+		
+		if (config.closeTopic)
+			throw new Error("closeTopic unimplemented");
+		if (config.willTopic)
+			throw new Error("willTopic unimplemented");
+		if (config.sessionExpiry)
+			throw new Error("sessionExpiry unimplemented");
+		if (4 != config.protocolVersion)
+			throw new Error("expected protocolVersion 4");
+		if (!config.autoConnect)
+			throw new Error("expected autoConnect true");
 
 		let port = config.port;
 		if (port)
@@ -160,7 +167,7 @@ class MQTTBrokerNode extends Node {
 								}
 								break;
 							case "base64":
-								p = Base64.encode(p);
+								p = (new Uint8Array(p)).toBase64();
 								break;
 							default:		// "auto-detect"
 								try {

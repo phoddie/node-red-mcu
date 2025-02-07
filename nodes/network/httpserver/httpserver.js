@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2025  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -94,6 +94,7 @@ const httpRoute = Object.freeze({
 	onResponse(response) {
 		if (!this.node) {
 			response.status = 404;
+			response.headers.set("content-length", 0);
 			this.respond(response);
 			return;
 		}
@@ -137,6 +138,8 @@ const httpRoute = Object.freeze({
 	},
 	onWritable(count) {
 		const payload = this.payload;
+		if (!payload)
+			return void this.write();
 		const end = Math.min(payload.position + count, payload.byteLength);
 		this.write(new Uint8Array(payload, payload.position, end - payload.position));
 		payload.position = end;

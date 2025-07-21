@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2025 Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -1217,7 +1217,17 @@ class Buffer extends Uint8Array {
 
 		return result;
 	}
-	
+	readUInt8(offset = 0) {
+		if ((offset < 0) || (offset >= this.length))
+			throw new RangeError;
+		return this[offset];
+	}
+	readUInt16LE(offset = 0) {
+		if ((offset < 0) || ((offset + 1) >= this.length))
+			throw new RangeError;
+		return this[offset] | (this[offset + 1] << 8);
+	}
+
 	static {
 		this.prototype.slice = this.prototype.subarray; 
 	}

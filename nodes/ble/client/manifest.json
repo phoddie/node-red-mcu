@@ -1,0 +1,11 @@
+{
+	"include": [
+		"$(MODDABLE)/modules/io/ble/client/manifest.json"
+	],
+	"modules": {
+		"*": "./bleclientnodes"
+	},
+	"preload": [
+		"bleclientnodes"
+	]
+}

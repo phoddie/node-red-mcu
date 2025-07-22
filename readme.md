@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
-Copyright 2022-2024, Moddable Tech, Inc. All rights reserved.<br>
+Copyright 2022-2025, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated December 13, 2024<br>
+Updated July 21, 2025<br>
 
 <img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
@@ -777,8 +777,19 @@ The API key is not exported by the Node-RED editor. Currently it must be entered
 
 **Note:** The [openweathermap node](https://flows.nodered.org/node/node-red-node-openweathermap) is the full Node-RED implementation with modifications to use `fetch` and to reduce its RAM footprint. This is possible by using the Compatibility Node.
 
+### BLE Scanner, Device, In, Out
+BLE Client support is based on [node-red-contrib-noble-bluetooth](https://github.com/clausbroch/node-red-contrib-noble-bluetooth). Install the nodes into the Node-RED editor, then configure and wire them as usual.
+
+The runtime implementation uses a draft of the ECMA-419 [GAP and GATT Clients](https://github.com/EcmaTC53/spec/blob/master/docs/tc53.md#bluetoothle-central) available starting in [Moddable SDK 5.9.0](https://github.com/Moddable-OpenSource/moddable/releases/tag/5.9.0) (Node-RED MCU Edition support requires at least commit 1bea8ad83750c0455ebb83e4ee5243d84e0745e1). The implementation is currently available for the ESP32 family and macOS.
+
+There are a few details to be aware of:
+
+- The BLE In node payload is an `ArrayBuffer` rather than a Node `Buffer`. As a result, downstream nodes may need to be written slightly different than in the examples. An easy workaround that operates on both Node-RED desktop and MCU Edition is to wrap `msg.payload` in a `Buffer` so that `var buffer = msg.payload;` becomes `var buffer = new Buffer(msg.payload);`.
+- The `name` and `type` fields for services and characteristics are unavailable.
+- Handling of service `1800` (Generic Access) is inconsistent across platforms because of host restrictions. Don't be surprised by failures accessing characteristics of this service.
+
 ### Compatibility Node
-The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
+The Compatibilityy Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
 
 The Compatibility Node is tricky for a number of reasons. At this time, it should be considered a proof-of-concept and a foundation for future work.
 

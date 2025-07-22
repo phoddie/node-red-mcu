@@ -302,7 +302,7 @@ class BLEIn extends Node {
 				device.subscribe(this, characteristic);
 				break;
 			case "unsubscribe":
-				device.subscribe(this, characteristic);
+				device.unsubscribe(this, characteristic);
 				break;
 			default:
 				this.error("Invalid characteristic");

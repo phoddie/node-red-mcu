@@ -46,6 +46,7 @@ class BLEScanner extends Node {
 			let services = this.#services ?? msg.services;
 			if ("string" === typeof services)
 				services = [services];
+			services = services?.filter(service => "" !== service.trim());
 			const filters = {};
 			if (services?.length)
 				filters.services = services.map(service => service.toLowerCase());

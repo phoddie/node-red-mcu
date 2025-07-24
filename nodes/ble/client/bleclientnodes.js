@@ -26,7 +26,14 @@ import {Node} from "nodered";
 import {GAPClient, GATTClient} from "embedded:io/bluetoothle/central"
 import Timer from "timer";
 
-class BLEScanner extends Node {
+class BLENode extends Node {
+	error(error, status) {
+		super.error(error);
+		this.status({fill: "red", shape: "dot", text: status ?? error});
+	}
+}
+
+class BLEScanner extends BLENode {
 	#scan;
 	#continuous;
 	#services;
@@ -41,8 +48,11 @@ class BLEScanner extends Node {
 	onMessage(msg) {
 		const continuous = this.#continuous ?? (true === msg.continuous);
 		const timeout = parseInt(msg.timeout ?? 0);
-		
+
 		if ("start" === msg.topic) {
+			if (this.#scan)
+				return;
+
 			let services = this.#services ?? msg.services;
 			if ("string" === typeof services)
 				services = [services];
@@ -90,8 +100,8 @@ class BLEScanner extends Node {
 					}
 				},
 				onError(error) {
-					this.target.error(`Error scanning for devices: ${error}`);
-					this.target.status({fill: "red", shape: "dot", text: "error"});
+					this.target.onMessage({topic: "stop"});
+					this.target.error(`Scan error: ${error}`);
 				}
 			});
 
@@ -102,7 +112,7 @@ class BLEScanner extends Node {
 		}
 		else if ("stop" === msg.topic) {
 			Timer.clear(this.#timer);
-			this.#scan.close();
+			this.#scan?.close();
 			this.#scan = this.#timer = undefined;
 			this.status({});
 		}
@@ -116,7 +126,7 @@ class BLEScanner extends Node {
 
 let devices;
 
-class BLEDevice extends Node {
+class BLEDevice extends BLENode {
 	#client;
 	#connected;
 	#characteristics = new Map;
@@ -133,7 +143,7 @@ class BLEDevice extends Node {
 		devices.set(peripheral, this);
 
 		try {
-			const msg = {
+			msg = {
 				topic: "connected",
 				connected: true,
 				connectable: true,		//@@
@@ -207,22 +217,17 @@ class BLEDevice extends Node {
 						});
 					}
 					this.target.#connected = false;
-					this.target.error(`GATT error: ${e}`);
-					void this.target.status({fill: "red", shape: "dot", text: "disconnected"});
+					this.target.error(`GATT error: ${e}`, "disconnected");
 					devices.delete(peripheral, this);
 				}
 			});
 		}
 		catch (e) {
-			this.error(`GATT error: ${e}`);
-			this.status({fill: "red", shape: "dot", text: "disconnected"});
+			this.error(`GATT error: ${e}`, "disconnected");
 		}
 	}
 	getCharacteristic(uuid) {
 		return this?.#characteristics?.get(uuid)
-	}
-	get client() {
-		return this.#client;
 	}
 	subscribe(node, characteristic) {
 		characteristic.subscribers ??= new Set;
@@ -264,7 +269,7 @@ class BLEDevice extends Node {
 	}
 }
 
-class BLEIn extends Node {
+class BLEIn extends BLENode {
 	#topic;
 	#characteristic;
 
@@ -310,10 +315,6 @@ class BLEIn extends Node {
 				break;
 		}
 	}
-	error(text) {
-		super.error(text);
-		this.status({fill: "red", shape: "dot", text});
-	}
 
 	static type = "BLE in";
 	static {
@@ -321,7 +322,7 @@ class BLEIn extends Node {
 	}
 }
 
-class BLEOut extends Node {
+class BLEOut extends BLENode {
 	#characteristic;
 
 	onStart(config) {
@@ -347,14 +348,14 @@ class BLEOut extends Node {
 			return void this.error("missing payload");
 		if ("string" === typeof payload)
 			payload = ArrayBuffer.fromString(payload);
+		else if (ArrayBuffer.isView(payload) || (payload instanceof ArrayBuffer))
+			;
+		else
+			return void this.error("invalid payload");
 		device.write(characteristic, payload, error => {
 			if (error)
 				this.error("write failed");
 		});
-	}
-	error(text) {
-		super.error(text);
-		this.status({fill: "red", shape: "dot", text});
 	}
 
 	static type = "BLE out";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2024  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -20,8 +20,6 @@
 
 import {Node} from "nodered";
 import {File, Directory} from "file";
-import Base64 from "base64";
-import Hex from "hex";
 import Timer from "timer";
 
 // ShareFile emulates File to allows one instance of a file to be shared across several File Read & Write nodes.
@@ -133,13 +131,13 @@ class FileWrite extends Node {
 			case "base64":
 				if (isBuffer)
 					throw new Error;
-				payload = Base64.decode(payload);
+				payload = Uint8Array.fromBase64(payload).buffer;
 				break;
 
 			case "hex":
 				if (isBuffer)
 					throw new Error;
-				payload = Hex.toBuffer(payload);
+				payload = Uint8Array.fromHex(payload).buffer;
 				break;
 
 			default:
@@ -279,12 +277,12 @@ class FileRead extends Node {
 						msg.payload = file.length ? file.read(String) : "";
 						break;
 					case "hex":
-						msg.payload = file.length ? Hex.toString(file.read(ArrayBuffer)) : "";
+						msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))).toHex() : "";
 						break;
 					case "base64":
 						if (state.chunk)
 							throw new Error;
-						msg.payload = file.length ? Base64.encode(file.read(ArrayBuffer)) : "";
+						msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))).toBase64() : "";
 						break;
 					default:
 						throw new Error("encoding unsupported: " + state.encoding)

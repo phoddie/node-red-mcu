@@ -1,6 +1,5 @@
 {
 	"include": [
-		"$(MODDABLE)/modules/data/base64/manifest.json",
 		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json"
 	],
 	"modules": {

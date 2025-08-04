@@ -21,7 +21,6 @@
 import Timer from "timer";
 import deepEqual from "deepEqual";
 import structuredClone from "structuredClone";
-import Hex from "hex";
 import Modules from "modules";
 import config from "mc/config";
 import Preference from "preference";
@@ -559,7 +558,7 @@ class DebugNode extends Node {
 
 		if (this.#console) {
 			if (value instanceof Uint8Array)
-				value = Hex.toString(value);
+				value = value.toHex();
 			trace("<warn>", ("object" === typeof value) ? JSON.stringify(value) : value, "\n");
 		}
 
@@ -1252,3 +1251,6 @@ globalThis.module = Object.freeze({
 		RED.addCompatibility(module);
 	}
 });
+
+if (!("fromBase64" in Uint8Array))
+	throw new Error("Base64 support misssing. Update Moddable SDK.");

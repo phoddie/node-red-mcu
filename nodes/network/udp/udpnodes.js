@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2024  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -20,7 +20,6 @@
 
 import UDP from "embedded:io/socket/udp";
 import {Node} from "nodered";
-import Base64 from "base64";
 
 // all nodes bound to same port share a single UDP socket 
 class SharedUDP {
@@ -76,7 +75,7 @@ class UDPIn extends Node {
 			else if ("buffer" === datatype)
 				payload = new Uint8Array(buffer);
 			else if ("base64" === datatype)
-				payload = Base64.encode(buffer);
+				payload = (new Uint8Array(buffer)).toBase64();
 			this.send({
 				payload,
 				ip: buffer.address,
@@ -119,7 +118,7 @@ class UDPOut extends Node {
 		if (!(payload instanceof Uint8Array)) {
 			try {
 				if (this.#base64)
-					payload  = Base64.decode(payload);
+					payload  = Uint8Array.fromBase64(payload).buffer;
 				else
 					payload = ArrayBuffer.fromString(payload);
 			}

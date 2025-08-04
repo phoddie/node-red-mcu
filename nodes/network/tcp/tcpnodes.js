@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2024  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -27,7 +27,6 @@ import {Node} from "nodered";
 import TextDecoder from "text/decoder"
 import Listener from "embedded:io/socket/listener";		// should use device.*
 import TCP from "embedded:io/socket/tcp";		// should use device.*
-import Base64 from "base64";
 
 let connections = [];
 
@@ -141,7 +140,7 @@ class TCPConnection {
 		if ("utf8" === this.config.datatype)
 			payload = this.decoder.decode(payload.buffer, {stream: true});
 		else if (("base64" === this.config.datatype) && (payload instanceof Uint8Array))
-			payload = Base64.encode(payload);
+			payload = payload.toBase64();
 
 		msg.payload = payload;
 		this.node.send(msg);
@@ -156,7 +155,7 @@ class TCPConnection {
 		if (!(buffer instanceof Uint8Array))
 			buffer = new Uint8Array(ArrayBuffer.fromString(buffer.toString()));
 		else if (this.config.base64)
-			buffer = new Uint8Array(Base64.decode(buffer));
+			buffer = Uint8Array.fromBase64(buffer);
 
 		this.output ??= [];
 		buffer.position = 0;

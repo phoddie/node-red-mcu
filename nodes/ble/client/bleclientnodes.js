@@ -22,6 +22,12 @@
 
 // Note: bleclient UUIDs are lowercase, this node uses Noble's convention of uppercase for UUIDs.
 
+/*
+	To do:
+	
+		call done() from when any onMessage is complete
+*/
+
 import {Node} from "nodered";
 import {GAPClient, GATTClient} from "embedded:io/bluetoothle/central"
 import Timer from "timer";
@@ -161,9 +167,15 @@ class BLEDevice extends BLENode {
 					this.target.#connected = true;
 
 					this.getPrimaryServices((error, services) => {
+						if (error)
+							return void this.target.error("getPrimaryServices: " + error);
+
 						let count = services.length;
 						services.forEach(service => {
 							this.getCharacteristics(service, (error, characteristics) => {
+								if (error)
+									return void this.target.error("getCharacteristics: " + error);
+
 								const s = {
 									uuid: service.uuid.toUpperCase(),
 									characteristics: [],

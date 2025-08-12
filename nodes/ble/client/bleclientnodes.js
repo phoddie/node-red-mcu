@@ -39,6 +39,8 @@ class BLENode extends Node {
 	}
 }
 
+const state = {};
+
 class BLEScanner extends BLENode {
 	#scan;
 	#continuous;
@@ -48,6 +50,9 @@ class BLEScanner extends BLENode {
 	onStart(config) {
 		super.onStart(config);
 
+		if (state.scanner)
+			return void this.error(`only one scanner`);
+
 		this.#continuous = config.continuous;
 		this.#services = config.services;
 	}
@@ -55,7 +60,7 @@ class BLEScanner extends BLENode {
 		const continuous = this.#continuous ?? (true === msg.continuous);
 		const timeout = parseInt(msg.timeout ?? 0);
 
-		if ("start" === msg.topic) {
+		if (("start" === msg.topic) || (("resume" === msg.topic) && continuous)) {
 			if (this.#scan)
 				return;
 
@@ -111,6 +116,8 @@ class BLEScanner extends BLENode {
 				}
 			});
 
+			state.scanner = this;
+
 			if (timeout > 0)
 				this.#timer = Timer.set(() => this.onMessage({topic: "stop"}), timeout);
 			
@@ -130,8 +137,6 @@ class BLEScanner extends BLENode {
 	}
 }
 
-let devices;
-
 class BLEDevice extends BLENode {
 	#client;
 	#connected;
@@ -145,8 +150,10 @@ class BLEDevice extends BLENode {
 		if (this.#client)
 			return;
 
-		devices ??= new Map;
-		devices.set(peripheral, this);
+		state.devices ??= new Map;
+		state.devices.set(peripheral, this);
+
+		state.scanner?.onMessage({topic: "stop"});
 
 		try {
 			msg = {
@@ -230,11 +237,14 @@ class BLEDevice extends BLENode {
 					}
 					this.target.#connected = false;
 					this.target.error(`GATT error: ${e}`, "disconnected");
-					devices.delete(peripheral, this);
+					state.devices.delete(peripheral, this);
+
+					state.scanner?.onMessage({topic: "resume"});
 				}
 			});
 		}
 		catch (e) {
+			state.scanner?.onMessage({topic: "resume"});
 			this.error(`GATT error: ${e}`, "disconnected");
 		}
 	}
@@ -292,7 +302,7 @@ class BLEIn extends BLENode {
 		this.#characteristic = config.characteristic ? config.characteristic.toLowerCase() : undefined;		// convert empty string to undefined 
 	}
 	onMessage(msg) {
-		const device = devices?.get(msg.peripheral);
+		const device = state.devices?.get(msg.peripheral);
 		if (!device)
 			return void this.error("invalid peripheral id");
 
@@ -343,7 +353,7 @@ class BLEOut extends BLENode {
 		this.#characteristic = config.characteristic ? config.characteristic.toLowerCase() : undefined;		// convert empty string to undefined 
 	}
 	onMessage(msg) {
-		const device = devices?.get(msg.peripheral);
+		const device = state.devices?.get(msg.peripheral);
 		if (!device)
 			return void this.error("invalid peripheral id");
 

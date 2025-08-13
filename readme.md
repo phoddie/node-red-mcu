@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2025, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated July 21, 2025<br>
+Updated August 13, 2025<br>
 
 <img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
@@ -780,7 +780,7 @@ The API key is not exported by the Node-RED editor. Currently it must be entered
 ### BLE Scanner, Device, In, Out
 BLE Client support is based on [node-red-contrib-noble-bluetooth](https://github.com/clausbroch/node-red-contrib-noble-bluetooth). Install the nodes into the Node-RED editor, then configure and wire them as usual.
 
-The runtime implementation uses a draft of the ECMA-419 [GAP and GATT Clients](https://github.com/EcmaTC53/spec/blob/master/docs/tc53.md#bluetoothle-central) available starting in [Moddable SDK 5.9.0](https://github.com/Moddable-OpenSource/moddable/releases/tag/5.9.0) (Node-RED MCU Edition support requires at least commit 1bea8ad83750c0455ebb83e4ee5243d84e0745e1). The implementation is currently available for the ESP32 family and macOS.
+The runtime implementation uses a draft of the ECMA-419 [GAP and GATT Clients](https://github.com/EcmaTC53/spec/blob/master/docs/tc53.md#bluetoothle-central) available starting in [Moddable SDK 5.10.0](https://github.com/Moddable-OpenSource/moddable/releases/tag/5.10.0). The implementation is currently available for the ESP32 family and macOS.
 
 There are a few details to be aware of:
 

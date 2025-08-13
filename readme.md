@@ -789,7 +789,7 @@ There are a few details to be aware of:
 - Handling of service `1800` (Generic Access) is inconsistent across platforms because of host restrictions. Don't be surprised by failures accessing characteristics of this service.
 
 ### Compatibility Node
-The Compatibilityy Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
+The Compatibility Node runs nodes written for Node-RED. It is able to run the `lower-case` example from ["Creating your first node"](https://nodered.org/docs/creating-nodes/first-node) without any changes.
 
 The Compatibility Node is tricky for a number of reasons. At this time, it should be considered a proof-of-concept and a foundation for future work.
 

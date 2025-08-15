@@ -25,7 +25,7 @@
 /*
 	To do:
 	
-		call done() from when any onMessage is complete
+		(this space intentionally left blank)
 */
 
 import {Node} from "nodered";
@@ -301,7 +301,7 @@ class BLEIn extends BLENode {
 		this.#topic = config.topic ? config.topic : undefined;		// convert empty string to undefined
 		this.#characteristic = config.characteristic ? config.characteristic.toLowerCase() : undefined;		// convert empty string to undefined 
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		const device = state.devices?.get(msg.peripheral);
 		if (!device)
 			return void this.error("invalid peripheral id");
@@ -318,6 +318,7 @@ class BLEIn extends BLENode {
 		switch (topic) {
 			case "read":
 				device.read(characteristic, (error, payload) => {
+					done(error);
 					if (error)
 						return void this.error("read failed");
 					this.send({
@@ -352,7 +353,7 @@ class BLEOut extends BLENode {
 		
 		this.#characteristic = config.characteristic ? config.characteristic.toLowerCase() : undefined;		// convert empty string to undefined 
 	}
-	onMessage(msg) {
+	onMessage(msg, done) {
 		const device = state.devices?.get(msg.peripheral);
 		if (!device)
 			return void this.error("invalid peripheral id");
@@ -375,6 +376,7 @@ class BLEOut extends BLENode {
 		else
 			return void this.error("invalid payload");
 		device.write(characteristic, payload, error => {
+			done(error);
 			if (error)
 				this.error("write failed");
 		});

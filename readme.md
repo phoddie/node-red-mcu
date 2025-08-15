@@ -1,7 +1,7 @@
 # Node-RED MCU Edition
 Copyright 2022-2025, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated August 13, 2025<br>
+Updated August 14, 2025<br>
 
 <img src="./assets/node-red-mcu-logo.png" width=200 height=200/>
 
@@ -329,6 +329,8 @@ Comment nodes are removed at build-time.
 - [X] Active
 - [X] Relay to Node-RED Editor
 - [ ] JSONata expression
+
+The Debug node displays binary data (`ArrayBuffer`, `Buffer`, `TypedArray`, and `DataView`) as a string in the form `"Uint8Array:2 bytes:48A6"`. The data bytes are hex encoded and truncated after the first 32-bytes.
 
 ### Function
 - [X] "On Start" and "On Message" handlers
@@ -784,7 +786,7 @@ The runtime implementation uses a draft of the ECMA-419 [GAP and GATT Clients](h
 
 There are a few details to be aware of:
 
-- The BLE In node payload is an `ArrayBuffer` rather than a Node `Buffer`. As a result, downstream nodes may need to be written slightly different than in the examples. An easy workaround that operates on both Node-RED desktop and MCU Edition is to wrap `msg.payload` in a `Buffer` so that `var buffer = msg.payload;` becomes `var buffer = new Buffer(msg.payload);`.
+- The BLE In node payload is an `ArrayBuffer` rather than a Node `Buffer`. As a result, downstream nodes may need to be written a bit differently than in the examples. An easy workaround that works on both Node-RED desktop and Node-RED MCU Edition is to wrap `msg.payload` in a `Buffer` so that `var buffer = msg.payload;` becomes `var buffer = new Buffer(msg.payload);`.
 - The `name` and `type` fields for services and characteristics are unavailable.
 - Handling of service `1800` (Generic Access) is inconsistent across platforms because of host restrictions. Don't be surprised by failures accessing characteristics of this service.
 

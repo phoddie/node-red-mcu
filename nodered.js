@@ -551,13 +551,13 @@ class DebugNode extends Node {
 
 		// Feed msg back to the editor
 		if (config.noderedmcu?.editor)
-			trace.left(this.stringify({input: msg}), this.id);
+			trace.left(JSON.stringify({input: msg}, this.replacer), this.id);
 
 		// Process msg for xsbug
 		let value = this.#getter(msg);
 
 		if (this.#console)
-			trace("<warn>", ("object" === typeof value) ? this.stringify(value) : value, "\n");
+			trace("<warn>", ("object" === typeof value) ? JSON.stringify(value, this.replacer) : value, "\n");
 
 		if (this.#sidebar) {
 			value = this.#property ? {[this.#property]: value} : msg;
@@ -569,7 +569,7 @@ class DebugNode extends Node {
 					name: this.name
 				} 
 			};
-			trace("<info>", this.stringify(value), "\n");
+			trace("<info>", JSON.stringify(value, this.replacer), "\n");
 		}
 
 		if (this.#toStatus) {
@@ -588,27 +588,18 @@ class DebugNode extends Node {
 		if ("debug" === options.command)
 			this.#active = !!options.data;
 	}
-	stringify(msg) {
-		return JSON.stringify(msg, this.replacer);
-	}
 	replacer(key, value) {
 		if (value instanceof ArrayBuffer) {
 			const byteLength = value.byteLength;
 			const bytes = new Uint8Array(value, 0, Math.min(byteLength, 32));
-			return `ArrayBuffer:${byteLength} bytes:${bytes.toHex()}${byteLength > 32 ? "…" : ""}`;
+			return `ArrayBuffer:${byteLength} byte${(1 === byteLength) ? "" : "s"}:${bytes.toHex()}${byteLength > 32 ? "…" : ""}`;
 		}
 
 		if (ArrayBuffer.isView(value)) {
 			const byteLength = value.byteLength;
 			const bytes = new Uint8Array(value.buffer, value.byteOffset, Math.min(byteLength, 32));
-			let name;
-			if (value instanceof Uint8Array)
-				name = "Uint8Array";
-			else if (value instanceof DataView)
-				name = "DataView";
-			else
-				name = "TypedArray";
-			return `${name}:${byteLength} bytes:${bytes.toHex()}${byteLength > 32 ? "…" : ""}`;
+			const name = (value instanceof Uint8Array) ? "Uint8Array" : ((value instanceof DataView) ? "DataView" : "TypedArray");
+			return `${name}:${byteLength} byte${(1 === byteLength) ? "" : "s"}:${bytes.toHex()}${byteLength > 32 ? "…" : ""}`;
 		}
 
 		return value;

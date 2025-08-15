@@ -271,7 +271,7 @@ class Context extends Map {
 	keys(store) {
 		if ("file" === store)
 			return Preference.keys(this.id);
-		
+
 		return [...super.keys()];
 	}
 }
@@ -894,7 +894,7 @@ class RangeNode extends Node {
 class FilterNode extends Node {
 	#topic;
 	#property;
-	#inout;
+//	#inout;
 	#ignoreFirst;
 	#last;
 
@@ -905,7 +905,7 @@ class FilterNode extends Node {
 			throw new Error("unimplemented filter func");
 
 		this.#ignoreFirst = "rbei" === config.func;
-		this.#inout = config.inout;
+//		this.#inout = config.inout;
 		this.#property = config.property;
 		this.#topic = config.septopics ? config.topi : undefined;
 	}
@@ -1190,10 +1190,7 @@ globalThis.process = class {
 globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 	const options = JSON.parse(script);
 	const node = globalThis.flows?.get(options.flow)?.getNode(options.id);
-	if (!node)
-		return;
-
-	node.onCommand(options);
+	node?.onCommand(options);
 }
 
 // placeholder for compatibility

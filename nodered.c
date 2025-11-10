@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2025  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -38,14 +38,6 @@ void xs_nodered_util_generateId(xsMachine *the)
 	}
 
 	xsmcSetStringBuffer(xsResult, id, sizeof(id));
-}
-
-void xs_nodered_util_debugging(xsMachine *the)
-{
-#ifdef mxDebug
-	extern xsBooleanValue fxIsConnected(xsMachine* the);
-	xsmcSetBoolean(xsResult, fxIsConnected(the));
-#endif
 }
 
 void xs_buffer_prototype_indexOf(xsMachine *the)

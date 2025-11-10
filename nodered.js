@@ -31,8 +31,9 @@ let msgQueue;
 export const configFlowID = "__config";
 const globalContextID = "__global";
 
-function generateId() @ "xs_nodered_util_generateId";
-function debugging() @ "xs_nodered_util_debugging";
+function generateId() {
+	return native("xs_nodered_util_generateId").call(this);
+}
 
 class RED {
 	static #compatibility = [];
@@ -103,7 +104,6 @@ class RED {
 		}
 	}
 	static mcu = class {
-		static debugging = debugging;
 		static getNodeConstructor(type) {
 			const Class = nodeClasses.get(type);
 			if (!Class) {	
@@ -1195,8 +1195,12 @@ globalThis["<xsbug:script>"] = function(mystery, path, line, script) {
 
 // placeholder for compatibility
 class Buffer extends Uint8Array {
-	indexOf(search, byteOffset) @ "xs_buffer_prototype_indexOf"
-	lastIndexOf(search, byteOffset) @ "xs_buffer_prototype_lastIndexOf"
+	indexOf(search, byteOffset) {
+        return native("xs_buffer_prototype_indexOf").call(this, search, byteOffset);
+    }
+	lastIndexOf(search, byteOffset) {
+        return native("xs_buffer_prototype_lastIndexOf").call(this, search, byteOffset);
+    }
 
 //	static from()		//@@ not the same!
 	static isBuffer(value) {

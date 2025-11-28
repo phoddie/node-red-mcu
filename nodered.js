@@ -104,6 +104,9 @@ class RED {
 		}
 	}
 	static mcu = class {
+		static debugging() {
+			return native("xs_nodered_util_debugging").call(this);
+		}
 		static getNodeConstructor(type) {
 			const Class = nodeClasses.get(type);
 			if (!Class) {	

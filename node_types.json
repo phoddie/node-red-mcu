@@ -73,9 +73,9 @@
 	"csv": "$(NODEREDMCU)/nodes/parser/csv/manifest.json",
 
 	"rpi-ds18b20": "$(NODEREDMCU)/nodes/rpi/rpi-ds18b20/manifest.json",
-	"rpi-gpio in": "$(NODEREDMCU)/nodes/rpi/rpi-gpio/manifest.json",
-	"rpi-gpio out": "$(NODEREDMCU)/nodes/rpi/rpi-gpio/manifest.json",
-	"rpi-neopixels": "$(NODEREDMCU)/nodes/rpi/rpi-neopixels/manifest.json",
+	"rpi-gpio in": "$(NODEREDMCU)/nodes/mcu/digital/manifest.json",
+	"rpi-gpio out": "$(NODEREDMCU)/nodes/mcu/digital/manifest.json",
+	"rpi-neopixels": "$(NODEREDMCU)/nodes/mcu/neopixels/manifest.json",
 
 	"batch": "$(NODEREDMCU)/nodes/sequence/batch/manifest.json",
 	"join": "$(NODEREDMCU)/nodes/sequence/join/manifest.json",

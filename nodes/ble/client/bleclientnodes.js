@@ -20,7 +20,8 @@
 
 // very much based on https://github.com/clausbroch/node-red-contrib-noble-bluetooth/blob/master/bluetooth.js
 
-// Note: bleclient UUIDs are lowercase, this node uses Noble's convention of uppercase for UUIDs.
+// Note: ECMA-419 bleclient UUIDs are lowercase. However, for compatibility, this node uses
+//		 Noble's convention of uppercase for UUIDs.
 
 /*
 	To do:
@@ -258,7 +259,7 @@ class BLEDevice extends BLENode {
 
 		characteristic.subscribers.add(node);
 
-		this.#client.enableNotifications(characteristic, true, error => {
+		this.#client.subscribe(characteristic, error => {
 			if (error) {
 				characteristic.subscribers.delete(node);
 				return void node.error(error);
@@ -272,7 +273,7 @@ class BLEDevice extends BLENode {
 
 		characteristic.subscribers.delete(node);
 
-		this.#client.enableNotifications(characteristic, false, error => {
+		this.#client.unsubscribe(characteristic, error => {
 			if (error)
 				return void node.error(error);
 			node.status();

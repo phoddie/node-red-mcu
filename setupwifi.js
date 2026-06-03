@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2023  Moddable Tech, Inc.
+ * Copyright (c) 2016-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -20,56 +20,63 @@
 
 import config from "mc/config";
 import Time from "time";
-import WiFi from "wifi/connection";
-import Net from "net";
-import SNTP from "sntp";
+import Timer from "timer";
 import Modules from "modules";
+import WiFi from "embedded:network/interface/wifi";
 
 export default function (done) {
 	const modconfig = Modules.has("mod/config") ? Modules.importNow("mod/config") : {};
 
-	WiFi.mode = 1;
-
-	const ssid = modconfig.ssid ?? config.ssid;
+	const SSID = modconfig.ssid ?? config.ssid;
 	const password = modconfig.password ?? config.password;
 	const sntp = modconfig.sntp ?? config.sntp;
-	if (!ssid) {
+
+	if (!SSID) {
 		trace("No Wi-Fi SSID\n");
 		return done();
 	}
 
-	new WiFi({ssid, password}, function(msg, code) {
-	   switch (msg) {
-		   case WiFi.gotIP:
-				trace(`IP address ${Net.get("IP")}\n`);
+	const w = new WiFi({
+		onChanged(property) {
+			if ("connection" !== property)
+				return;
 
-				if (!sntp || (Date.now() > 1672722071_000)) {
-					done?.();
-					done = undefined;
-					return;
+			const connection = this.connection;
+			if (connection < 500) {
+				if (connection >= 400)
+					trace(`Wi-Fi connected to "${this.SSID}"\n`);
+				else if (connection <= 200) {
+					trace(`Wi-Fi disconnected\n`);		//@@ password rejected?
+					Timer.schedule(this.reconnect, 5_000, 1_000_000);		// try to reconnect in 5 seconds
 				}
+				return;
+			}
 
-				new SNTP({host: sntp}, function(message, value) {
-					if (SNTP.time === message) {
-						trace("got time\n");
-						Time.set(value);
-					}
-					else if (SNTP.error === message)
-						trace("can't get time\n");
-					else
-						return;
-					done?.();
-					done = undefined;
-				});
-				break;
+			trace(`IP address ${this.address}\n`);
+			Timer.schedule(this.reconnect);		// unschedule
+			if (!config.sntp || (Date.now() > 1672722071_000)) {
+				const d = done;
+				done = undefined
+				return d?.();
+			}
 
-			case WiFi.connected:
-				trace(`Wi-Fi connected to "${Net.get("SSID")}"\n`);
-				break;
-
-			case WiFi.disconnected:
-				trace((-1 === code) ? "Wi-Fi password rejected\n" : "Wi-Fi disconnected\n");
-				break;
+			new SNTP({host: sntp}, function(message, value) {
+				if (SNTP.time === message) {
+					trace(`got unix time ${value} from ${sntp}\n`);
+					Time.set(value);
+				}
+				else if (SNTP.error === message)
+					trace("can't get time\n");
+				else
+					return;
+				const d = done;
+				done = undefined
+				return d?.();
+			});
 		}
 	});
+
+	w.reconnect = Timer.set(() => {
+		w.connect(password ? {SSID, password, secure: true} : {SSID});
+	}, 0, 1_000_000);
 }

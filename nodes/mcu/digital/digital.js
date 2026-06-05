@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -34,18 +34,15 @@ class DigitalInNode extends Node {
 			return void this.status({fill: "red", shape: "dot", text: "node-red:common.status.error"});
 
 		if (config.debounce)
-			Object.defineProperty(this, "debouce", {value: config.debounce});
+			Object.defineProperty(this, "debounce", {value: config.debounce});
 
-		let edge = config.edge;
-		if (config.invert) {
-			Object.defineProperty(this, "invert", {value: 1});
-			edge = ((edge & 1) << 1) | ((edge & 2) >> 1);
-		}
+		const edge = config.edge;
+		const invert = config.invert ?? 0;
 
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 		if (io) {
-			if ((io.mode !== config.mode) || (io.edge !== edge))
+			if ((io.mode !== config.mode) || (io.edge !== edge) || (io.invert !== invert))
 				return void this.status({fill: "red", shape: "dot", text: "mismatch"});
 			io.readers.push(this);
 		}
@@ -53,31 +50,44 @@ class DigitalInNode extends Node {
 			io = new Digital({
 				pin: config.pin,
 				mode: Digital[config.mode],
-				edge: ((edge & 1) ? Digital.Rising : 0) + ((edge & 2) ? Digital.Falling : 0),
+				activeLow: invert,
+				edge: Digital.Rising | Digital.Falling,
 				onReadable() {
 					this.readers.forEach(reader => {
-						reader.#timer ??= Timer.set(() => {
-							reader.#timer = undefined;
+						if (!reader.#timer) {
+							reader.#timer = Timer.set(() => {
+								const payload = this.read();
 
-							const msg = {
-								payload: this.read() ^ (reader.invert ?? 0),
-								topic: "gpio/" + this.pin
-							};
-							reader.send(msg)
-							reader.status({fill: "green", shape: "dot", text: msg.payload.toString()});
-						}, reader.debounce ?? 0);
+								reader.#timer = undefined;
+								reader.status({fill: "green", shape: "dot", text: payload.toString()});
+
+								if ((payload && (io.edge & 1)) || (!payload && (io.edge & 2))) {
+									const msg = {
+										payload,
+										topic: "gpio/" + this.pin
+									};
+									reader.send(msg)
+									reader.status({fill: "green", shape: "dot", text: payload.toString()});
+								}
+							}, reader.debounce ?? 0);
+							reader.status({fill: "yellow", shape: "dot", text: "debounce"});
+						}
+
+						if (reader.debounce)
+							Timer.schedule(reader.#timer, reader.debounce); 
 					});
 				}
 			});
 			io.mode = config.mode;
 			io.edge = edge;
+			io.invert = invert;
 			io.pin = config.pin;
 			io.readers = [this];
 			cache.set(config.pin, io);
 		}
 
 		if (config.initial) {
-			const payload = io.read() ^ (this.invert ?? 0);
+			const payload = io.read();
 			this.send({
 				payload,
 				topic: "gpio/" + config.pin
@@ -101,9 +111,6 @@ class DigitalOutNode extends Node {
 		if (!globalThis.device?.io?.Digital)
 			return;
 
-		if (config.invert)
-			Object.defineProperty(this, "invert", {value: 1}); 
-
 		cache ??= new Map;
 		let io = cache.get(config.pin);
 
@@ -116,15 +123,11 @@ class DigitalOutNode extends Node {
 			try {
 				this.#io = io = new device.io.Digital({
 					pin: config.pin,
-					mode: device.io.Digital[config.mode]
+					mode: device.io.Digital[config.mode],
+					activeLow: config.invert ?? 0,
+					initialValue: config.initial ?? 0
 				});
 
-				if (undefined !== config.initial) {
-					if (0 == config.initial)
-						io.write(0 ^ (this.invert ?? 0));
-					else if (1 == config.initial)
-						io.write(1 ^ (this.invert ?? 0));
-				}
 				io.mode = config.mode;
 				cache.set(config.pin, io);
 			}
@@ -135,7 +138,7 @@ class DigitalOutNode extends Node {
 	}
 	onMessage(msg, done) {
 		if (this.#io) {
-			const value = msg.payload ^ (this.invert ?? 0);
+			const value = msg.payload;
 			this.#io.write(value);
 			this.status({fill:"green", shape:"dot", text: value.toString()});
 		}

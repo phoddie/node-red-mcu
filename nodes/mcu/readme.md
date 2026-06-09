@@ -1,7 +1,7 @@
 # MCU Nodes
-Copyright 2022-2023, Moddable Tech, Inc. All rights reserved.<br>
+Copyright 2022-2026, Moddable Tech, Inc. All rights reserved.<br>
 Peter Hoddie<br>
-Updated April 30, 2023<br>
+Updated June 6, 2026<br>
 
 The MCU Nodes are a suite of nodes that provides access to features of microcontrollers including various I/O methods, Neopixels light strips, real-time clocks, and sensors. Each node includes built-in documentation describing their inputs, outputs, and configuration options.
 

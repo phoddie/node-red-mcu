@@ -62,12 +62,10 @@ class DigitalInNode extends Node {
 								reader.status({fill: "green", shape: "dot", text: payload.toString()});
 
 								if ((payload && (io.edge & 1)) || (!payload && (io.edge & 2))) {
-									const msg = {
+									reader.send({
 										payload,
 										topic: "gpio/" + this.pin
-									};
-									reader.send(msg)
-									reader.status({fill: "green", shape: "dot", text: payload.toString()});
+									});
 								}
 							}, reader.debounce ?? 0);
 							reader.status({fill: "yellow", shape: "dot", text: "debounce"});

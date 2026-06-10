@@ -23,6 +23,7 @@ import Time from "time";
 import Timer from "timer";
 import Modules from "modules";
 import WiFi from "embedded:network/interface/wifi";
+import SNTP from "sntp";
 
 export default function (done) {
 	const modconfig = Modules.has("mod/config") ? Modules.importNow("mod/config") : {};
@@ -54,7 +55,7 @@ export default function (done) {
 
 			trace(`IP address ${this.address}\n`);
 			Timer.schedule(this.reconnect);		// unschedule
-			if (!config.sntp || (Date.now() > 1672722071_000)) {
+			if (!sntp || (Date.now() > 1672722071_000)) {
 				const d = done;
 				done = undefined
 				return d?.();

@@ -23,7 +23,6 @@ import Time from "time";
 import Timer from "timer";
 import Modules from "modules";
 import WiFi from "embedded:network/interface/wifi";
-import SNTP from "sntp";
 
 export default function (done) {
 	const modconfig = Modules.has("mod/config") ? Modules.importNow("mod/config") : {};
@@ -61,15 +60,19 @@ export default function (done) {
 				return d?.();
 			}
 
-			new SNTP({host: sntp}, function(message, value) {
-				if (SNTP.time === message) {
-					trace(`got unix time ${value} from ${sntp}\n`);
-					Time.set(value);
-				}
-				else if (SNTP.error === message)
-					trace("can't get time\n");
-				else
-					return;
+			const ntp = new device.network.ntp.client.io({
+				...device.network.ntp.client,
+				servers: [sntp]
+			});
+
+			ntp.getTime((error, value) => {
+				if (error)
+					trace(`can't get time\n`);
+				else {
+					trace(`got unix time ${value / 1000} from ${sntp}\n`);
+					Time.set(value / 1000);
+				 }
+				ntp.close();
 				const d = done;
 				done = undefined
 				return d?.();

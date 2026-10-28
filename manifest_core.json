@@ -6,7 +6,9 @@
 		"$(MODDABLE)/modules/base/modules/manifest.json",
 		"$(MODDABLE)/modules/io/manifest.json",
 		"$(MODDABLE)/modules/io/wifi/manifest.json",
-		"$(MODDABLE)/examples/io/udp/ntp/manifest_ntp.json",
+		"$(MODDABLE)/modules/io/dns/resolver",
+		"$(MODDABLE)/modules/io/ntp/client",
+		"$(MODDABLE)/modules/io/socket",
 		"$(MODDABLE)/modules/files/preference/manifest.json"
  	],
 	"modules": {

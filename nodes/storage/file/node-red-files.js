@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -22,7 +22,7 @@ import {Node} from "nodered";
 import {File, Directory} from "file";
 import Timer from "timer";
 
-// ShareFile emulates File to allows one instance of a file to be shared across several File Read & Write nodes.
+// ShareFile wraps ECMA-419 file to allows one instance of a file to be shared across several File Read & Write nodes.
 // This avoids issues with file system implementation caching across instances.
 
 let cache;
@@ -99,7 +99,7 @@ class FileWrite extends Node {
 				state.appendNewline = config.appendNewline;
 			if (config.createDir)
 				state.createDir = config.createDir;
-			if ("none" !== config.encoding)
+			if (("none" !== config.encoding) && ("setbymsg" !== config.encoding))
 				state.encoding = config.encoding;
 		}
 	}
@@ -108,45 +108,51 @@ class FileWrite extends Node {
 		const filename = state.filename ?? msg.filename;
 
 		if ("delete" === state.overwriteFile) {
+			if (!File.exists(filename))
+				return void this.error("file not found: " + filename, msg);
 			SharedFile.delete(filename);
 			return msg;
 		}
 
 		const type = typeof payload;
 		const isBuffer = payload instanceof Uint8Array;
-		const encoding = state.encoding ?? msg.encoding ?? (("object" === type) ? "binary" : "utf8");
-
-		switch (encoding) {
-			case "utf8":
-				if ("object" === type)
-					throw new Error;
-				payload = payload.toString();
-				break;
-			
-			case "binary":
-				if (!isBuffer)
-					throw new Error;
-				break;
-
-			case "base64":
-				if (isBuffer)
-					throw new Error;
-				payload = Uint8Array.fromBase64(payload).buffer;
-				break;
-
-			case "hex":
-				if (isBuffer)
-					throw new Error;
-				payload = Uint8Array.fromHex(payload).buffer;
-				break;
-
-			default:
-				throw new Error(`unsupported encoding ${state.encoding}`);
-		}
+		if (("object" === type) && !isBuffer)
+			payload = JSON.stringify(payload);
+		else if (("number" === type) || ("boolean" === type))
+			payload = payload.toString();
+		const encoding = state.encoding ?? msg.encoding ?? (isBuffer ? "binary" : "utf8");
 
 		let file;
 		try {
+			switch (encoding) {
+				case "utf8":
+					if (!isBuffer)
+						payload = payload.toString();
+					break;
+				
+				case "binary":
+					if (!isBuffer)
+						throw new Error;
+					break;
+
+				case "base64":
+					if (isBuffer)
+						throw new Error;
+					payload = Uint8Array.fromBase64(payload).buffer;
+					break;
+
+				case "hex":
+					if (isBuffer)
+						throw new Error;
+					payload = Uint8Array.fromHex(payload).buffer;
+					break;
+
+				default:
+					throw new Error(`unsupported encoding ${encoding}`);
+			}
+
 			if (state.createDir) {
+				// should be able to use 419 createDirectory here... it should do the full path
 				const parts = filename.split("/");
 				for (let i = 1; i <= parts.length - 1; i++) {
 					const partial = parts.slice(0, i).join("/");
@@ -162,14 +168,14 @@ class FileWrite extends Node {
 			file.position = file.length;
 
 			file.write(payload);
-			if (state.appendNewline)
+			if (state.appendNewline && !isBuffer)
 				file.write("\n");
 			file.close();
 			return msg;
 		}
 		catch (e) {
 			file?.close();
-			this.error(e, {_msgid: msg._msgid, filename});
+			this.error(e, msg);
 		}
 	}
 
@@ -208,9 +214,14 @@ class FileRead extends Node {
 
 			file = new SharedFile(filename);
 			if ("" === state.format) {
-				msg.payload = new Uint8Array(file.read(ArrayBuffer));
+				msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))) : (new Uint8Array(0));
 			}
 			else if ("stream" === state.format) {
+				if (!file.length) {
+					file.close();
+					return void done();
+				}
+
 				msg.parts = {
 					index: 0,
 					ch: "",
@@ -235,33 +246,49 @@ class FileRead extends Node {
 			else if ("lines" === state.format) {
 				msg.parts = {
 					index: 0,
-					ch: "",
+					ch: "\n",
 					id: RED.util.generateId()
 				};
 
 				msg.parts.type = "string";
-				
+
+				if (!file.length) {
+					msg.payload = "";
+					msg.parts.count = 1;
+					file.close();
+					done();
+					return msg;
+				}
+
 				let count = 256;
 				Timer.repeat(id => {
+					if (file.position === file.length) {		// EOF is newline or empty file
+						msg.payload = "";
+						msg.parts.count = msg.parts.index + 1;
+						this.send(msg);
+						Timer.clear(id);
+						file.close();
+						done();
+						return;
+					}
 					const data = new Uint8Array(file.read(ArrayBuffer, count));
-					const index = data.indexOf(10);
+					let index = data.indexOf(10);
 					if (-1 === index) {
 						if (file.position !== file.length) {
-							file.position -= count;
+							file.position -= data.length;
 							count += 256;
 							return;
 						}
+						index = data.length;	 // last line terminates at EOF
+						msg.parts.count = msg.parts.index + 1;
 					}
-					file.position -= data.length - (index + 1);
+					else
+						file.position -= data.length - (index + 1);
 					count = 256;
-					data[index] = 0;
-					msg.payload = String.fromArrayBuffer(data.buffer);
-										
-					if (file.length === file.position)
-						msg.parts.count = msg.parts.index + 1; 
+					msg.payload = String.fromArrayBuffer(data.buffer, 0, index);
 					this.send(msg);
 					msg.parts.index += 1;
-					if (file.length <= file.position) {
+					if (undefined !== msg.parts.count) {
 						Timer.clear(id);
 						file.close();
 						done();
@@ -293,7 +320,7 @@ class FileRead extends Node {
 		}
 		catch (e) {
 			file?.close();
-			this.error(e, {_msgid: msg._msgid, filename});
+			this.error(e, msg);
 			return;
 		}
 		

@@ -221,7 +221,7 @@ class TCPIn extends Node {
 			});
 		}
 		else if ("client" === config.server) {
-			const DNS = device.network.http.dns;		//@@ should have device.network.dns
+			const DNS = device.network.dns;
 			const dns = new DNS.io(DNS);
 			const port = config.port;
 			dns.resolve({
@@ -280,7 +280,7 @@ class TCPOut extends Node {
 			});
 		}
 		else if ("client" === config.beserver) {
-			const DNS = device.network.http.dns;		//@@ should have device.network.dns
+			const DNS = device.network.dns;
 			const dns = new DNS.io(DNS);
 			const port = config.port;
 			dns.resolve({

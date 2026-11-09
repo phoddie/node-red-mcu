@@ -20,16 +20,16 @@
 
 import "nodered";	// import for global side effects
 import Time from "time";
-import Preference from "preference";
 
 export default function (done) {
-	const timezone = Preference.get("time", "zone");
-	const dst = Preference.get("time", "dst");
+	using time = device.keyValue.open({path: "TIME", format: "int32"});
+	const timezone = time.read("zone");
+	const dst = time.read("dst");
 	if (RED.mcu.debugging()) {
 		if (Time.timezone !== timezone)
-			Preference.set("time", "zone", Time.timezone);
+			time.write("zone", Time.timezone);
 		if (Time.dst !== dst)
-			Preference.set("time", "dst", Time.dst);
+			time.write("dst", Time.dst);
 	}
 	else if ((undefined !== timezone) && (undefined !== dst)) {
 		Time.timezone = timezone;

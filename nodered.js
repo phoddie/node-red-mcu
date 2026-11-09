@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025 Moddable Tech, Inc.
+ * Copyright (c) 2022-2026 Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -23,7 +23,6 @@ import deepEqual from "deepEqual";
 import structuredClone from "structuredClone";
 import Modules from "modules";
 import config from "mc/config";
-import Preference from "preference";
 
 const nodeClasses = new Map;
 let compatibilityClasses;
@@ -202,8 +201,12 @@ class Context extends Map {
 	}
 	get(name, store) {
 		if ("file" === store) {
-			let value = Preference.get(this.id, name);
-			if (value instanceof ArrayBuffer) {
+			store = device.keyValue.open({path: this.id.toUpperCase()});
+			let value = store.read(name);
+			store.close();
+			if (!(value instanceof ArrayBuffer))
+				return;
+
 				let view = new DataView(value);
 				switch (view.getUint8(0)) {
 					case 1:		// Number
@@ -211,8 +214,7 @@ class Context extends Map {
 						break;
 
 					case 2:		// JSON
-						view.setUint8(0, 32);
-						value = String.fromArrayBuffer(view.buffer);
+					value = String.fromArrayBuffer(value, 1);
 						view = undefined;
 						value = JSON.parse(value);
 						break;
@@ -221,9 +223,16 @@ class Context extends Map {
 						value = new Uint8Array(view.buffer, 1);
 						break;
 
+				case 4:		// boolean
+					value = !!view.getUint8(1);
+					break;
+
+				case 5:		// string
+					value = String.fromArrayBuffer(value, 1)
+					break;
+
 					default:
-						throw new Error("unexpected buffer type");
-				}
+					throw new Error("unexpected type tag");
 			}
 			return value;
 		}
@@ -232,18 +241,30 @@ class Context extends Map {
 	}
 	set(name, value, store) {
 		if ("file" === store) {
+			store = device.keyValue.open({path: this.id.toUpperCase()});
 			switch (typeof value) {
-				case "number":
-					if (value !== (value | 0)) {
+				case "number": {
 						const buffer = new DataView(new ArrayBuffer(8 + 1))
 						buffer.setUint8(0, 1);
 						buffer.setFloat64(1, value);
 						value = buffer.buffer;
-					}
+					} break;
+
+				case "boolean":
+					value = Uint8Array.of(4, value ? 1 : 0);
+					break;
+
+				case "string":
+					value = ArrayBuffer.fromString("\u0005" + value);
 					break;
 
 				case "object":
-					if (value instanceof Uint8Array) {		// Buffer
+					if (null === value) {		// delete when value is null
+						store.delete(name);
+						store.close();
+						return;
+					}
+					else if (value instanceof Uint8Array) {		// Buffer
 						const buffer = new Uint8Array(value.length + 1);
 						buffer[0] = 3;
 						buffer.set(value, 1);
@@ -255,25 +276,36 @@ class Context extends Map {
 					}
 					break;
 
-				case "null":
 				case "undefined":		// delete when value missing
-					Preference.delete(this.id, name);
+					store.delete(name);
+					store.close();
 					return;
+				
+				default:
+					throw new Error(`can't store ${typeof value}`);
 			}
-			Preference.set(this.id, name, value);
+			store.write(name, value);
+			store.close();
 		}
 		else
 			return super.set(name, value);
 	}
 	delete(name, store) {
-		if ("file" === store)
-			Preference.delete(this.id, name);
+		if ("file" === store) {
+			store = device.keyValue.open({path: this.id.toUpperCase()});
+			store.delete(name);
+			store.close();
+		}
 		else
 			super.delete(name);
 	}
 	keys(store) {
-		if ("file" === store)
-			return Preference.keys(this.id);
+		if ("file" === store) {
+			store = device.keyValue.open({path: this.id.toUpperCase()});
+			const result = [...store];
+			store.close();
+			return result;
+		}
 
 		return [...super.keys()];
 	}

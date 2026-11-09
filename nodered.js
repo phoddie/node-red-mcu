@@ -1281,17 +1281,6 @@ class Buffer extends Uint8Array {
 	}
 }
 
-class Console {
-	static log(...parts) {
-		trace(...parts, "\n");
-	}
-}
-
-globalThis.setInterval = Timer.repeat;
-globalThis.clearInterval = Timer.clear;
-globalThis.setTimeout = Timer.set;
-globalThis.clearTimeout = Timer.clear;
-globalThis.console = Console;
 globalThis.Buffer = Buffer;
 
 globalThis.RED = RED;
@@ -1300,6 +1289,3 @@ globalThis.module = Object.freeze({
 		RED.addCompatibility(module);
 	}
 });
-
-if (!("fromBase64" in Uint8Array))
-	throw new Error("Base64 support misssing. Update Moddable SDK.");

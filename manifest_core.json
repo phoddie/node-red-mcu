@@ -6,7 +6,9 @@
 		"$(MODDABLE)/modules/base/structuredClone",
 		"$(MODDABLE)/modules/base/modules",
 		"$(MODDABLE)/modules/embedded/storage/key-value",
-		"$(MODDABLE)/modules/embedded/io"
+		"$(MODDABLE)/modules/embedded/io",
+		"$(MODDABLE)/modules/web/console",
+		"$(MODDABLE)/modules/web/timers"
  	],
 	"modules": {
 		"*": [

@@ -1,6 +1,6 @@
 {
 	"include": [
-		"$(MODDABLE)/modules/files/file/manifest_littlefs.json"
+		"$(MODDABLE)/modules/embedded/storage/files"
 	],
 	"modules": {
 		"*": "./node-red-files"

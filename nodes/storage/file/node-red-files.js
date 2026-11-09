@@ -19,67 +19,73 @@
  */
 
 import {Node} from "nodered";
-import {File, Directory} from "file";
 import Timer from "timer";
 
-// ShareFile wraps ECMA-419 file to allows one instance of a file to be shared across several File Read & Write nodes.
+// ShareFile lightly wraps ECMA-419 file to allows one instance of a file to be shared across several File Read & Write nodes.
 // This avoids issues with file system implementation caching across instances.
 
 let cache;
 
 class SharedFile {
-	#filename;
+	#path;
 	position = 0;
 
-	constructor(filename, write) {
-		if (!write && !File.exists(filename))
-			throw new Error("file not found: " + filename);
+	constructor(path, write) {
+		if (!write && !SharedFile.exists(path))
+			throw new Error("file not found: " + path);
 
-		this.#filename = filename;
-		this.file;				// try to open file immediately, to throw from constructor if error
+		this.#path = path;
+		this.file;				// open file immediately, so constructors throws if error 
 	}
 	close() {
-		if (undefined === this.#filename)
+		if (undefined === this.#path)
 			return;
 
-		cache.get(this.#filename)?.close();
-		cache.delete(this.#filename);
+		cache.get(this.#path)?.close();
+		cache.delete(this.#path);
 		if (!cache.size)
 			cache = undefined;
-		this.#filename = undefined;
+		this.#path = undefined;
 	}
-	read(...args) {
+	read(count) {
 		const file = this.file;
-		file.position = this.position;
-		const result = file.read(...args);
-		this.position = file.position;
+		const result = file.read(count, this.position);
+		this.position += result.byteLength;
 		return result;
 	}
-	write(...args) {
+	write(buffer) {
 		const file = this.file;
-		file.position = this.position;
-		const result = file.write(...args);
-		this.position = file.position;
-		return result;
+		if ("string" === typeof buffer)
+			buffer = ArrayBuffer.fromString(buffer);
+		file.write(buffer, this.position);
+		this.position += buffer.byteLength;
 	}
 	get length() {
-		return this.file.length;
+		const status = this.file.status();
+		return status.size;
 	}
 	get file() {
 		cache ??= new Map;
-		let file = cache.get(this.#filename);
+		let file = cache.get(this.#path);
 		if (file)
 			return file;
 
-		file = new File(this.#filename, true);
-		cache.set(this.#filename, file);
+		if (SharedFile.exists(this.#path))
+			file = device.files.openFile({path: this.#path, mode: "r+"});
+		else
+			file = device.files.openFile({path: this.#path, mode: "w+"});
+		cache.set(this.#path, file);
 		return file;
 	}
 
-	static delete(filename) {
-		cache?.get(filename)?.close();
-		cache?.delete(filename);
-		File.delete(filename);
+	static delete(path) {
+		cache?.get(path)?.close();
+		cache?.delete(path);
+		device.files.delete(path);
+	}
+	static exists(path) {
+		const status = device.files.status(path);
+		return status.isFile();
 	}
 }
 
@@ -108,7 +114,7 @@ class FileWrite extends Node {
 		const filename = state.filename ?? msg.filename;
 
 		if ("delete" === state.overwriteFile) {
-			if (!File.exists(filename))
+			if (!SharedFile.exists(filename))
 				return void this.error("file not found: " + filename, msg);
 			SharedFile.delete(filename);
 			return msg;
@@ -152,12 +158,11 @@ class FileWrite extends Node {
 			}
 
 			if (state.createDir) {
-				// should be able to use 419 createDirectory here... it should do the full path
 				const parts = filename.split("/");
 				for (let i = 1; i <= parts.length - 1; i++) {
 					const partial = parts.slice(0, i).join("/");
-					if (!File.exists(partial))
-						Directory.create(partial);
+					if (!SharedFile.exists(partial))
+						device.files.createDirectory(partial);
 				}
 			}
 
@@ -209,12 +214,13 @@ class FileRead extends Node {
 				return void done();
 
 			msg.filename = filename;
-			if (!File.exists(filename))
+			if (!SharedFile.exists(filename))
 				return void this.error("file not found: " + filename, msg);
 
 			file = new SharedFile(filename);
 			if ("" === state.format) {
-				msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))) : (new Uint8Array(0));
+				const length = file.length;
+				msg.payload = length ? (new Uint8Array(file.read(length))) : (new Uint8Array(0));
 			}
 			else if ("stream" === state.format) {
 				if (!file.length) {
@@ -232,7 +238,7 @@ class FileRead extends Node {
 				msg.parts.count = Math.idiv(file.length + 511, 512);
 
 				Timer.repeat(id => {
-					msg.payload = new Uint8Array(file.read(ArrayBuffer, Math.min(file.length - file.position, 512)));
+					msg.payload = new Uint8Array(file.read(Math.min(file.length - file.position, 512)));
 					this.send(msg);
 					msg.parts.index += 1;
 					if (file.length <= file.position) {
@@ -271,7 +277,7 @@ class FileRead extends Node {
 						done();
 						return;
 					}
-					const data = new Uint8Array(file.read(ArrayBuffer, count));
+					const data = new Uint8Array(file.read(count));
 					let index = data.indexOf(10);
 					if (-1 === index) {
 						if (file.position !== file.length) {
@@ -297,19 +303,20 @@ class FileRead extends Node {
 				return;
 			}
 			else {
+				const length = file.length;
 				switch (state.encoding) {
 					case undefined:
 					case "binary":
 					case "utf8":
-						msg.payload = file.length ? file.read(String) : "";
+						msg.payload = length ? String.fromArrayBuffer(file.read(length)) : "";
 						break;
 					case "hex":
-						msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))).toHex() : "";
+						msg.payload = length ? (new Uint8Array(file.read(length))).toHex() : "";
 						break;
 					case "base64":
 						if (state.chunk)
 							throw new Error;
-						msg.payload = file.length ? (new Uint8Array(file.read(ArrayBuffer))).toBase64() : "";
+						msg.payload = length ? (new Uint8Array(file.read(length))).toBase64() : "";
 						break;
 					default:
 						throw new Error("encoding unsupported: " + state.encoding)

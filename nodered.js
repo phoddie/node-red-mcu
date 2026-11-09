@@ -464,7 +464,7 @@ export class Node {
 	}
 	error(error, msg = {}) {
 		if (config.noderedmcu?.editor)
-			trace.left(JSON.stringify({error: {error}}), this.id);
+			trace.left(JSON.stringify({error: {error: String(error)}}), this.id);
 		this.makeDone(msg)(error);
 	}
 	debug(msg) {

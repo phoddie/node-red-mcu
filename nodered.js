@@ -221,21 +221,21 @@ class Context extends Map {
 			if (!(value instanceof ArrayBuffer))
 				return;
 
-				let view = new DataView(value);
-				switch (view.getUint8(0)) {
-					case 1:		// Number
-						value = view.getFloat64(1);
-						break;
+			let view = new DataView(value);
+			switch (view.getUint8(0)) {
+				case 1:		// Number
+					value = view.getFloat64(1);
+					break;
 
-					case 2:		// JSON
+				case 2:		// JSON
 					value = String.fromArrayBuffer(value, 1);
-						view = undefined;
-						value = JSON.parse(value);
-						break;
-					
-					case 3:		// Buffer
-						value = new Uint8Array(view.buffer, 1);
-						break;
+					view = undefined;
+					value = JSON.parse(value);
+					break;
+				
+				case 3:		// Buffer
+					value = new Uint8Array(view.buffer, 1);
+					break;
 
 				case 4:		// boolean
 					value = !!view.getUint8(1);
@@ -245,7 +245,7 @@ class Context extends Map {
 					value = String.fromArrayBuffer(value, 1)
 					break;
 
-					default:
+				default:
 					throw new Error("unexpected type tag");
 			}
 			return value;
@@ -304,7 +304,7 @@ class Context extends Map {
 			if (undefined === value)
 				return super.delete(name);
 			return super.set(name, value);
-	}
+		}
 	}
 	delete(name, store) {
 		checkName(name);
@@ -767,9 +767,10 @@ class FunctionNode extends Node {
 			const node = Object.create(this, {
 				done: {value: done},
 				error: {value: (error, msg) => {
-					this.debug(error.toString());
 					if (msg)
-						done(msg);
+						this.error(error, msg);		// report to Catch nodes with msg
+					else
+						this.debug(error.toString());
 				}},
 				send: {value: msg => {
 					this.send(msg, _msgid);
@@ -830,7 +831,7 @@ class ChangeNode extends Node {
 				return toValue;
 		}
 		else if (("boolean" === type) && (fromType === "bool")) {
-			if (current.toString() === fromValue)
+			if (current === fromValue)
 				return toValue;
 		}
 		return current;
@@ -919,6 +920,17 @@ class SwitchNode extends Node {
 			this.send(result);
 		}
 	}
+	isJSON(value) {		// adapted from 10-switch.js: Node-RED parses a Buffer as text; here any Uint8Array
+		try {
+			if (value instanceof Uint8Array)
+				value = String.fromArrayBuffer(value.buffer, value.byteOffset, value.byteLength);
+			JSON.parse(value);
+			return true;
+		}
+		catch {
+			return false;
+		}
+	}
 	empty(value) {		// adapted from 10-switch.js
 		const type = typeof value;
 		if ((type === "string") || Array.isArray(value) || (value instanceof Uint8Array))
@@ -979,9 +991,7 @@ class FilterNode extends Node {
 		let value = msg[this.#property], last, ignoreFirst, topic;
 		if (this.#topic) { 
 			this.#last ??= new Map;
-			topic = msg[this.#topic];
-			if (undefined === topic)
-				return;
+			topic = msg[this.#topic] || "_no_topic";
 			last = this.#last.get(topic);
 		}
 		else
@@ -1121,20 +1131,18 @@ class JSONNode extends Node {
 		if (msg.schema)
 			throw new Error("schema unimplemented")
 
+		// as Node-RED's 70-JSON.js: no action converts in whichever direction applies
 		let value = this.#property(msg);
 		const type = typeof value;
-		const action = this.#action ?? (("object" === type) ? "str" : "obj"); 
-		if ("str" === action) {
-			if ("string" === type)
-				return msg;
-			
-			value = JSON.stringify(value, null, this.#indent);
-		}
-		else {
-			if ("object" === type)
-				return msg;
+		if (undefined === value)
+			return msg;		// no property: pass the message on
 
+		if (("string" === type) || (value instanceof Uint8Array)) {		// Node-RED requires a Buffer
+			if ("str" === this.#action)
+				return msg;
 			try {
+				if ("string" !== type)
+					value = String.fromArrayBuffer(value.buffer, value.byteOffset, value.byteLength);
 				value = JSON.parse(value);
 			}
 			catch (e) {
@@ -1142,7 +1150,17 @@ class JSONNode extends Node {
 				return;
 			}
 		}
-		
+		else if (("object" === type) || ("boolean" === type) || ("number" === type)) {
+			if ("obj" === this.#action)
+				return msg;
+			value = JSON.stringify(value, null, this.#indent);
+		}
+		else {
+			this.warn("dropped: msg property is not a string, buffer, object, boolean, or number");
+			done();
+			return;
+		}
+
 		this.#property(msg, value);
 		return msg;
 	}

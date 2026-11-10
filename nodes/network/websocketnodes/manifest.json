@@ -1,6 +1,6 @@
 {
 	"include": [
-		"$(MODDABLE)/examples/io/tcp/websocket/manifest_websocket.json"
+		"$(MODDABLE)/modules/web/websocket"
 	],
 	"modules": {
 		"*": "./websocketnodes"

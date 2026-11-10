@@ -71,33 +71,36 @@ class WebSocketClient extends Node {
 	#connect() {
 		let wss;
 		if (this.#tls) {
+			if (!device.io.TLS)
+				throw new Error("TLS socket unavailable");
+
+			const options = this.#tls.options ?? {};
+			const tls = {
+				applicationLayerProtocol: "http/1.1",		// handshake is HTTP/1.1 upgrade
+				verify: options.verifyservercert ?? true
+			};
+			if (options.servername)
+				tls.host = options.servername;		// WebSocket Client defaults tls.host to the URL host
+			if (options.ca)
+				tls.ca = options.ca;
+			if (options.cert) {
+				tls.clientCertificate = options.cert;
+				if (options.key)
+					tls.clientKey = options.key;
+			}
 			wss = {
 				...device.network.ws,
 				socket: {
-					io: Modules.importNow("embedded:io/socket/tcp/tls"),
-					TCP: {
-						io: device.network.ws.socket.io
-					},
-					secure: {
-						verify: this.#tls.options?.verifyservercert ?? true
-					}
+					io: device.io.TLS,
+					TCP: device.network.ws.socket,
+					tls
 				}
 			};
-			const servername = this.#tls.options?.servername;
-			if (servername) wss.socket.secure.serverName = servername; 
-			const ca = this.#tls.options?.ca;
-			if (ca) wss.socket.secure.certificate = ca; 
-			const cert = this.#tls.options?.cert;
-			if (cert) {
-				wss.socket.secure.clientCertificates = [cert]; 
-				const key = this.#tls.options?.key;
-				if (key) wss.socket.secure.clientKey = key;
-			}
 		}
 
 		const options = this.#options, o = {};
 		if (wss) o.wss = wss;
-		({path: o.url, subprotocol: o.subprotocol, keepalive: o.keepalive} = options); 
+		({path: o.url, subprotocol: o.protocol, keepalive: o.keepalive} = options);		// WebSocket() option is "protocol"
 		this.#ws = new WebSocket(o);
 		this.#ws.binaryType = "arraybuffer"; 
 		this.#ws.addEventListener("open", () => {
@@ -157,14 +160,14 @@ class WebSocketListener extends Node {
 		this.#wholemsg = "true" === config.wholemsg;
 
 		const Server = Modules.importNow("httpserver");		// dynamic import so dependency on http server only if websocket listener is used 
-		const WebSocketHandshake = Modules.importNow("embedded:network/http/server/options/websocket");
+		const WebSocketHandshake = Modules.importNow("embedded:network/http/server/route/ws/handshake");
 
 		Server.add("GET", config.path, this, {
 			...WebSocketHandshake,
 			listener: this,
 			onDone() {
 				const listener = this.route.listener;
-				const ws = new WebSocket({socket: this.detach()});
+				const ws = new WebSocket({attach: this.detach()});
 				ws._session = RED.util.generateId();
 				listener.#connections.set(ws._session, ws);
 				ws.addEventListener("message", function(event) {

@@ -1,6 +1,6 @@
 {
 	"include": [
-		"$(MODDABLE)/examples/io/tcp/fetch/manifest_fetch.json"
+		"$(MODDABLE)/modules/web/fetch"
 	],
 	"modules": {
 		"openweathermap": "./weather"

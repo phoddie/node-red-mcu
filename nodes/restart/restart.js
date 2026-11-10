@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023  Moddable Tech, Inc.
+ * Copyright (c) 2023-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -21,7 +21,9 @@
 import {Node} from "nodered";
 
 class Restart extends Node {
-	onMessage() @ "xs_mcu_restart" 
+	onMessage() {
+		device.system.restart()
+	}
 
 	static type = "mcu_restart";
 	static {

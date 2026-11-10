@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2023  Moddable Tech, Inc.
+ * Copyright (c) 2023-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -32,7 +32,7 @@ class OTAUpdateNode extends Node {
 	onStart(config) {
 		super.onStart(config);
 
-		if (!Modules.has("ota"))
+		if (!device.update)
 			return void this.status({fill: "red", shape: "ring", text: "OTA not supported"});
 
 		if (config.path) {
@@ -48,7 +48,9 @@ class OTAUpdateNode extends Node {
 			return void done();
 
 		if (this.#client) {		// OTA in progress: cancel and start new request
-			this.#ota?.cancel();
+		//@ make this work for PUSH requests too
+			this.#ota?.close();
+			this.#ota?.partition?.close();
 			this.#client.close();
 			this.#ota = this.#client = undefined;
 		}
@@ -57,12 +59,12 @@ class OTAUpdateNode extends Node {
 		if ("http:" !== url.protocol)
 			return void done("http only");
 		const options = {
-			...device.network.http,
+			...device.network.http.client,
 			host: url.hostname
 		};
 		if (url.port)
 			options.port = parseInt(url.port); 
-		this.#client = new device.network.http.io(options); 
+		this.#client = new device.network.http.client.io(options); 
 		const request = this.#client.request({
 			path: url.pathname,
 			onHeaders(status, headers) {
@@ -72,7 +74,7 @@ class OTAUpdateNode extends Node {
 				this.node.begin(headers, done);
 			},
 			onReadable(count) {
-				this.node.append(this, count);
+				this.node.append(this, count, done);
 			},
 			onDone(error) {
 				if (this.node.end(error, done)) {
@@ -89,14 +91,24 @@ class OTAUpdateNode extends Node {
 			return void done?.("OTA update already in progress");
 
 		this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
-		const total = headers.get("content-length");
-		if (undefined !== total)
-			this.total = parseInt(total);
+		const byteLength = headers.get("content-length");
+		if (undefined !== byteLength)
+			this.byteLength = parseInt(byteLength);
+		else
+			delete this.byteLength;
 		this.received = 0;
 
 		try {
-			const OTA = Modules.importNow("ota");
-			this.#ota = new OTA
+			const options = {
+				partition: device.flash.open({
+					path: "nextota"
+				}),
+				mode: "a"
+			};
+			if (undefined !== this.byteLength)
+				options.byteLength = this.byteLength;
+			this.#ota = device.update.open(options);
+			this.#ota.partition = options.partition;
 		}
 		catch (e) {
 			e = e.toString();
@@ -106,14 +118,18 @@ class OTAUpdateNode extends Node {
 			done?.(e);
 		}
 	}
-	append(from, count) {
+	append(from, count, done) {
 		try {
 			const data = from.read(count);
 			this.#ota?.write(data);
 		}
 		catch (e) {		// probably invalid OTA data
-			this.#ota.cancel();
+			this.#ota?.close();
+			this.#ota?.partition?.close();
 			this.#ota = undefined;
+			this.#client?.close();
+			this.#client = undefined;
+			done?.(e);
 			this.status({fill: "red", shape: "ring", text: e.toString()});
 			return;
 		}
@@ -121,10 +137,10 @@ class OTAUpdateNode extends Node {
 		this.received += count;
 		if (!this.#ota)
 			;
-		else if (undefined === this.total)
+		else if (undefined === this.byteLength)
 			this.status({fill: "green", shape: "dot", text: this.received + " bytes"});
 		else {
-			const percent = Math.round((this.received / this.total) * 10000) / 100;
+			const percent = Math.round((this.received / this.byteLength) * 10000) / 100;
 			this.status({fill: "green", shape: "dot", text: percent + "%"});
 		}
 	}
@@ -135,13 +151,16 @@ class OTAUpdateNode extends Node {
 			success = false;
 		else if (error) {
 			error = error.toString();
-			this.#ota.cancel();
+			this.#ota.close();
+			this.#ota.partition?.close();
 			this.status({fill: "red", shape: "ring", text: error.toString()});
 			done?.(error);
 		}
 		else {
 			try {
 				this.#ota.complete();
+				this.#ota.close();
+				this.#ota.partition?.close();
 				this.status({fill: "green", shape: "dot", text: "success"});
 			}
 			catch (e) {
@@ -165,6 +184,7 @@ class OTAUpdateNode extends Node {
 
 const route = Object.freeze({
 	onRequest(request) {
+		this.node.end(new Error("OTA canceled"));
 		this.node.begin(request.headers);
 	},
 	onReadable(count) {
@@ -174,6 +194,7 @@ const route = Object.freeze({
 		const success = this.node.end(null);
 
 		response.status = success ? 200 : 500; 
+		response.headers.set("content-length", 0);
 		this.respond(response);
 
 		if (success)

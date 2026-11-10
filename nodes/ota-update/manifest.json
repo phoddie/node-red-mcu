@@ -1,7 +1,7 @@
 {
 	"include": [
 		"$(MODDABLE)/modules/data/url/manifest.json",
-		"$(MODDABLE)/examples/io/tcp/httpclient/manifest_httpclient.json",
+		"$(MODDABLE)/modules/embedded/network/http/client",
 		"$(NODEREDMCU)/nodes/network/httpserver/manifest.json"
 	],
 	"modules": {
@@ -12,7 +12,22 @@
 	],
 	"platforms": {
 		"esp32": {
-			"include": "$(MODDABLE)/build/devices/esp32/modules/ota/manifest.json"
+			"include": [
+				"$(EMBEDDED)/storage/flash",
+				"$(EMBEDDED)/update"
+			]
+		},
+		"esp8266": {
+			"include": [
+				"$(EMBEDDED)/storage/flash",
+				"$(EMBEDDED)/update"
+			]
+		},
+		"mac": {
+			"include": [
+				"$(EMBEDDED)/storage/flash",
+				"$(EMBEDDED)/update"
+			]
 		},
 		"...": {
 			"warning": "OTA not supported"

@@ -77,7 +77,7 @@ class AudioOutNode extends Node {
 			}
 
 			this.#streamer = new Streamer({
-				http: device.network.http,
+				http: device.network.http.client,
 				port: url.port || 80,
 				host: url.hostname,
 				path: url.pathname + url.search,

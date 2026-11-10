@@ -85,11 +85,11 @@ class MQTTBrokerNode extends Node {
 		let mqtt = device.network.mqtt;
 		if (this.#tls) {
 			if (!device.io.TLS)
-				throw new Error("TLS  unavailable");
+				throw new Error("TLS unavailable");
 
 			const options = this.#tls.options ?? {};
 			const tls = {
-				applicationLayerProtocol: "mqtt",
+				applicationLayerProtocol: options.alpnprotocol ?? "mqtt",
 				verify: options.verifyservercert ?? true
 			};
 			if (options.servername)

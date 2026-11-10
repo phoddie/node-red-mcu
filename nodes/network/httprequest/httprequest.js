@@ -50,6 +50,8 @@ class HTTPRequestNode extends Node {
 			const tls = {
 				verify: options.verifyservercert ?? true
 			};
+			if (options.alpnprotocol)
+				tls.applicationLayerProtocol = options.alpnprotocol;
 			if (options.servername)
 				tls.host = options.servername;		// HTTPS client defaults tls.host to the URL host
 			if (options.ca)

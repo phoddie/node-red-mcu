@@ -76,7 +76,7 @@ class WebSocketClient extends Node {
 
 			const options = this.#tls.options ?? {};
 			const tls = {
-				applicationLayerProtocol: "http/1.1",		// handshake is HTTP/1.1 upgrade
+				applicationLayerProtocol: options.alpnprotocol ?? "http/1.1",		// handshake is HTTP/1.1 upgrade
 				verify: options.verifyservercert ?? true
 			};
 			if (options.servername)

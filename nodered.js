@@ -189,6 +189,16 @@ class RED {
 	}
 }
 
+function unsupported(what) {
+	throw new Error(`context: ${what} unsupported`);
+}
+function checkName(name) {
+	if ("string" !== typeof name)
+		unsupported(Array.isArray(name) ? "array of keys" : "non-string key");
+	if ((name.indexOf(".") >= 0) || (name.indexOf("[") >= 0))
+		unsupported(`property path "${name}"`);
+}
+
 class Context extends Map {
 	constructor(id) {
 		super();
@@ -199,7 +209,11 @@ class Context extends Map {
 		}
 		Object.defineProperty(this, "id", {value: id});
 	}
-	get(name, store) {
+	get(name, store, callback) {
+		checkName(name);
+		if (("function" === typeof store) || (undefined !== callback))
+			unsupported("callback");
+
 		if ("file" === store) {
 			store = device.keyValue.open({path: this.id.toUpperCase()});
 			let value = store.read(name);
@@ -239,7 +253,11 @@ class Context extends Map {
 
 		return super.get(name); 
 	}
-	set(name, value, store) {
+	set(name, value, store, callback) {
+		checkName(name);
+		if (("function" === typeof store) || (undefined !== callback))
+			unsupported("callback");
+
 		if ("file" === store) {
 			store = device.keyValue.open({path: this.id.toUpperCase()});
 			switch (typeof value) {
@@ -259,12 +277,7 @@ class Context extends Map {
 					break;
 
 				case "object":
-					if (null === value) {		// delete when value is null
-						store.delete(name);
-						store.close();
-						return;
-					}
-					else if (value instanceof Uint8Array) {		// Buffer
+					if (value instanceof Uint8Array) {		// Buffer
 						const buffer = new Uint8Array(value.length + 1);
 						buffer[0] = 3;
 						buffer.set(value, 1);
@@ -287,10 +300,15 @@ class Context extends Map {
 			store.write(name, value);
 			store.close();
 		}
-		else
+		else {
+			if (undefined === value)
+				return super.delete(name);
 			return super.set(name, value);
 	}
+	}
 	delete(name, store) {
+		checkName(name);
+
 		if ("file" === store) {
 			store = device.keyValue.open({path: this.id.toUpperCase()});
 			store.delete(name);
@@ -299,7 +317,10 @@ class Context extends Map {
 		else
 			super.delete(name);
 	}
-	keys(store) {
+	keys(store, callback) {
+		if (("function" === typeof store) || (undefined !== callback))
+			unsupported("callback");
+
 		if ("file" === store) {
 			store = device.keyValue.open({path: this.id.toUpperCase()});
 			const result = [...store];

@@ -1,6 +1,6 @@
 {
 	"include": [
-		"$(MODDABLE)/examples/io/tcp/tlssocket/manifest.json"
+		"$(MODDABLE)/modules/embedded/io/socket/tcp/tls"
 	],
 	"modules": {
 		"*": "./tls-config"

@@ -23,13 +23,13 @@ import fetch from "fetch";
 import {Headers} from "fetch";
 import {URLSearchParams} from "url";
 import Mustache from "mustache";
-import CertificateManager from "ssl/cert";
 
 class HTTPRequestNode extends Node {
 	#options;
 	#format; 
 	#paytoqs;
 	#persist;
+	#senderr;
 
 	onStart(config) {
 		super.onStart(config);
@@ -40,12 +40,27 @@ class HTTPRequestNode extends Node {
 		this.#format = config.ret;
 		this.#paytoqs = config.paytoqs;
 		this.#persist = config.persist;
+		this.#senderr = config.senderr;
 		this.#options = {
 			method: config.method,
 			url: config.url
 		};
-		if (config.tls)
-			this.#options.tls = RED.nodes.getNode(config.tls);
+		if (config.tls) {
+			const options = RED.nodes.getNode(config.tls)?.options ?? {};
+			const tls = {
+				verify: options.verifyservercert ?? true
+			};
+			if (options.servername)
+				tls.host = options.servername;		// HTTPS client defaults tls.host to the URL host
+			if (options.ca)
+				tls.ca = options.ca;
+			if (options.cert) {
+				tls.clientCertificate = options.cert;
+				if (options.key)
+					tls.clientKey = options.key;
+			}
+			this.#options.embedded = Object.freeze({tls: Object.freeze(tls)});
+		}
 	}
 	onMessage(msg) {
 		const headers = new Headers([
@@ -86,16 +101,10 @@ class HTTPRequestNode extends Node {
 		}
 
 		if (!url.startsWith("http:") && !url.startsWith("https:"))
-			url = (this.#options.tls ? "https://" : "http://") + url;
+			url = (this.#options.embedded ? "https://" : "http://") + url;
 
-		if (url.startsWith("https://")) {
-			if (false === this.#options.tls?.options?.verifyservercert)
-				throw new Error("cannot skip server cert validation yet")
-	
-			const ca = this.#options.tls?.options?.ca;
-			if (ca)
-				CertificateManager.register(ca);
-		}
+		if (this.#options.embedded)
+			options.embedded = this.#options.embedded;
 
 		fetch(url, options)
 		.then(response => {
@@ -121,7 +130,11 @@ class HTTPRequestNode extends Node {
 			this.send(msg);
 		})
 		.catch(e => {
-			this.send(msg);
+			this.error(e, msg);
+			msg.payload = `${e} : ${url}`;
+			msg.statusCode = e.code;
+			if (!this.#senderr)
+				this.send(msg);
 		});
 	}
 

@@ -95,7 +95,7 @@ class RED {
 		static createNode() {		// nothing to do: initialization done in class
 		}
 		static getNode(id) {
-			for (let flow of flows.values()) {
+			for (let flow of globalThis.flows.values()) {
 				const node = flow.getNode(id);
 				if (node)
 					return node;
@@ -153,7 +153,7 @@ class RED {
 		globalThis.globalContext = new Context(globalContextID);
 
 		if (this.#compatibility.length) {
-			compatibilityClasses = new Map;
+			compatibilityClasses ??= new Map;
 			this.#compatibility.forEach(f => f(RED));
 		}
 
@@ -171,7 +171,7 @@ class RED {
 					Class = UnknownNode;
 				}
 
-				if (Node.isPrototypeOf(Class))
+				if (Object.prototype.isPrototypeOf.call(Node, Class))		// Node.isPrototypeOf(Class)
 					flow.addNode(new Class(id, flow, name));
 				else
 					flow.addNode(new CompatibiltyNode(id, flow, name, Class));

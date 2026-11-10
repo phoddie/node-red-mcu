@@ -38,23 +38,17 @@ class Clock extends Node {
 		if (!this.#clock)
 			return;
 
-		try {
-			if (msg.configuration) {
-				this.#clock.configure(msg.configuration);
-				msg = undefined;
-			}
-			else if (msg.payload) {
-				this.#clock.time = Number(msg.payload);
-				msg = undefined;
-			}
-			else
-				msg.payload = this.#clock.time;
-			done();
-		}
-		catch (e) {
-			done(e);
+		if (msg.configuration) {
+			this.#clock.configure(msg.configuration);
 			msg = undefined;
 		}
+		else if (msg.payload) {
+			this.#clock.time = Number(msg.payload);
+			msg = undefined;
+		}
+		else
+			msg.payload = this.#clock.time;
+		done();
 
 		return msg;
 	}

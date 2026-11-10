@@ -61,13 +61,8 @@ class Sensor extends Node {
 			return;
 
 		if (msg.configuration) {
-			try {
-				sensor.configure(msg.configuration);
-				done?.();
-			}
-			catch (e) {
-				done?.(e);
-			}
+			sensor.configure(msg.configuration);
+			done?.();
 			return;
 		}
 		

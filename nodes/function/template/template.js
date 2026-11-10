@@ -59,15 +59,8 @@ class Template extends Node {
 		let result = template;
 		if ("mustache" === this.#syntax)
 			result = Mustache.render(template, new Context(msg, this));
-		if ("json" === this.#output) {
-			try {
-				result = JSON.parse(result);
-			}
-			catch (e) {
-				this.error(e);
-				return;
-			}
-		}
+		if ("json" === this.#output)
+			result = JSON.parse(result);
 		msg.payload = result;
 		done();
 		return msg; 

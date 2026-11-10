@@ -136,7 +136,12 @@ class RED {
 				const next = current._next, target = current._target;
 				delete current._next; 
 				delete current._target; 
+				try {
 				target.receive(current, target.makeDone(current));
+				}
+				catch (e) {
+					target.error(e, current);
+				}
 				current = next;
 			}
 		}
@@ -760,7 +765,6 @@ class FunctionNode extends Node {
 		}
 	}
 	onMessage(msg, done) {
-		try {
 			const context = this.context;
 			const func = this.#func;
 			const _msgid = msg._msgid;
@@ -783,10 +787,6 @@ class FunctionNode extends Node {
 			if (msg)
 				this.send(msg, _msgid);
 		}
-		catch (e) {
-			done(e);
-		}
-	}
 	send(msg, _msgid) {
 		_msgid ??= generateId();
 		if (Array.isArray(msg)) {
@@ -1140,16 +1140,10 @@ class JSONNode extends Node {
 		if (("string" === type) || (value instanceof Uint8Array)) {		// Node-RED requires a Buffer
 			if ("str" === this.#action)
 				return msg;
-			try {
 				if ("string" !== type)
 					value = String.fromArrayBuffer(value.buffer, value.byteOffset, value.byteLength);
 				value = JSON.parse(value);
 			}
-			catch (e) {
-				done(e);
-				return;
-			}
-		}
 		else if (("object" === type) || ("boolean" === type) || ("number" === type)) {
 			if ("obj" === this.#action)
 				return msg;

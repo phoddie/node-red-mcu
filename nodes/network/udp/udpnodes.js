@@ -116,16 +116,10 @@ class UDPOut extends Node {
 		let payload = msg.payload;
 
 		if (!(payload instanceof Uint8Array)) {
-			try {
-				if (this.#base64)
-					payload  = Uint8Array.fromBase64(payload).buffer;
-				else
-					payload = ArrayBuffer.fromString(payload);
-			}
-			catch (e) {
-				this.error(e);
-				return;
-			}
+			if (this.#base64)
+				payload  = Uint8Array.fromBase64(payload).buffer;
+			else
+				payload = ArrayBuffer.fromString(payload);
 		}
 
 		this.#socket.write(ip, port, payload);

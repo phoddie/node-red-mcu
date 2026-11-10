@@ -19,8 +19,6 @@
  */
 
 import {Node} from "nodered";
-import HTTPServer from "embedded:network/http/server";
-import Listener from "embedded:io/socket/listener";
 import TextDecoder from "text/decoder";
 import TextEncoder from "text/encoder";
 
@@ -160,8 +158,8 @@ const httpRoute = Object.freeze({
 class Server {
 	static add(method, path, node, route) {
 		if (!server) {
-			server = new HTTPServer({ 
-				io: Listener,
+			server = new device.network.http.server.io({
+				...device.network.http.server,
 				port: 80,
 				onConnect(connection) {
 					connection.server = this;

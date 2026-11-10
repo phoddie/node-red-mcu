@@ -66,7 +66,7 @@
 	"udp in": "$(NODEREDMCU)/nodes/network/udp/manifest.json",
 	"udp out": "$(NODEREDMCU)/nodes/network/udp/manifest.json",
 	"websocket-client": "$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json",
-	"websocket-listener": "$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json",
+	"websocket-listener": ["$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json", "$(NODEREDMCU)/nodes/network/httpserver/manifest.json", "$(MODDABLE)/modules/embedded/network/http/server/route/ws/handshake"],
 	"websocket in": "$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json",
 	"websocket out": "$(NODEREDMCU)/nodes/network/websocketnodes/manifest.json",
 

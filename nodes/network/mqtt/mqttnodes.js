@@ -17,10 +17,13 @@
  *   along with the Moddable SDK Runtime.  If not, see <http://www.gnu.org/licenses/>.
  *
  */
+ 
+/*
+	is birth message sent on reconnection, or just initial connection?
+*/
 
 import {Node, configFlowID} from "nodered";
 import Timer from "timer";
-import Modules from "modules";
 
 class MQTTBrokerNode extends Node {
 	#mqtt;
@@ -55,7 +58,7 @@ class MQTTBrokerNode extends Node {
 			host: config.broker,
 			port,
 			id: config.clientid ? config.clientid : "node-red-" + this.id + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000),		//@@ revisit this
-			keepalive: config.keepalive,
+			keepAlive: config.keepalive,		// nodered2mcu converts Node-RED's seconds to milliseconds
 			clean: true === config.cleansession
 		};
 		if (config.credentials?.user)
@@ -79,33 +82,39 @@ class MQTTBrokerNode extends Node {
 	connect() {
 		this.status({fill: "yellow", shape: "ring", text: "node-red:common.status.connecting"});
 
-		const tls = {};
+		let mqtt = device.network.mqtt;
 		if (this.#tls) {
-			tls.socket = {
-				io: Modules.importNow("embedded:io/socket/tcp/tls"),
-				TCP: {
-					io: device.network.mqtt.socket.io
-				},
-				secure: {
-					verify: this.#tls.options?.verifyservercert ?? true
+			if (!device.io.TLS)
+				throw new Error("TLS  unavailable");
+
+			const options = this.#tls.options ?? {};
+			const tls = {
+				applicationLayerProtocol: "mqtt",
+				verify: options.verifyservercert ?? true
+			};
+			if (options.servername)
+				tls.host = options.servername;		// MQTT Client defaults tls.host to the broker host
+			if (options.ca)
+				tls.ca = options.ca;
+			if (options.cert) {
+				tls.clientCertificate = options.cert;
+				if (options.key)
+					tls.clientKey = options.key;
+			}
+			mqtt = {
+				...mqtt,
+				socket: {
+					io: device.io.TLS,
+					TCP: {
+						io: mqtt.socket.io
+					},
+					tls
 				}
 			};
-			const servername = this.#tls.options?.servername;
-			if (servername) tls.socket.secure.serverName = servername; 
-			const ca = this.#tls.options?.ca;
-			if (ca) tls.socket.secure.certificate = ca; 
-			const cert = this.#tls.options?.cert;
-			if (cert) {
-				tls.socket.secure.clientCertificates = [cert]; 
-				const key = this.#tls.options?.key;
-				if (key) tls.socket.secure.clientKey = key;
-			}
 		}
 
-		const MQTTClient = device.network.mqtt.io;
-		this.#mqtt = new device.network.mqtt.io({
-			...device.network.mqtt,
-			...tls,
+		this.#mqtt = new mqtt.io({
+			...mqtt,
 			...this.#options,
 			onReadable: (count, options) => {
 				let payload = this.#mqtt.read(count);
@@ -188,7 +197,7 @@ class MQTTBrokerNode extends Node {
 					delete this.#options.wait;
 					if (this.#subscriptions.length) {
 						const msg = {
-							operation: MQTTClient.SUBSCRIBE,
+							operation: mqtt.io.SUBSCRIBE,
 							items: this.#subscriptions.map(subscription => {
 								return {
 									topic: subscription.topic,

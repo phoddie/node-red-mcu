@@ -1,6 +1,6 @@
 {
 	"include": [
-		"$(MODDABLE)/examples/io/tcp/mqttclient/manifest_mqttclient.json"
+		"$(MODDABLE)/modules/embedded/network/mqtt/client"
 	],
 	"modules": {
 		"*": "./mqttnodes"

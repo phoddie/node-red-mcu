@@ -98,6 +98,8 @@ class FileWrite extends Node {
 		const state = this.#state;
 		if (config.filename)
 			state.filename = config.filename;
+		if (config.getFilename)
+			state.getFilename = config.getFilename;
 
 		state.overwriteFile = config.overwriteFile;
 		if ("delete" !== config.overwriteFile) {
@@ -111,7 +113,7 @@ class FileWrite extends Node {
 	}
 	onMessage(msg) {
 		let payload = msg.payload, state = this.#state
-		const filename = state.filename ?? msg.filename;
+		const filename = state.filename ?? (state.getFilename ? state.getFilename.call(this, msg) : msg.filename);
 
 		if ("delete" === state.overwriteFile) {
 			if (!SharedFile.exists(filename))
@@ -121,7 +123,7 @@ class FileWrite extends Node {
 		}
 
 		const type = typeof payload;
-		const isBuffer = payload instanceof Uint8Array;
+		const isBuffer = payload instanceof Uint8Array; // deliberate difference from Node-RED. It only accepts Buffer here.
 		if (("object" === type) && !isBuffer)
 			payload = JSON.stringify(payload);
 		else if (("number" === type) || ("boolean" === type))
@@ -199,6 +201,8 @@ class FileRead extends Node {
 		const state = this.#state;
 		if (config.filename)
 			state.filename = config.filename;
+		if (config.getFilename)
+			state.getFilename = config.getFilename;
 		state.format = config.format;
 		if (config.chunk)
 			state.chunk = config.chunk;
@@ -207,7 +211,7 @@ class FileRead extends Node {
 	}
 	onMessage(msg, done) {
 		let state = this.#state;
-		const filename = state.filename ?? msg.filename;
+		const filename = state.filename ?? (state.getFilename ? state.getFilename.call(this, msg) : msg.filename);
 		let file;
 		try {
 			if (!filename)

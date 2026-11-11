@@ -24,6 +24,16 @@ import {Headers} from "fetch";
 import {URLSearchParams} from "url";
 import Mustache from "mustache";
 
+const responseMarker = "x-node-red-request-node";
+
+function hashHeaders(headers) {		// x-node-red-request-node: identifies unmodified response headers left on msg.headers (FNV-1a of the JSON)
+	const s = JSON.stringify(headers);
+	let h = 0x811c9dc5;
+	for (let i = 0; i < s.length; i++)
+		h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
+	return (h >>> 0).toString(16).padStart(8, "0");
+}
+
 class HTTPRequestNode extends Node {
 	#options;
 	#format; 
@@ -42,7 +52,7 @@ class HTTPRequestNode extends Node {
 		this.#persist = config.persist;
 		this.#senderr = config.senderr;
 		this.#options = {
-			method: config.method,
+			method: ("use" === config.method) ? undefined : config.method,
 			url: config.url
 		};
 		if (config.tls) {
@@ -69,6 +79,12 @@ class HTTPRequestNode extends Node {
 			["User-Agent", "node-red-mcu/v0"]
 		]);
 		headers.set("Connection", this.#persist ? "keep-alive" : "close");		//@@ not sure
+		if (msg.headers?.[responseMarker] !== undefined) {
+			const marker = msg.headers[responseMarker];
+			delete msg.headers[responseMarker];
+			if (marker === hashHeaders(msg.headers))
+				delete msg.headers;
+		}
 		for (let name in msg.headers)
 			headers.set(name, msg.headers[name]);
 //		let body = ("ignore" === this.#paytoqs) ? undefined : msg.payload;		//@@ what does paytoqs do?? 
@@ -80,12 +96,12 @@ class HTTPRequestNode extends Node {
 				url = Mustache.render(url, msg)
 		}
 		const options = {
-			method: msg.method ?? this.#options.method ?? "GET",
+			method: this.#options.method ?? msg.method?.toUpperCase() ?? "GET",	
 			headers
 		}
 		if (undefined !== body) {
 			if ("object" === typeof body) {
-				if (!(body instanceof ArrayBuffer)) {
+				if (!(body instanceof ArrayBuffer) && !ArrayBuffer.isView(body)) {		// binary sent as is
 					if ("query" === this.#paytoqs) {
 						url += (url.indexOf("?") < 0) ? "?" : "&";
 						url += (new URLSearchParams(Object.entries(body))).toString(); 
@@ -111,8 +127,10 @@ class HTTPRequestNode extends Node {
 		fetch(url, options)
 		.then(response => {
 			msg.statusCode = response.status;
-			msg.headers = {/* ["x-node-red-request-node"]: this.id */};		//@@ what is this?
+			msg.responseUrl = response.url;
+			msg.headers = {};
 			response.headers.forEach((value, key) => {msg.headers[key] = value;});
+			msg.headers[responseMarker] = hashHeaders(msg.headers);
 
 			if (("txt" === this.#format) || ("obj" === this.#format))
 				return response.text();
@@ -121,7 +139,7 @@ class HTTPRequestNode extends Node {
 			throw new Error("unexpected http request format");
 		})
 		.then(payload => {
-			msg.payload = payload;
+			msg.payload = ("bin" === this.#format) ? new Uint8Array(payload) : payload;
 			if ("obj" === this.#format) {
 				try {
 					msg.payload = JSON.parse(payload);

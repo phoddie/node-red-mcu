@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2025  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -24,13 +24,18 @@
 
 import {Node, configFlowID} from "nodered";
 import Timer from "timer";
+import TextDecoder from "text/decoder";
+
+function byteLength(string) {
+	return ArrayBuffer.fromString(string).byteLength;
+}
 
 class MQTTBrokerNode extends Node {
 	#mqtt;
 	#options;
 	#subscriptions = [];
 	#writable;
-	#queue;
+	#queue;		// pending write operations
 	#status = [];
 	#tls;
 
@@ -119,7 +124,7 @@ class MQTTBrokerNode extends Node {
 			onReadable: (count, options) => {
 				let payload = this.#mqtt.read(count);
 				let fragment = this.#options.fragment; 
-				const msg = fragment ?? {topic: options.topic, QoS: Number(options.QoS), retain: options.retain ?? false};
+				const msg = fragment ?? {topic: options.topic, qos: Number(options.QoS), retain: options.retain ?? false};
 
 				if (options.more || fragment) {
 					if (!fragment) {
@@ -163,26 +168,37 @@ class MQTTBrokerNode extends Node {
 					if (ti === topic.length) {
 						switch (subscription.format) {
 							case "utf8":
-								p = String.fromArrayBuffer(p);		//@@ TextDecoder with fatal: false seems to be the intent here
+								p = (new TextDecoder).decode(p);
 								break;
 							case "buffer":
+								p = new Uint8Array(p);		// Node-RED: Buffer
 								break;
 							case "json":
 								try {
 									p = JSON.parse(String.fromArrayBuffer(p));
 								}
 								catch {
-									this.error("invalid JSON");
+									subscription.node.error("invalid JSON", {payload: new Uint8Array(p), topic: msg.topic, qos: msg.qos, retain: msg.retain});
+									continue subscriptions;		// not sent
 								}
 								break;
 							case "base64":
 								p = (new Uint8Array(p)).toBase64();
 								break;
-							default:		// "auto-detect"
+							default:		// "auto-detect" (and legacy "auto"): UTF-8 is a string, parsed as JSON if it is; anything else a buffer
 								try {
 									p = String.fromArrayBuffer(p);
 								}
 								catch {
+									p = new Uint8Array(p);
+									break;
+								}
+								if ("auto" !== subscription.format) {
+									try {
+										p = JSON.parse(p);
+									}
+									catch {
+									}
 								}
 								break;
 						}
@@ -192,38 +208,29 @@ class MQTTBrokerNode extends Node {
 				}
 			},
 			onWritable: (count) => {
-				if (undefined === this.#writable) {
+				const connected = undefined === this.#writable;
+				this.#writable = count;
+				if (connected) {
 					this.status({fill: "green", shape: "dot", text: "node-red:common.status.connected"});
 					delete this.#options.wait;
-					if (this.#subscriptions.length) {
-						const msg = {
-							operation: mqtt.io.SUBSCRIBE,
-							items: this.#subscriptions.map(subscription => {
-								return {
-									topic: subscription.topic,
-									QoS: subscription.QoS
-								};
-							})
-						};
-						count = this.#mqtt.write(null, msg);
+					this.#queue = [];
+					const topics = new Set;
+					for (const {topic, QoS} of this.#subscriptions) {
+						if (topics.has(topic))
+							continue;
+						topics.add(topic);
+						this.#queue.push({subscribe: topic, QoS});
 					}
-
 					if (this.#options.birthTopic) {
-						this.#queue = [{
+						this.#queue.push({publish: {
 							topic: this.#options.birthTopic,
 							QoS: this.#options.birthQos ?? 0,
 							retain: this.#options.birthRetain ?? false,
 							payload: this.#options.birthPayload
-						}];
+						}});
 					}
 				}
-
-				this.#writable = count
-
-				if (this.#queue?.length) {
-					for (let i = 0, queue = this.#queue.splice(0), length = queue.length; i < length; i++)
-						this.onMessage(queue[i]);
-				}
+				this.#drain();
 			},
 			onError: () => {
 				this.#mqtt = undefined;
@@ -240,55 +247,82 @@ class MQTTBrokerNode extends Node {
 			}
 		});
 	}
-	onMessage(msg) {
-		//@@ fragmented send unimplemented so will stall if message is bigger than output buffer
-		const payload = msg.payload;
-		
+	onMessage(msg) {		// publish {topic, payload, QoS, retain}
 		if (undefined === this.#writable)
-			return;		// drop messages when disconnected
-		
-		if (this.#queue?.length || ((payload.byteLength + msg.topic.length) > this.#writable)) {
-			this.#queue ??= [];
-			this.#queue.push(msg);
-			return;
-		}
-
-		this.#writable = this.#mqtt.write(payload, {
-			topic: msg.topic,
-			QoS: Number(msg.QoS),
-			retain: msg.retain
-		});
+			return;		// dropped when disconnected, as Node-RED
+		this.#queue.push({publish: msg});
+		this.#drain();
 	}
 	subscribe(node, topic, format, QoS = 0) {
-		const MQTTClient = device.network.mqtt.io;
-
 		QoS = Number(QoS);
+		const subscribed = this.#subscriptions.some(subscription => subscription.topic === topic);
 		this.#subscriptions.push({node, topic, format, QoS});
-		if (undefined === this.#writable)
-			return;
-
-		this.#mqtt.write(null, {
-			operation: MQTTClient.SUBSCRIBE,
-			items: [
-				{topic, QoS},
-			]
-		});
+		if ((undefined === this.#writable) || subscribed)
+			return;		// subscribed on connect, or already subscribed
+		this.#queue.push({subscribe: topic, QoS});
+		this.#drain();
 	}
-	unsubscribe(node, topic) {
-		const MQTTClient = device.network.mqtt.io;
-		const items = [];
-		for (let subscriptions = this.#subscriptions, i = 0, length = subscriptions.length; i < length; i++) {
-			const subscription = subscriptions[i];
-			if (!node || (subscription.node === node) && (subscription.topic === topic))
-				items.push({topic: subscription.topic, QoS: subscription.QoS});
-		}
+	unsubscribe(node, topic) {		// node's subscription to topic; no node: all subscriptions
+		const removed = new Set;
+		this.#subscriptions = this.#subscriptions.filter(subscription => {
+			if (node && ((subscription.node !== node) || (subscription.topic !== topic)))
+				return true;
+			removed.add(subscription.topic);
+			return false;
+		});
 		if (undefined === this.#writable)
 			return;
-
-		this.#mqtt.write(null, {
-			operation: MQTTClient.UNSUBSCRIBE,
-			items
-		});
+		for (const topic of removed) {
+			if (!this.#subscriptions.some(subscription => subscription.topic === topic))
+				this.#queue.push({unsubscribe: topic});
+		}
+		this.#drain();
+	}
+	#drain() {
+		const queue = this.#queue, MQTTClient = this.#mqtt.constructor;
+		while (queue.length) {
+			const operation = queue[0];
+			if (operation.publish) {
+				const {topic, QoS, retain} = operation.publish;
+				let payload = operation.publish.payload;
+				if (!(payload instanceof Uint8Array))
+					payload = operation.publish.payload = ArrayBuffer.isView(payload) ? new Uint8Array(payload.buffer, payload.byteOffset, payload.byteLength) : new Uint8Array(payload);
+				const total = payload.byteLength;
+				if (undefined === operation.offset) {		// not started
+					const header = 2 + (operation.bytes ??= byteLength(topic));
+					if ((header + total) <= this.#writable)
+						this.#writable = this.#mqtt.write(payload, {topic, QoS: Number(QoS), retain});		// whole message
+					else {		// fragmented: the first fragment gives the total length, the rest follow as space allows
+						if (header >= this.#writable)
+							return;
+						const count = this.#writable - header;
+						this.#writable = this.#mqtt.write(payload.subarray(0, count), {topic, QoS: Number(QoS), retain, byteLength: total});
+						operation.offset = count;
+						continue;
+					}
+				}
+				else {
+					if (!this.#writable)
+						return;
+					const count = Math.min(this.#writable, total - operation.offset);
+					this.#writable = this.#mqtt.write(payload.subarray(operation.offset, operation.offset + count));
+					operation.offset += count;
+					if (operation.offset < total)
+						continue;
+				}
+			}
+			else if (operation.subscribe) {
+				if ((2 + (operation.bytes ??= byteLength(operation.subscribe)) + 1) > this.#writable)
+					return;
+				this.#writable = this.#mqtt.write(null, {operation: MQTTClient.SUBSCRIBE, items: [{topic: operation.subscribe, QoS: operation.QoS}]});
+			}
+			else {
+				if ((2 + (operation.bytes ??= byteLength(operation.unsubscribe))) > this.#writable)
+					return;
+				this.#writable = this.#mqtt.write(null, {operation: MQTTClient.UNSUBSCRIBE, items: [{topic: operation.unsubscribe}]});
+			}
+			queue.shift();
+		}
 	}
 	requestStatus(node) {
 		// if no node.#outputs.statuses and !config.noderedmcu?.editor... could safely ignore this 
@@ -342,17 +376,26 @@ class MQTTOutNode extends Node {
 			return;
 		}
 
-		if (payload instanceof ArrayBuffer)
-			;
+		const topic = this.#topic ?? msg.topic;
+		if (("string" !== typeof topic) || !topic.length || topic.includes("+") || topic.includes("#")) {
+			this.warn("invalid topic");
+			done();
+			return;
+		}
+
+		if (null === payload)
+			payload = new ArrayBuffer(0);
+		else if ((payload instanceof ArrayBuffer) || ArrayBuffer.isView(payload))
+			;		// binary, as is
 		else if ("object" === typeof payload)
 			payload = ArrayBuffer.fromString(JSON.stringify(payload));
 		else
-			payload = ArrayBuffer.fromString(payload.toString());		//@@ not sure about this... correct for string and number and probably boolean
+			payload = ArrayBuffer.fromString(String(payload));
 
 		this.#broker.onMessage({		// maybe unnecessary to use RED.mcu.enqueue here
 			payload,
-			topic: this.#topic ?? msg.topic,
-			QoS: this.#QoS ?? msg.QoS ?? 0,
+			topic,
+			QoS: this.#QoS ?? msg.qos ?? 0,
 			retain: this.#retain ?? msg.retain ?? false,
 		});
 	

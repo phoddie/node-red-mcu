@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -19,6 +19,7 @@
  */
 
 import UDP from "embedded:io/socket/udp";
+import TextDecoder from "text/decoder";
 import {Node} from "nodered";
 
 // all nodes bound to same port share a single UDP socket 
@@ -64,20 +65,15 @@ class UDPIn extends Node {
 		const datatype = config.datatype;
 		SharedUDP.add(parseInt(config.port), buffer => {
 			let payload;
-			if ("utf8" === datatype) {
-				try {
-					payload = String.fromArrayBuffer(buffer);
-				}
-				catch {
-					return;
-				}
-			}
-			else if ("buffer" === datatype)
-				payload = new Uint8Array(buffer);
+			if ("utf8" === datatype)
+				payload = (new TextDecoder).decode(buffer);
 			else if ("base64" === datatype)
 				payload = (new Uint8Array(buffer)).toBase64();
+			else
+				payload = new Uint8Array(buffer);
 			this.send({
 				payload,
+				fromip: buffer.address + ":" + buffer.port,
 				ip: buffer.address,
 				port: buffer.port
 			});
@@ -102,27 +98,39 @@ class UDPOut extends Node {
 		if (("udp4" !== config.ipv) || config.iface || ("false" !== config.multicast))
 			throw new Error("unsupported");
 
-		if (config.addr)
-			this.#ip = config.addr;
-		if (config.port)
-			this.#port = parseInt(config.port);
-		this.#base64 = "true" === config.base64;
+		this.#ip = config.addr;
+		this.#port = Number(config.port);
+		this.#base64 = config.base64;
 
 		this.#socket = SharedUDP.add(config.outport ? parseInt(config.outport) : 0);
 	}
-	onMessage(msg) {
-		const ip = this.#ip ?? msg.ip;
-		const port = this.#port ?? msg.port;
-		let payload = msg.payload;
+	onMessage(msg, done) {
+		if (!("payload" in msg))
+			return void done();
 
-		if (!(payload instanceof Uint8Array)) {
+		const ip = this.#ip || msg.ip || "";
+		const port = this.#port || msg.port || 0;
+		if (!ip)
+			this.warn("udp: ip address not set");
+		else if (!port)
+			this.warn("udp: port not set");
+		else if (isNaN(port) || (port < 1) || (port > 65535))
+			this.warn("udp: invalid port");
+		else {
+			let payload = msg.payload;
 			if (this.#base64)
-				payload  = Uint8Array.fromBase64(payload).buffer;
-			else
-				payload = ArrayBuffer.fromString(payload);
-		}
+				payload = Uint8Array.fromBase64(""+ payload);
+			else if (!(payload instanceof Uint8Array))
+				payload = ArrayBuffer.fromString("" + payload);
 
-		this.#socket.write(ip, port, payload);
+			try {
+				this.#socket.write(payload, ip, Number(port));
+			}
+			catch (e) {
+				this.error("udp : " + e, msg);
+			}
+		}
+		done();
 	}
 
 	static type = "udp out";

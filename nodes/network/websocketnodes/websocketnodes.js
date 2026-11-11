@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -37,6 +37,33 @@ const disconnected = Object.freeze({
 	event: "disconnect"
 });
 
+function toMessage(data, wholemsg, id) {		// adapted from handleEvent in 22-websocket.js
+	let msg;
+	if (wholemsg) {
+		try {
+			msg = JSON.parse(("string" === typeof data) ? data : String.fromArrayBuffer(data));
+			if ((null === msg) || ("object" !== typeof msg))		// Node-RED throws for null
+				msg = {payload: msg};
+		}
+		catch {
+		}
+	}
+	msg ??= {payload: ("string" === typeof data) ? data : new Uint8Array(data)};
+	msg._session = {type: "websocket", id};
+	return msg;
+}
+
+function toPayload(msg, wholemsg) {		// adapted from WebSocketOutNode in 22-websocket.js: undefined when nothing to send
+	if (wholemsg)
+		return JSON.stringify({...msg, _session: undefined});
+	if (Object.hasOwn(msg, "payload")) {
+		const payload = msg.payload;
+		if (payload instanceof Uint8Array)		// Node-RED requires a Buffer
+			return payload;
+		return RED.util.ensureString(payload) || undefined;		// empty string is not sent
+	}
+}
+
 class WebSocketClient extends Node {
 	#ws;
 	#reconnect;
@@ -59,14 +86,11 @@ class WebSocketClient extends Node {
 
 		Timer.set(() => this.#connect());
 	}
-	onMessage(msg) {
-		if (1 !== this.#ws?.readyState)
-			return;
-
-		if (this.#options.wholemsg)
-			this.#ws.send(JSON.stringify(msg));
-		else
-			this.#ws.send(msg.payload);
+	onMessage(msg, done) {
+		const payload = toPayload(msg, this.#options.wholemsg);
+		if ((undefined !== payload) && ("websocket" !== msg._session?.type) && (1 === this.#ws?.readyState))
+			this.#ws.send(payload);
+		done();
 	}
 	#connect() {
 		let wss;
@@ -109,13 +133,9 @@ class WebSocketClient extends Node {
 			this.status({...connected});
 		});
 		if (this.#nodes) {
+			const id = RED.util.generateId();		// connection id
 			this.#ws.addEventListener("message", event => {
-				let msg = event.data;
-				if (this.#options.wholemsg)
-					msg = JSON.parse(msg);
-				else
-					msg = {payload: msg};
-
+				const msg = toMessage(event.data, this.#options.wholemsg, id);
 				for (let node of this.#nodes)
 					node.send(msg);
 			});
@@ -171,14 +191,11 @@ class WebSocketListener extends Node {
 				ws._session = RED.util.generateId();
 				listener.#connections.set(ws._session, ws);
 				ws.addEventListener("message", function(event) {
-					let msg = event.data;
-					if (listener.#wholemsg)
-						msg = JSON.parse(msg);
-					else
-						msg = {payload: msg};
-					msg._session = {type: "websocket", id: ws._session};
-
-					for (let node of listener.#nodes)
+					const nodes = listener.#nodes;
+					if (!nodes)
+						return;
+					const msg = toMessage(event.data, listener.#wholemsg, ws._session);
+					for (let node of nodes)
 						node.send(msg);
 				});
 				const remove = function() {
@@ -190,19 +207,15 @@ class WebSocketListener extends Node {
 		});
 	}
 	onMessage(msg, done) {
-		const _session = msg._session;
-		delete msg._session;
-		const payload = this.#wholemsg ? JSON.stringify(msg) : (Buffer.isBuffer(msg.payload) ? msg.payload : RED.util.ensureString(msg.payload));  
-		if ("websocket" === _session?.type) {
-			const connection = this.#connections.get(_session.id);
-			if (connection)
-				connection.send(payload);
-			else
-				this.warn("websocket session not found")
-		}
-		else {
-			for (const [id, connection] of this.#connections)
-				connection.send(payload);
+		const payload = toPayload(msg, this.#wholemsg);
+		if (undefined !== payload) {
+			const session = msg._session;
+			if ("websocket" === session?.type)
+				this.#connections.get(session.id)?.send(payload);
+			else {
+				for (const connection of this.#connections.values())
+					connection.send(payload);
+			}
 		}
 		done();
 	}

@@ -1,6 +1,7 @@
 {
 	"include": [
-		"$(MODDABLE)/modules/embedded/network/mqtt/client"
+		"$(MODDABLE)/modules/embedded/network/mqtt/client",
+		"$(MODDABLE)/modules/data/text/decoder"
 	],
 	"modules": {
 		"*": "./mqttnodes"

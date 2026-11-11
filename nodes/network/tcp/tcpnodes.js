@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2024  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -23,12 +23,35 @@
 */
 
 import {Node} from "nodered";
-//import Timer from "timer";
 import TextDecoder from "text/decoder"
-import Listener from "embedded:io/socket/listener";		// should use device.*
-import TCP from "embedded:io/socket/tcp";		// should use device.*
+import Timer from "timer";
 
 let connections = [];
+
+const reconnectTime = 10_000;
+
+function connect(node, config, host, port) {
+	node.status({fill: "grey", shape: "dot", text: "common.status.connecting"});
+	const DNS = device.network.dns.resolver;
+	const dns = new DNS.io(DNS);
+	dns.resolve({
+		host,
+		onResolved: (host, address) => {
+			new TCPConnection({
+				config,
+				node,
+				address,
+				host,
+				port
+			});
+		},
+		onError: () => {
+			node.log(`cannot resolve ${host}`);
+			node.status({fill: "red", shape: "ring", text: "common.status.disconnected"});
+			Timer.set(() => connect(node, config, host, port), reconnectTime);
+		}
+	});
+}
 
 class TCPConnection {
 	socket;
@@ -39,7 +62,7 @@ class TCPConnection {
 		this.node = options.node;
 		this.config = options.config;
 		this.id = RED.util.generateId();
-		if ((("stream" === this.config.datamode) && this.config.newline) || ("single" === this.config.datamode))  
+		if ((("stream" === this.config.datamode) && this.config.newline && ("utf8" === this.config.datatype)) || ("single" === this.config.datamode))
 			this.remainder = new Uint8Array(new ArrayBuffer(0, {maxByteLength: 0x8000}));
 		if ("utf8" === this.config.datatype)
 			this.decoder = new TextDecoder;
@@ -65,7 +88,7 @@ class TCPConnection {
 			if (options.host)
 				o.host = options.host;
 			o.port = options.port;
-			this.socket = new TCP(o);
+			this.socket = new device.io.TCP(o);
 			this.socket.address = o.address;
 			this.socket.port = o.port;
 			if (o.host)
@@ -85,6 +108,8 @@ class TCPConnection {
 		this.socket.close();
 		
 		if (this.socket.address) {	// reconnect... might want/need to wait?
+			this.node.status({fill: "red", shape: "ring", text: "common.status.disconnected"});
+			this.node.status({fill: "grey", shape: "dot", text: "common.status.connecting"});
 			new TCPConnection({
 				config: this.config,
 				node: this.node,
@@ -130,12 +155,14 @@ class TCPConnection {
 		const config = this.config;
 		const msg = {
 			topic: config.topic ?? "",
-			ip: this.socket.remoteAddress,
-			port: this.socket.remotePort,
-			_session: {
-				type: "tcp",
-				id: this.id
-			}
+		};
+		if (!this.socket.address) {
+			msg.ip = this.socket.remoteAddress;
+			msg.port = this.socket.remotePort;
+		}
+		msg._session = {
+			type: "tcp",
+			id: this.id
 		};
 		if ("utf8" === this.config.datatype)
 			payload = this.decoder.decode(payload.buffer, {stream: true});
@@ -147,16 +174,16 @@ class TCPConnection {
 	}
 	onWritable(count) {
 		this.writable = count;
+		if (!this.connected) {
+			this.connected = true;
+			if (this.socket.address)		// client connection
+				this.node.status({fill: "green", shape: "dot", text: "common.status.connected"});
+		}
 		if (this.end)
 			return void this.onError();		// close and reconnect
 		this.flush();
 	}
-	write(buffer) {
-		if (!(buffer instanceof Uint8Array))
-			buffer = new Uint8Array(ArrayBuffer.fromString(buffer.toString()));
-		else if (this.config.base64)
-			buffer = Uint8Array.fromBase64(buffer);
-
+	write(buffer) {		// Uint8Array
 		this.output ??= [];
 		buffer.position = 0;
 		this.output.push(buffer);
@@ -206,7 +233,7 @@ class TCPIn extends Node {
 			this.#config.trim = config.trim;
 
 		if ("server" === config.server) {
-			new Listener({
+			new device.io.Listener({
 				port: config.port,
 				target: this,
 				onReadable(count) {
@@ -220,26 +247,8 @@ class TCPIn extends Node {
 				}
 			});
 		}
-		else if ("client" === config.server) {
-			const DNS = device.network.dns;
-			const dns = new DNS.io(DNS);
-			const port = config.port;
-			dns.resolve({
-				host: config.host, 
-				onResolved: (host, address) => {
-					new TCPConnection({
-						config: this.#config,
-						node: this,
-						address,
-						host,
-						port
-					});
-				},
-				onError: (err) => {
-					debugger;
-				},
-			});
-		}
+		else if ("client" === config.server)
+			connect(this, this.#config, config.host, config.port);
 		else
 			debugger;
 	}
@@ -265,7 +274,7 @@ class TCPOut extends Node {
 			this.#config.end = true; 
 
 		if ("server" === config.beserver) {
-			new Listener({
+			new device.io.Listener({
 				port: config.port,
 				target: this,
 				onReadable(count) {
@@ -279,48 +288,45 @@ class TCPOut extends Node {
 				}
 			});
 		}
-		else if ("client" === config.beserver) {
-			const DNS = device.network.dns;
-			const dns = new DNS.io(DNS);
-			const port = config.port;
-			dns.resolve({
-				host: config.host, 
-				onResolved: (host, address) => {
-					new TCPConnection({
-						config: this.#config,
-						node: this,
-						address,
-						host,
-						port
-					});
-				},
-				onError: (err) => {
-					debugger;
-				},
-			});
-
-		} 
+		else if ("client" === config.beserver)
+			connect(this, this.#config, config.host, config.port);
 	}
 	onMessage(msg) {
+		let payload = msg.payload;
 		if ("reply" === this.#config.beserver) {
-			const connection = TCPConnection.find(msg._session?.id);
-			if (connection)
-				connection.write(msg.payload);
-			else
-				this.error("invalid connection");
+			payload = this.#toBuffer(payload);
+			if ("tcp" === msg._session?.type)
+				TCPConnection.find(msg._session.id)?.write(payload);
+			else {
+				connections.forEach(connection => {
+					if (connection.node instanceof TCPIn)
+						connection.write(payload);
+				});
+			}
 		}
 		else {
+			if (null == payload)
+				return;
+			payload = this.#toBuffer(payload);
+
 			if (msg._session) {
 				const connection = TCPConnection.find(msg._session?.id);
 				if (connection && (connection.node === this))
-					return void connection.write(msg.payload);
+					return void connection.write(payload);
 			}
 
 			connections.forEach(connection => {
 				if (connection.node === this)
-					connection.write(msg.payload);
+					connection.write(payload);
 			});
 		}
+	}
+	#toBuffer(payload) {
+		if (payload instanceof Uint8Array)
+			return payload;
+		if (this.#config.base64 && ("string" === typeof payload))
+			return Uint8Array.fromBase64(payload);
+		return new Uint8Array(ArrayBuffer.fromString("" + payload));
 	}
 
 	static type = "tcp out";

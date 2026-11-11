@@ -5,7 +5,7 @@ import Timer from "timer";
 if (!Modules.has("flows"))
 	trace("no flows installed\n");
 else {
-	Timer.set(function() {		// run on an empty stack
+	Timer.set(() => {		// run on empty stack
 		const flows = Modules.importNow("flows");
 		RED.build(flows);
 
@@ -21,7 +21,8 @@ else {
 						const model = buildModel();
 						new REDApplication(model, { commandListLength:4096, displayListLength:8192, touchCount:1, pixels: 240 * 48 });
 					}
-					catch {
+					catch (e) {
+						trace(`failed to instantiate REDApplication: ${e}\n`);
 					}
 				}
 			}

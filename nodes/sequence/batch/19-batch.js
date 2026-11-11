@@ -20,7 +20,7 @@
 	- let instead of var
 	- set pending.length to 0 instead of assigning empty array to pending
 	- msg.parts ??= {};
-	= rework pending and grouns from objecgt to  Map (in concat case)
+	= rework pending and groups from object to Map (in concat case)
 	- comment out unused close event handlers
 	- eliminate CommonJS wrapper
 */

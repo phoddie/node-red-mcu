@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -22,7 +22,8 @@ import {Node} from "nodered";
 
  class SplitNode extends Node {
 	#arraySplt;
-	#splt;
+	#spltBytes;	
+	#spltString;
 	#spltType;
 	#addname;
 	#stream;
@@ -31,7 +32,8 @@ import {Node} from "nodered";
 		super.onStart(config);
 
 		this.#spltType = config.spltType;
-		this.#splt = config.splt;
+		this.#spltBytes = config.spltBytes;
+		this.#spltString = config.spltString;
 		this.#arraySplt = config.arraySplt;
 		this.#addname = config.addname;
 		if (config.stream)
@@ -42,9 +44,7 @@ import {Node} from "nodered";
 		let stream = this.#stream;
 
 		if (payload instanceof Uint8Array) {
-			let splt = this.#splt;
-			if ("str" === this.#spltType)
-				splt = new Uint8Array(ArrayBuffer.fromString(splt));
+			const splt = this.#spltBytes;
 
 			if (stream) {
 				stream.buf ??= {dones: [], index: 0};
@@ -85,23 +85,18 @@ import {Node} from "nodered";
 				}
 			}
 
-			const parts = {type: "buffer", id: RED.util.generateId()};
-			msg.parts = parts;
-
-			if (stream)
-				parts.index = stream.index;
-			else
-				parts.index = 0;
+			const parts = this.#makeParts(msg, {type: "buffer"});
+			parts.index = stream ? stream.index : 0;
 
 			if ("len" === this.#spltType) {
 				const length = payload.length;
-				parts.ch = splt;
+				parts.len = splt;
 				if (!stream)
 					parts.count = Math.idiv((length + splt - 1), splt); 
 				for (let i = 0; i < length; i += splt) {
 					msg.payload = Uint8Array.prototype.slice.call(payload, i, i + splt);
-					parts.index += 1;
 					this.send(msg);
+					parts.index += 1;
 				}
 			}
 			else if (("bin" === this.#spltType) || ("str" === this.#spltType)) {
@@ -121,8 +116,8 @@ import {Node} from "nodered";
 					parts.count = length; 
 				for (let i = 0; i < length; i += 1) {
 					msg.payload = payload[i]
-					parts.index += 1;
 					this.send(msg);
+					parts.index += 1;
 				}
 			}
 			if (stream)
@@ -130,8 +125,7 @@ import {Node} from "nodered";
 		}
 		else if (Array.isArray(payload)) {
 			const length = payload.length, arraySplt = this.#arraySplt;
-			const parts = {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt, id: RED.util.generateId()};
-			msg.parts = parts;
+			const parts = this.#makeParts(msg, {type: "array", count: Math.idiv(length + arraySplt - 1, arraySplt), len: arraySplt});
 			for (let i = 0; i < length; i += arraySplt) {
 				msg.payload = (1 === arraySplt) ? payload[i] : payload.slice(i, i + arraySplt);
 				parts.index = Math.idiv(i, arraySplt);
@@ -141,8 +135,7 @@ import {Node} from "nodered";
 		else if ("object" === typeof payload) {
 			const names = Object.getOwnPropertyNames(payload);
 			const length = names.length;
-			const parts = {type: "object", count: length, id: RED.util.generateId()};
-			msg.parts = parts;
+			const parts = this.#makeParts(msg, {type: "object", count: length});
 			for (let i = 0, addname = this.#addname; i < length; i += 1) {
 				const key = names[i];
 				msg.payload = payload[key];
@@ -153,12 +146,10 @@ import {Node} from "nodered";
 				this.send(msg);
 			}
 		}
-		else {	// string
-
-			payload = payload.toString();
-			let splt = this.#splt;
-			if ("bin" === this.#spltType)
-				splt = String.fromArrayBuffer(splt)
+		else if ("string" === typeof payload) {
+			const splt = this.#spltString;
+			if (undefined === splt)
+				throw new Error("binary delimiter is not valid text");
 
 			if (stream) {
 				stream.str ??= {dones: [], index: 0};
@@ -210,7 +201,7 @@ import {Node} from "nodered";
 				payload = payload.split(splt);
 
 			const length = payload.length;
-			const parts = {type: "string", ch: splt, id: RED.util.generateId()};
+			const parts = this.#makeParts(msg, ("len" === this.#spltType) ? {type: "string", ch: "", len: splt} : {type: "string", ch: splt});
 			if (stream) {
 				parts.index = stream.index;
 				stream.index = parts.index + length;
@@ -219,12 +210,15 @@ import {Node} from "nodered";
 				parts.count = length;
 				parts.index = 0;
 			}
-			msg.parts = parts;
 			for (let i = 0; i < length; i += 1) {
 				msg.payload = payload[i];
 				this.send(msg);
 				parts.index += 1;
 			}
+		}
+		else {		// not a buffer, array, object, or string: dropped, as Node-RED
+			done();
+			return;
 		}
 
 		if (stream) {
@@ -240,6 +234,13 @@ import {Node} from "nodered";
 		}
 		else
 			done();
+	}
+	#makeParts(msg, parts) {		// as Node-RED: an existing msg.parts is kept in the new one, for nested sequences
+		if (msg.parts)
+			parts.parts = msg.parts;
+		parts.id = RED.util.generateId();
+		msg.parts = parts;
+		return parts;
 	}
 
 	static type = "split";

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -23,14 +23,19 @@ import Mustache from "mustache";
 
 class Context extends Mustache.Context {
 	#node;
-	constructor(msg, node) {
+	#escape;
+	constructor(msg, node, escape) {
 		super(msg);
 		this.#node = node;
+		this.#escape = escape;
 	}
 	lookup(name) {
 		const result = super.lookup(name);
-		if (result)
+		if (undefined !== result) {
+			if (this.#escape && ("string" === typeof result))
+				return result.replace(/\\/g, "\\\\").replace(/\n/g, "\\n").replace(/\t/g, "\\t").replace(/\r/g, "\\r").replace(/\f/g, "\\f").replace(/[\b]/g, "\\b");
 			return result;
+		}
 
 		if (name.startsWith("env."))
 			return this.#node.getSetting(name.slice(4));
@@ -58,7 +63,7 @@ class Template extends Node {
 		const template = this.#template ?? msg.template;
 		let result = template;
 		if ("mustache" === this.#syntax)
-			result = Mustache.render(template, new Context(msg, this));
+			result = Mustache.render(template, new Context(msg, this, "json" === this.#output));
 		if ("json" === this.#output)
 			result = JSON.parse(result);
 		msg.payload = result;

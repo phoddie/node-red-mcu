@@ -455,11 +455,11 @@ export class Node {
 		const msg = {
 			status: {
 				...status,
-			},
-			source: {
+				source: {
 				id: this.id,
 				type: this.constructor.type,
 				name: this.name
+			}
 			}
 		};
 

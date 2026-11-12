@@ -98,25 +98,24 @@ class TCPConnection {
 		connections.push(this);
 	}
 	onError() {
+		let expected = this.end;		// closed after send
 		if ("single" === this.config.datamode) {
-			if (this.remainder.byteLength)
+			if (this.remainder.byteLength) {
 				this.send(this.remainder);
+				expected = true;		// closed after a reply
+			}
 			delete this.remainder;
 		}
-
+		this.close(expected ? 20 : reconnectTime);
+	}
+	close(delay = reconnectTime) {		// a client connection reconnects after delay
 		connections.splice(connections.indexOf(this), 1);
 		this.socket.close();
-		
-		if (this.socket.address) {	// reconnect... might want/need to wait?
-			this.node.status({fill: "red", shape: "ring", text: "common.status.disconnected"});
-			this.node.status({fill: "grey", shape: "dot", text: "common.status.connecting"});
-			new TCPConnection({
-				config: this.config,
-				node: this.node,
-				address: this.socket.address,
-				host: this.socket.host,
-				port: this.socket.port
-			});
+
+		const {node, config} = this, {address, host, port} = this.socket;
+		if (address) {
+			node.status({fill: "red", shape: "ring", text: "common.status.disconnected"});
+			Timer.set(() => connect(node, config, host, port), delay);
 		}
 
 		delete this.socket;
@@ -294,12 +293,21 @@ class TCPOut extends Node {
 	onMessage(msg) {
 		let payload = msg.payload;
 		if ("reply" === this.#config.beserver) {
-			payload = this.#toBuffer(payload);
-			if ("tcp" === msg._session?.type)
-				TCPConnection.find(msg._session.id)?.write(payload);
+			const reset = true === msg.reset;
+			if (!reset)
+				payload = this.#toBuffer(payload);
+			if ("tcp" === msg._session?.type) {
+				const connection = TCPConnection.find(msg._session.id);
+				if (reset)
+					connection?.close();
+				else
+					connection?.write(payload);
+			}
 			else {
-				connections.forEach(connection => {
-					if (connection.node instanceof TCPIn)
+				connections.filter(connection => connection.node instanceof TCPIn).forEach(connection => {
+					if (reset)
+						connection.close();
+					else
 						connection.write(payload);
 				});
 			}

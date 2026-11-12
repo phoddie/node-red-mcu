@@ -62,7 +62,7 @@ class MQTTBrokerNode extends Node {
 		this.#options = {
 			host: config.broker,
 			port,
-			id: config.clientid ? config.clientid : "node-red-" + this.id + "-" + Date.now() + "-" + Math.floor(Math.random() * 10000),		//@@ revisit this
+			id: config.clientid ? config.clientid : "nodered" + RED.util.generateId(),
 			keepAlive: config.keepalive,		// nodered2mcu converts Node-RED's seconds to milliseconds
 			clean: true === config.cleansession
 		};

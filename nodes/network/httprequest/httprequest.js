@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2022-2023  Moddable Tech, Inc.
+ * Copyright (c) 2022-2026  Moddable Tech, Inc.
  *
  *   This file is part of the Moddable SDK Runtime.
  *
@@ -29,7 +29,7 @@ const responseMarker = "x-node-red-request-node";
 function hashHeaders(headers) {		// x-node-red-request-node: identifies unmodified response headers left on msg.headers (FNV-1a of the JSON)
 	const s = JSON.stringify(headers);
 	let h = 0x811c9dc5;
-	for (let i = 0; i < s.length; i++)
+	for (let i = 0, length = s.length; i < length; i++)
 		h = Math.imul(h ^ s.charCodeAt(i), 0x01000193);
 	return (h >>> 0).toString(16).padStart(8, "0");
 }

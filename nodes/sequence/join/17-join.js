@@ -58,6 +58,7 @@ function JoinNode(n) {
 	this.joiner = n.joiner;		// string, or Uint8Array for "bin" (nodered2mcu)
 	this.setter = n.setter;
 	this.getter = n.getter;
+	this.useparts = n.useparts;
 
 	this.build = n.build || "array";
 	this.accumulate = n.accumulate || "false";
@@ -160,6 +161,15 @@ function JoinNode(n) {
 				}
 				done();
 				return;
+			}
+
+			if (node.useparts === false && msg.hasOwnProperty('parts')) {		// Node-RED 4: manual mode ignores msg.parts (nodered2mcu passes useparts only for manual mode)
+				if (msg.parts.hasOwnProperty('parts')) {
+					msg.parts = { parts: msg.parts.parts };
+				}
+				else {
+					delete msg.parts;
+				}
 			}
 
 			var payloadType;

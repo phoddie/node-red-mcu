@@ -575,15 +575,61 @@ class Group extends Node {
 	}
 }
 
+function isIdentifier(key) {
+	const length = key.length;
+	for (let i = 0; i < length; i++) {
+		const c = key.charCodeAt(i);
+		if (!(((c >= 97) && (c <= 122)) || ((c >= 65) && (c <= 90)) || (95 === c) || (i && (c >= 48) && (c <= 57))))		// a-z, A-Z, _, 0-9
+			return false;
+	}
+	return length > 0;
+}
+
+function inspect(value, depth = 0) {		// Node.js util.inspect on one line, for the Debug node status: only enough to fill its 32 characters
+	switch (typeof value) {
+		case "string":
+			const quote = value.includes("'") ? '"' : "'";
+			return quote + value.slice(0, 32) + quote;
+		case "object":
+			if (null !== value)
+				break;
+		default:
+			return String(value);
+	}
+	if (value instanceof Uint8Array)		// Node-RED: Buffer
+		return `<Buffer ${Array.from(value.subarray(0, 9), byte => byte.toString(16).padStart(2, "0")).join(" ")}>`;
+	if (value instanceof Date)
+		return value.toISOString();
+
+	const array = Array.isArray(value);
+	if (depth > 2)
+		return array ? "[Array]" : "[Object]";
+	const keys = array ? undefined : Object.keys(value), length = array ? value.length : keys.length;
+	if (!length)
+		return array ? "[]" : "{}";
+	let result = "";
+	for (let i = 0; (i < length) && (result.length <= 32); i++) {
+		if (i)
+			result += ", ";
+		if (array)
+			result += inspect(value[i], depth + 1);
+		else {
+			const key = keys[i];
+			result += (isIdentifier(key) ? key : inspect(key)) + ": " + inspect(value[key], depth + 1);
+		}
+	}
+	return array ? `[ ${result} ]` : `{ ${result} }`;
+}
+
 class DebugNode extends Node {
 	#property;
 	#getter;
 	#console;
 	#sidebar;
 	#toStatus;
-//	#statusType;
+	#statusAuto;
 	#statusVal;
-	#oldStatus;
+	#oldStatus = {};
 	#active;
 
 	onStart(config) {
@@ -594,18 +640,44 @@ class DebugNode extends Node {
 		this.#console = config.console;
 		this.#sidebar = config.tosidebar;
 		this.#toStatus = config.tostatus;
-//		this.#statusType = config.statusType;
+		this.#statusAuto = "auto" === config.statusType;
 		this.#statusVal = config.statusVal;
 		this.#active = config.active
 	}
 	onMessage(msg, done) {
-		if (!this.#active) {
+		// to prevent endless loops -> 21-debug.js:123
+		if (msg.status?.source?.id === this.id) {
 			done();
 			return;
 		}
 
-		// to prevent endless loops -> 21-debug.js:123
-		if (msg.status?.source?.id === this.id) {
+		if (this.#toStatus) {
+			const output = this.#statusVal(msg);
+			let fill = "grey", shape = "dot", text;
+			if (output?.fill && output.shape && output.text)
+				({fill, shape, text} = output);
+			else
+				text = ("string" === typeof output) ? output : inspect(output);
+			if (this.#statusAuto) {
+				if (msg.error) {
+					fill = "red";
+					text = msg.error.message;
+				}
+				if (msg.status) {
+					fill = msg.status.fill || "grey";
+					shape = msg.status.shape || "ring";
+					text = msg.status.text || "";
+				}
+			}
+			if (text?.length > 32)
+				text = text.slice(0, 32) + "...";
+			if ((this.#oldStatus.text !== text) || (this.#oldStatus.shape !== shape) || (this.#oldStatus.fill !== fill)) {
+				this.#oldStatus = {fill, shape, text};
+				this.status(this.#oldStatus);
+			}
+		}
+
+		if (!this.#active) {
 			done();
 			return;
 		}
@@ -631,16 +703,6 @@ class DebugNode extends Node {
 				} 
 			};
 			trace("<info>", JSON.stringify(value, this.replacer), "\n");
-		}
-
-		if (this.#toStatus) {
-			let statusVal = this.#statusVal(msg);		// NR says: #statusVal shall return typeof string!
-			if (statusVal !== this.#oldStatus) {
-				if (statusVal.length > 32)
-					statusVal = statusVal.slice(0, 32) + "…";
-				this.status({fill: "grey", shape: "dot", text: statusVal});
-				this.#oldStatus = statusVal;
-			}
 		}
 
 		done();

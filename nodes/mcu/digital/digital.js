@@ -136,7 +136,7 @@ class DigitalOutNode extends Node {
 	}
 	onMessage(msg, done) {
 		if (this.#io) {
-			const value = msg.payload;
+			const value = msg.payload ? 1 : 0;
 			this.#io.write(value);
 			this.status({fill:"green", shape:"dot", text: value.toString()});
 		}

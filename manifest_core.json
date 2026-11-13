@@ -25,7 +25,7 @@
 	},
 	"config": {
 		"noderedmcu": {
-			"editor": true
+			"editor": false
 		},
 		"sntp": "pool.ntp.org"
 	},
